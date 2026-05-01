@@ -28,7 +28,6 @@
   "editor.suggest.showStatusBar": true,
   "editor.minimap.enabled": false,
   "editor.codeActionsOnSave": {
-    "source.removeUnusedImports": "explicit",
     "source.fixAll.biome": "explicit"
   },
   "explorer.compactFolders": false,
