@@ -92,6 +92,7 @@
   ],
   "gitlens.rebaseEditor.openOnPausedRebase": false,
   "json.schemaDownload.trustedDomains": {
+    "https://biomejs.dev": true,
     "https://developer.microsoft.com/json-schemas/": true,
     "https://json-schema.org/": true,
     "https://json.schemastore.org/": true,

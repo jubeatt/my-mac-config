@@ -114,6 +114,12 @@ alias so="source ~/.zshrc"
 alias kc="kiro-cli"
 alias lg="lazygit"
 alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
+alias vs="codium"
+
+# lazygit project switcher
+alias pj='cd $(find ~/Projects -maxdepth 1 -type d | fzf)'
+alias lgp='pj && lazygit'
+
 
 # fnm (Node.js version manager)
 eval "$(fnm env --use-on-cd)"
@@ -121,12 +127,11 @@ eval "$(fnm env --use-on-cd)"
 # for uv package
 export PATH="$HOME/.local/bin:$PATH"
 
+# openvpn
+export PATH="/opt/homebrew/sbin:$PATH"
 
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
 
 # Kiro CLI post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
 
-# lazygit project switcher
-alias pj='cd $(find ~/Projects -maxdepth 1 -type d | fzf)'
-alias lgp='pj && lazygit'

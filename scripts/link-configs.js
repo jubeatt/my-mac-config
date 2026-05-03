@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Create symlinks from config files in this repo to their expected locations.
-// Usage: node scripts/link-configs.js [--all] [--vscode] [--kiro] [--kiro-cli] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit]
+// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--kiro-cli] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit]
 
 import {
   existsSync,
@@ -25,6 +25,12 @@ const CONFIGS = {
     flag: "--vscode",
     source: resolve(__dirname, "../ide/vscode"),
     target: `${home}/Library/Application Support/Code/User`,
+    files: IDE_LINK_FILES,
+  },
+  codium: {
+    flag: "--codium",
+    source: resolve(__dirname, "../ide/vscode"),
+    target: `${home}/Library/Application Support/VSCodium/User`,
     files: IDE_LINK_FILES,
   },
   kiro: {

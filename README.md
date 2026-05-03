@@ -58,6 +58,7 @@ bash scripts/setup-terminal.sh
 ```bash
 node scripts/link-configs.js --all
 node scripts/link-configs.js --vscode
+node scripts/link-configs.js --codium
 node scripts/link-configs.js --kiro
 node scripts/link-configs.js --vim
 node scripts/link-configs.js --git
@@ -74,6 +75,7 @@ node scripts/link-configs.js --lazygit
 
 ```bash
 node scripts/install-extensions.js --vscode
+node scripts/install-extensions.js --codium
 node scripts/install-extensions.js --kiro
 ```
 
@@ -85,10 +87,12 @@ node scripts/install-extensions.js --kiro
 
 ```bash
 node scripts/gen-vscode-extensions.js --vscode
+node scripts/gen-vscode-extensions.js --codium
 node scripts/gen-vscode-extensions.js --kiro
 
 # 預覽變更，不寫入檔案
 node scripts/gen-vscode-extensions.js --vscode --dryrun
+node scripts/gen-vscode-extensions.js --codium --dryrun
 ```
 
 ## Symlink 對照表
@@ -96,6 +100,7 @@ node scripts/gen-vscode-extensions.js --vscode --dryrun
 | 設定 | Repo 位置 | 目標位置 |
 |------|----------|---------|
 | VS Code | `ide/vscode/` | `~/Library/Application Support/Code/User/` |
+| VSCodium | `ide/vscode/` | `~/Library/Application Support/VSCodium/User/` |
 | Kiro IDE | `ide/kiro/` | `~/Library/Application Support/Kiro/User/` |
 | Kiro CLI | `ai/.kiro/` | `~/.kiro/` |
 | Vim | `.vimrc` | `~/.vimrc` |

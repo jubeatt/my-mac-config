@@ -5,8 +5,11 @@ gui:
     selectedLineBgColor:
       - "#444444"
 os:
-  editPreset: 'vscode'
-  openDirInEditor: 'code {{dir}}'
+  edit: 'codium --goto {{filename}}'
+  editAtLine: 'codium --goto {{filename}}:{{line}}'
+  editAtLineAndWait: 'codium --goto --wait {{filename}}:{{line}}'
+  editInTerminal: false
+  openDirInEditor: 'codium {{dir}}'
 customCommands:
   - key: "A"
     command: git commit --amend {{.Form.V}} --no-edit
