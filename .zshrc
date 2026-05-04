@@ -120,6 +120,10 @@ alias vs="codium"
 alias pj='cd $(find ~/Projects -maxdepth 1 -type d | fzf)'
 alias lgp='pj && lazygit'
 
+# Git
+# generate .gitignore from toptal templates (e.g. gi node,macos)
+gi() { curl -sL "https://www.toptal.com/developers/gitignore/api/$1" -o .gitignore && echo "Created .gitignore for: $1" }
+
 
 # fnm (Node.js version manager)
 eval "$(fnm env --use-on-cd)"
