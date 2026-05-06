@@ -13,6 +13,7 @@
 	cl = clean -fd
   lg = log --oneline --graph
   wk = worktree
+	find = !git branch -a --contains
 
 [core]
 	autocrlf = input
