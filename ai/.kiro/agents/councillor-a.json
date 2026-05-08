@@ -1,7 +1,7 @@
 {
   "name": "councillor-a",
   "description": "Council advisor using Claude Opus 4.6. Read-only codebase analysis for multi-model consensus.",
-  "model": "claude-opus-4.6",
+  "model": "claude-opus-4.7",
   "tools": ["*"],
   "allowedTools": ["@builtin", "fs_*", "execute_bash"],
   "resources": [
