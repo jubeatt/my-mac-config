@@ -1,18 +1,19 @@
 ---
-name: commit
-description: Generate a commit message (title only) from staged changes and execute the commit. Use when the user types /commit.
+name: commit-s
+description: Generate a concise commit message (title only) from staged changes and execute the commit. Use when the user types /commit-s.
 ---
 
-# Commit (Title Only)
+# Commit Simple (Title Only)
 
-Generate a concise commit message and execute the commit.
+Generate a concise commit message (title only) and execute the commit by default.
 
 ## Workflow
 
 1. Run `git diff --cached --stat` and `git diff --cached` to review staged changes
 2. If nothing is staged, inform the user and stop
 3. Determine the appropriate type and scope following Conventional Commits format
-4. Output the commit message (title only) for the user to review — do NOT execute `git commit`
+4. Execute the commit with `git commit -m "<message>"`
+5. If the user's prompt contains `dryrun` (in any form, e.g., "dry run", "dry-run"), do NOT execute the commit — only output the proposed message for review
 
 ## Rules
 
