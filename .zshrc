@@ -126,6 +126,15 @@ pf() {
   file=$(fd --type f --hidden --exclude .git | fzf) && cd "$(dirname "$file")"
 }
 
+# cmux shortcuts
+cm() {
+  case "$1" in
+    md)  shift; cmux markdown open "$@" ;;
+    mdd) shift; cmux markdown open --direction down "$@" ;;
+    *)   echo "Usage: cm <md|mdd> <path>" ;;
+  esac
+}
+
 # Git
 # generate .gitignore from toptal templates (e.g. gi node,macos)
 gi() { curl -sL "https://www.toptal.com/developers/gitignore/api/$1" -o .gitignore && echo "Created .gitignore for: $1" }
