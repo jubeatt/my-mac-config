@@ -98,6 +98,8 @@ Council 是一個多模型決策機制，適用於高風險、需要多元觀點
 | get-code-context-exa                   | Exa 程式碼上下文搜尋指引                               |
 | web-search-advanced-research-paper-exa | 透過 Exa 搜尋學術論文                                  |
 | council-session                        | 多模型議會協調協議                                     |
+| cmux                                   | cmux 拓樸與路由控制（window/workspace/pane/surface）   |
+| cmux-markdown                          | 在 cmux 面板開啟 Markdown 檔案並即時重載               |
 
 ### Hooks
 
