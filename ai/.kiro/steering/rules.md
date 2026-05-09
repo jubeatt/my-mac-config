@@ -10,7 +10,6 @@ inclusion: always
 - **ALWAYS** match the existing repo's style, even if it differs from personal preference
 - When unsure, **ALWAYS** check the codebase first — **DO NOT** guess
 - When the user is asking a question or seeking advice about code, **DO NOT** modify any files — explain the approach first and wait for explicit instruction to proceed
-- When the user sends **`rule?`**, it means the agent is not following its responsibilities or has broken a rule. You **MUST** immediately re-read all relevant steering rules and your own agent prompt (e.g., `developer.md`, `reviewer.md`, etc.) to identify what rule you violated. Then acknowledge the violation and correct your behavior. If you genuinely cannot identify the issue, ask the user to clarify what went wrong.
 
 # Workflow
 
