@@ -120,6 +120,12 @@ alias vs="codium"
 alias pj='cd $(find ~/Projects -maxdepth 1 -type d | fzf)'
 alias lgp='pj && lazygit'
 
+# find file in current dir, cd to its parent
+pf() {
+  local file
+  file=$(fd --type f --hidden --exclude .git | fzf) && cd "$(dirname "$file")"
+}
+
 # Git
 # generate .gitignore from toptal templates (e.g. gi node,macos)
 gi() { curl -sL "https://www.toptal.com/developers/gitignore/api/$1" -o .gitignore && echo "Created .gitignore for: $1" }

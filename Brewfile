@@ -1,4 +1,6 @@
 brew "biome"
+brew "duti"
+brew "fd"
 brew "fnm"
 brew "fzf"
 brew "gh"
