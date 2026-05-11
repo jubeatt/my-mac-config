@@ -1,7 +1,7 @@
 {
   "name": "explorer",
   "description": "Explorer Agent that investigates codebases, reads documentation, and researches library usage via Context7",
-  "model": "claude-opus-4.7",
+  "model": "claude-opus-4.6",
   "tools": ["*"],
   "allowedTools": [
     "@builtin",

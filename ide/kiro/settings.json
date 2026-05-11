@@ -89,7 +89,7 @@
   // kiro
   "kiroAgent.enableTabAutocomplete": false,
   "kiroAgent.agentAutonomy": "Autopilot",
-  "kiroAgent.modelSelection": "claude-opus-4.7",
+  "kiroAgent.modelSelection": "claude-opus-4.6",
   "kiroAgent.trustedCommands": [
     "git *",
     "pnpm *",
