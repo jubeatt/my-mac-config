@@ -10,8 +10,9 @@
     "execute_bash",
     "@context7",
     "@exa",
-    "@mcp-atlassian",
-    "@figma-developer-mcp"
+    "@atlassian",
+    "@figma-developer-mcp",
+    "@git"
   ],
   "toolsSettings": {
     "subagent": {

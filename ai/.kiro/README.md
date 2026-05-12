@@ -85,7 +85,7 @@ Council 是一個多模型決策機制，適用於高風險、需要多元觀點
 | @exa (Exa)           | explorer, librarian, researcher, light | 程式碼範例、學術論文 |
 | @figma-developer-mcp | designer, light                        | Figma 設計擷取       |
 | @chrome-devtools     | explorer, developer                    | 瀏覽器除錯           |
-| @mcp-atlassian       | light                                  | Jira/Confluence      |
+| @atlassian           | light                                  | Jira/Confluence      |
 
 ### Skills
 
