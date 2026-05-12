@@ -2,6 +2,14 @@
 # Kiro CLI pre block. Keep at the top of this file.
 [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 
+# load secret env
+local_env_file="$HOME/.zsh_secrets"
+if [[ -f "$local_env_file" ]]; then
+    set -a
+    source "$local_env_file"
+    set +a
+fi
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
