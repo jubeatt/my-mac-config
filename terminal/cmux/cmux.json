@@ -1,4 +1,14 @@
 {
+  "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux-settings.schema.json",
+  "sidebar": {
+    "showPullRequests": true,
+    "makePullRequestsClickable": true,
+    "openPullRequestLinksInCmuxBrowser": true
+  },
+  "browser": {
+    "interceptTerminalOpenCommandInCmuxBrowser": true,
+    "openTerminalLinksInCmuxBrowser": true
+  },
   "commands": [
     {
       "name": "Left 2 Right 1",

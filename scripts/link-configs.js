@@ -73,7 +73,7 @@ const CONFIGS = {
     flag: "--cmux",
     source: resolve(__dirname, "../terminal/cmux"),
     target: `${home}/.config/cmux`,
-    files: ["cmux.json", "settings.json"],
+    files: ["cmux.json"],
   },
   lazygit: {
     flag: "--lazygit",
