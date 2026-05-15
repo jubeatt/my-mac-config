@@ -63,7 +63,7 @@ gh pr view <number> --json comments --jq '.comments[] | {author: .author.login, 
 
 ### 4. 整合舊 Feedback
 
-產生新的 feedback 內容前，先讀取使用者在該 PR 上的舊 feedback comment（以 `## Review Feedback` 開頭、非 `github-actions` bot 留的）。若舊 comment 中某些「暫不處理」項目已填寫原因，將原因帶入新的 feedback，不以 `（待補原因）` 覆蓋。
+產生新的 feedback 內容前，先讀取使用者在該 PR 上的舊 feedback comment（以 `## AI Review` 開頭、非 `github-actions` bot 留的）。若舊 comment 中某些「暫不處理」項目已填寫原因，將原因帶入新的 feedback，不以 `（待補原因）` 覆蓋。
 
 ### 5. 比對 Diff
 
@@ -77,7 +77,7 @@ gh pr view <number> --json comments --jq '.comments[] | {author: .author.login, 
 使用以下格式：
 
 ```markdown
-## Review Feedback 修正紀錄
+## AI Review 修正紀錄
 
 ### ✅ 已修正
 
@@ -120,12 +120,13 @@ EOF
 
 1. 刪除舊 feedback comment（如果有的話）
 2. 新增新的 feedback comment
+3. 將 bot 的 review comment 標記為 outdated（minimize）
 
 ```bash
-# 找到使用者舊的 feedback comment ID（以 "## Review Feedback 修正紀錄" 開頭的）
+# 找到使用者舊的 feedback comment ID（以 "## AI Review 修正紀錄" 開頭的）
 # 可能有多筆，逐一刪除
 COMMENT_IDS=$(gh api repos/<owner>/<repo>/issues/<number>/comments \
-  --jq '[.[] | select(.user.login != "github-actions" and (.body | startswith("## Review Feedback"))) | .id] | .[]')
+  --jq '[.[] | select(.user.login != "github-actions" and (.body | startswith("## AI Review"))) | .id] | .[]')
 
 for ID in $COMMENT_IDS; do
   gh api repos/<owner>/<repo>/issues/comments/$ID -X DELETE
@@ -133,6 +134,22 @@ done
 
 # 新增 feedback comment
 gh pr comment <number> --repo <owner/repo> --body '<content>'
+
+# 將 bot 的 review comment minimize 為 outdated
+# 取得 github-actions bot 留下的 comment node IDs
+NODE_IDS=$(gh api repos/<owner>/<repo>/issues/<number>/comments \
+  --jq '[.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("# PR Review"))) | .node_id] | .[]')
+
+for NODE_ID in $NODE_IDS; do
+  gh api graphql -f query='
+    mutation($id: ID!) {
+      minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
+        minimizedComment {
+          isMinimized
+        }
+      }
+    }' -f id="$NODE_ID"
+done
 ```
 
 ## 注意事項
