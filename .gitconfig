@@ -25,3 +25,5 @@
 
 [pull]
 	rebase = true
+[push]
+	default = upstream
