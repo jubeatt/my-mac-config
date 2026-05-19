@@ -137,9 +137,17 @@ pf() {
 # cmux shortcuts
 cm() {
   case "$1" in
-    md)  shift; cmux markdown open "$@" ;;
-    mdd) shift; cmux markdown open --direction down "$@" ;;
-    *)   echo "Usage: cm <md|mdd> <path>" ;;
+    md)
+      shift
+      local output
+      output=$(cmux markdown open "$@" 2>&1) || { echo "$output"; return 1; }
+      local surface=$(echo "$output" | grep -o 'surface=surface:[0-9]*' | head -1 | cut -d= -f2)
+      local my_pane=$(cmux identify --json 2>/dev/null | grep pane_ref | head -1 | grep -o 'pane:[0-9]*')
+      if [[ -n "$surface" && -n "$my_pane" ]]; then
+        cmux move-surface --surface "$surface" --pane "$my_pane" --focus true >/dev/null 2>&1
+      fi
+      ;;
+    *) echo "Usage: cm md <path>" ;;
   esac
 }
 
