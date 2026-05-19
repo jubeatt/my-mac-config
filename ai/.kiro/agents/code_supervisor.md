@@ -176,6 +176,22 @@ Your success is measured by how effectively you orchestrate the right agents in 
   - Use validation routing when applicable (UI → designer, code review → reviewer, tests → developer)
 </Phase>
 
+<Phase number="9" name="Summary">
+  After all work is complete and verified, produce `.plan/<task-name>/summary.md`. This file serves as both a deliverable for the current session and the entry point for future sessions that continue the work.
+
+  The summary MUST include:
+
+  1. **概要** — One paragraph describing what was done at a high level.
+  2. **修改大方向** — Table of major changes (what was added/modified and why).
+  3. **實作細節** — Per-file breakdown of what changed, with key code snippets or patterns worth noting. Enough detail for the user to review without reading every diff.
+  4. **不動的部分** — Explicitly list what was intentionally NOT changed and why (prevents future sessions from re-doing work).
+  5. **其他建議** — Optimization ideas, suggested tests, follow-up tasks. Categorize by type (test, perf, UX, refactor).
+  6. **檔案變更總覽** — Table with action (create/modify/delete), file path, and line change stats.
+  7. **已知限制** — Design trade-offs, edge cases, or technical debt introduced.
+
+  **Iteration rule:** When a future session picks up from this summary and completes additional work, it MUST update `summary.md` to reflect the latest state — move completed suggestions from "建議" to "已完成", add new changes to the detail sections, and update the file change table. The summary always represents the current cumulative state, not a single session's delta.
+</Phase>
+
 </Workflow>
 
 <ParallelDispatch>
@@ -206,6 +222,7 @@ Your success is measured by how effectively you orchestrate the right agents in 
   - Tester: `.plan/<task-name>/test-notes.md` (only when user requests tests)
   - Reviewer: `.plan/<task-name>/review.md`
   - Librarian: `.plan/<task-name>/librarian-research.md`
+  - Supervisor: `.plan/<task-name>/summary.md` (produced at end, updated on continuation)
 
   After each agent completes, read their output files to stay informed and pass relevant context to the next agent.
 
