@@ -4,9 +4,6 @@ gui:
   theme:
     selectedLineBgColor:
       - "#444444"
-git:
-  log:
-    showWholeGraph: true
 os:
   edit: 'codium --goto {{filename}}'
   editAtLine: 'codium --goto {{filename}}:{{line}}'
