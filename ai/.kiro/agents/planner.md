@@ -135,8 +135,7 @@ The Supervisor can dispatch these agents (account for them when designing execut
 - **developer** — writes code based on specifications
 - **reviewer** — code review, YAGNI enforcement, simplification
 - **designer** — UI/UX design and implementation
-- **explorer** — codebase search, architecture analysis, library research via Context7/Exa
-- **librarian** — library documentation, API references, GitHub examples via Context7/Exa/grep.app
+- **explorer** — codebase search, architecture analysis, library research, API references via Context7/Exa/grep.app
 - **simplifier** — refines code for clarity and maintainability
 - **tester** — designs test suites and writes tests (only when user requests tests)
 - **debugger** — investigates issues, traces root causes
