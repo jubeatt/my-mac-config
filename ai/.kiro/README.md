@@ -18,7 +18,6 @@
 | tester          | 測試撰寫（僅在明確要求時） | claude-opus-4.6 |
 | debugger        | 深度調查持續性 bug         | claude-opus-4.6 |
 | explorer        | 程式碼庫探索與研究         | claude-opus-4.6 |
-| librarian       | 函式庫文件與 API 研究      | claude-opus-4.6 |
 | researcher      | 學術論文研究               | claude-opus-4.6 |
 | council-master  | 綜合議員回應               | claude-opus-4.6 |
 | councillor-a    | 議會顧問                   | claude-opus-4.6 |
@@ -56,8 +55,7 @@
 ├── simplifier-notes.md     # 精煉摘要（simplifier）
 ├── test-notes.md           # 測試筆記（tester）
 ├── review.md               # 審查結果（reviewer）
-├── feedback-investigation.md # 問題調查報告（debugger）
-└── librarian-research.md   # 函式庫研究（librarian）
+└── feedback-investigation.md # 問題調查報告（debugger）
 ```
 
 ## 4. Council 機制
@@ -79,19 +77,22 @@ Council 是一個多模型決策機制，適用於高風險、需要多元觀點
 
 ### MCP Servers
 
-| MCP Server           | 使用的 Agent                           | 用途                 |
-| -------------------- | -------------------------------------- | -------------------- |
-| @context7 (Context7) | explorer, librarian, light             | 函式庫文件查詢       |
-| @exa (Exa)           | explorer, librarian, researcher, light | 程式碼範例、學術論文 |
-| @figma-developer-mcp | designer, light                        | Figma 設計擷取       |
-| @chrome-devtools     | explorer, developer                    | 瀏覽器除錯           |
-| @atlassian           | light                                  | Jira/Confluence      |
+| MCP Server           | 使用的 Agent           | 用途                 |
+| -------------------- | ---------------------- | -------------------- |
+| @context7 (Context7) | explorer, light        | 函式庫文件查詢       |
+| @exa (Exa)           | explorer, researcher, light | 程式碼範例、學術論文 |
+| @figma-developer-mcp | designer, light        | Figma 設計擷取       |
+| @chrome-devtools     | explorer, developer    | 瀏覽器除錯           |
+| @atlassian           | light                  | Jira/Confluence      |
+| @git                 | light                  | Git 操作             |
 
 ### Skills
 
 | Skill                                  | 說明                                                   |
 | -------------------------------------- | ------------------------------------------------------ |
 | git-workflow                           | Conventional Commits、rebase 策略、commit message 產生 |
+| commit-s                               | 從 staged changes 產生簡潔 commit（僅標題）            |
+| commit-v                               | 從 staged changes 產生詳細 commit（標題 + 描述）       |
 | playwright-cli                         | Playwright 瀏覽器自動化                                |
 | vercel-react-best-practices            | React/Next.js 效能最佳化（69 條規則）                  |
 | vercel-composition-patterns            | React 組合模式（8 條規則）                             |
@@ -100,16 +101,32 @@ Council 是一個多模型決策機制，適用於高風險、需要多元觀點
 | council-session                        | 多模型議會協調協議                                     |
 | cmux                                   | cmux 拓樸與路由控制（window/workspace/pane/surface）   |
 | cmux-markdown                          | 在 cmux 面板開啟 Markdown 檔案並即時重載               |
+| grill-me                               | 對計畫或設計進行深度質問                               |
+| gh-comment                             | 讀取 PR review comments，產生結構化 feedback 修正紀錄  |
+| gh-read-comment                        | 讀取 PR review comments，統整成 review.md              |
+| deps-upgrade-check                     | 驗證 dependabot PR 的依賴升級是否安全                  |
 
 ### Hooks
 
-| Hook              | 觸發時機                            | 說明                           |
-| ----------------- | ----------------------------------- | ------------------------------ |
-| phase-reminder.sh | `postResponse` on `code_supervisor` | 提醒 supervisor 當前工作流階段 |
+| Hook                 | 觸發時機                                       | 說明                                     |
+| -------------------- | ---------------------------------------------- | ---------------------------------------- |
+| phase-reminder.sh    | `userPromptSubmit` on `code_supervisor`         | 提醒 supervisor 當前工作流階段           |
+| cmux-notify.sh       | `stop` on `code_supervisor`, `light`            | 回應完成時透過 cmux 發送桌面通知         |
+| post-write-format.sh | `postToolUse` on `light` (matcher: `fs_write`) | 寫入檔案後自動用 Biome 或專案 formatter 格式化 |
 
 ### Steering
 
 - `steering/rules.md`：全域規則，套用於所有 agent — zh-TW 回應、Biome 格式化、pnpm、named exports、程式碼風格慣例
+
+### CLI Settings
+
+| 設定項                 | 值              |
+| ---------------------- | --------------- |
+| chat.defaultModel      | claude-opus-4.7 |
+| chat.defaultAgent      | light           |
+| chat.enableSubagent    | true            |
+| chat.enableDelegate    | true            |
+| chat.ui                | classic         |
 
 ## 6. 常用指令
 
