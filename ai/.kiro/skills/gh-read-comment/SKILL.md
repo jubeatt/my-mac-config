@@ -85,9 +85,9 @@ git --no-pager diff origin/main..HEAD
 
 ## ❌ 未修復
 
-| # | 嚴重度 | 檔案 | 問題 | 說明 |
-|---|--------|------|------|------|
-| 2 | Important | `file.tsx` | 問題描述 | 目前狀態說明 |
+| # | 嚴重度 | 檔案 | 問題 | 建議方式 | 說明 |
+|---|--------|------|------|----------|------|
+| 2 | Important | `file.tsx` | 問題描述 | reviewer 建議的修法（無建議則填 N/A） | 目前狀態說明 |
 
 ---
 
@@ -112,3 +112,4 @@ git --no-pager diff origin/main..HEAD
 - 若 PR 有多個 reviewer 的 comment，全部合併分析
 - 比對時注意：有些修改可能用了不同於建議的方案，只要問題被解決就算已修復
 - 輸出檔案固定為 `review.md`，覆蓋既有檔案
+- **所有嚴重度的 findings 都必須列出**（包含 Suggestion），不可省略或摘要帶過
