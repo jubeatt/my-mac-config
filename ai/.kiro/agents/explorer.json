@@ -11,6 +11,14 @@
     "@exa",
     "@chrome-devtools"
   ],
+  "hooks": {
+    "preToolUse": [
+      {
+        "matcher": "write",
+        "command": "~/.kiro/hooks/plan_writers/validate-artifact-plan-write.js"
+      }
+    ]
+  },
   "resources": [
     "file:///Users/peanu/.kiro/steering/*.md",
     "file:///Users/peanu/.kiro/skills/*/SKILL.md",

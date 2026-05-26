@@ -51,6 +51,16 @@
       {
         "command": "~/.kiro/hooks/phase-reminder.sh"
       }
+    ],
+    "preToolUse": [
+      {
+        "matcher": "read",
+        "command": "~/.kiro/hooks/code_supervisor/validate-read-allowed-paths.js"
+      },
+      {
+        "matcher": "write",
+        "command": "~/.kiro/hooks/code_supervisor/validate-supervisor-plan-write.js"
+      }
     ]
   },
   "resources": [

@@ -10,6 +10,13 @@
       "trustedAgents": ["councillor-a", "councillor-b", "councillor-c"]
     }
   },
+  "hooks": {
+    "agentSpawn": [
+      {
+        "command": "~/.kiro/hooks/caveman.sh"
+      }
+    ]
+  },
   "resources": [
     "file:///Users/peanu/.kiro/steering/*.md",
     "file:///Users/peanu/.kiro/skills/*/SKILL.md",
