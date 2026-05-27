@@ -31,8 +31,6 @@ The following agents are pre-configured with different models in `~/.kiro/agents
 
 All councillors are read-only (can read files, grep, glob but cannot edit). The council-master is pure synthesis.
 
-To change models, re-run `~/.kiro/generate-configs.sh` after editing the model values in the script.
-
 ## How to Run a Council
 
 You (code_supervisor) construct a 4-stage subagent call:

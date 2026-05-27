@@ -10,12 +10,6 @@
         "matcher": "write",
         "command": "~/.kiro/hooks/planner/validate-planner-plan-write.js"
       }
-    ],
-    "postToolUse": [
-      {
-        "matcher": "write",
-        "command": "~/.kiro/hooks/planner/open-task-markdown.js"
-      }
     ]
   },
   "resources": [

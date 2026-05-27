@@ -124,7 +124,7 @@ git worktree remove /tmp/<project>-upgrade-<package> --force
 
 ## Agent 指派
 
-執行此 skill 時，**必須**將任務指派給 `developer` agent。此 skill 需要執行 bash 指令（git、pnpm）和檔案寫入，只有 developer agent 具備完整的工具集。不可指派給 explorer、librarian 或其他唯讀 agent。
+執行此 skill 時，**必須**將任務指派給 `worker` agent。此 skill 需要執行 bash 指令（git、pnpm）和檔案寫入，且不走 plan 流程，只有 worker agent 可以在無 plan 驗證的情況下執行。不可指派給 explorer、researcher 或其他唯讀 agent。
 
 ## 注意事項
 
