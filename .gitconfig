@@ -19,6 +19,7 @@
 	autocrlf = input
 	fileMode = true
   ignoreCase = true
+	excludesFile = /Users/peanu/.gitignore_global
 
 [submodule]
 	recurse = true
