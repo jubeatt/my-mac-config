@@ -1,7 +1,7 @@
 {
   "name": "light",
   "description": "General-purpose agent for answering questions, looking things up, and making small changes",
-  "model": "claude-opus-4.6",
+  "model": "claude-opus-4.7",
   "tools": ["*"],
   "allowedTools": [
     "@builtin",

@@ -1,7 +1,7 @@
 {
   "name": "developer",
   "description": "Developer Agent that writes high-quality, maintainable code based on specifications",
-  "model": "claude-opus-4.6",
+  "model": "claude-opus-4.7",
   "tools": ["*"],
   "allowedTools": ["@builtin", "fs_*", "execute_bash", "@chrome-devtools"],
   "hooks": {

@@ -8,21 +8,21 @@
 
 | Agent           | 角色                       | Model           |
 | --------------- | -------------------------- | --------------- |
-| code_supervisor | 任務協調與品質管控         | claude-opus-4.6 |
-| light           | 通用助手，快速任務         | claude-opus-4.6 |
-| planner         | 結構化執行計畫產生器       | claude-opus-4.6 |
-| developer       | 程式碼實作（需 plan 驗證） | claude-opus-4.6 |
-| worker          | 通用執行者（無 plan 驗證） | claude-opus-4.6 |
-| reviewer        | 程式碼審查 + YAGNI 執行者  | claude-opus-4.6 |
-| designer        | Figma 設計擷取 + UI/UX     | claude-opus-4.6 |
-| simplifier      | 程式碼精煉                 | claude-opus-4.6 |
-| tester          | 測試撰寫 + 瀏覽器驗證      | claude-opus-4.6 |
-| debugger        | 深度調查持續性 bug         | claude-opus-4.6 |
-| summarizer      | 任務完成摘要產生           | claude-opus-4.6 |
-| explorer        | 程式碼庫探索與研究         | claude-opus-4.6 |
-| researcher      | 學術論文研究               | claude-opus-4.6 |
-| council-master  | 綜合議員回應               | claude-opus-4.6 |
-| councillor-a    | 議會顧問                   | claude-opus-4.6 |
+| code_supervisor | 任務協調與品質管控         | claude-opus-4.7 |
+| light           | 通用助手，快速任務         | claude-opus-4.7 |
+| planner         | 結構化執行計畫產生器       | claude-opus-4.7 |
+| developer       | 程式碼實作（需 plan 驗證） | claude-opus-4.7 |
+| worker          | 通用執行者（無 plan 驗證） | claude-opus-4.7 |
+| reviewer        | 程式碼審查 + YAGNI 執行者  | claude-opus-4.7 |
+| designer        | Figma 設計擷取 + UI/UX     | claude-opus-4.7 |
+| simplifier      | 程式碼精煉                 | claude-opus-4.7 |
+| tester          | 測試撰寫 + 瀏覽器驗證      | claude-opus-4.7 |
+| debugger        | 深度調查持續性 bug         | claude-opus-4.7 |
+| summarizer      | 任務完成摘要產生           | claude-opus-4.7 |
+| explorer        | 程式碼庫探索與研究         | claude-opus-4.7 |
+| researcher      | 學術論文研究               | claude-opus-4.7 |
+| council-master  | 綜合議員回應               | claude-opus-4.7 |
+| councillor-a    | 議會顧問                   | claude-opus-4.7 |
 | councillor-b    | 議會顧問                   | glm-5           |
 | councillor-c    | 議會顧問                   | claude-opus-4.5 |
 
