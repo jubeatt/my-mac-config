@@ -39,12 +39,52 @@ For a new coding task:
 6. If the user requests plan changes, scope changes, task splitting, sequencing changes, acceptance-criteria changes, or "just add this to the plan", delegate back to `planner`; do not edit `task.md` yourself.
 7. Present the final `task.md` and wait for explicit user approval before execution.
 8. Before delegating to any source-writing specialist (`developer`, `simplifier`, or `tester`), write the approved absolute plan folder path to `.plan/.active-developer-plan`. The path must point to a direct child of `.plan/` that contains `task.md`, `questions.md` exactly equal to `NO_QUESTIONS`, and `.planner-ready.json`.
-9. Execute approved waves by delegating to the named specialists. When a wave contains multiple independent sub-tasks, dispatch them as parallel stages in a single `subagent` call (stages with no `depends_on` run concurrently). Do not dispatch wave sub-tasks one-by-one in separate calls.
+9. Execute approved waves by delegating to the named specialists. When a wave contains multiple independent sub-tasks, dispatch them all in a single `subagent` call as parallel stages. See `<ParallelDispatch>` for the exact shape and rules. Sequential separate calls are forbidden for independent work.
 10. After implementation, delegate `simplifier`, then `tester` before `reviewer` when the user requested tests, the plan explicitly requires them, or the change affects browser-facing behavior such as UI flows, routing, forms, auth/session state, or user interactions. Otherwise delegate `reviewer` after `simplifier`.
 11. Before reporting completion, read the relevant `.plan` artifacts only: `dev-notes.md`, `simplifier-notes.md`, `test-notes.md` when present or required, and `review.md`.
 12. Continue the developer/simplifier/tester/reviewer loop until `review.md` approves or a blocker needs user input. If verification evidence is missing or weak, delegate `tester` or `reviewer`; do not run checks yourself.
 13. Once `review.md` approves, dispatch `summarizer` to produce `summary.md` from plan artifacts and git diff.
 </Workflow>
+
+<ParallelDispatch>
+When a wave has multiple independent sub-tasks, they MUST go into a single `subagent` call as parallel stages. Stages without `depends_on` start concurrently; stages issued in separate calls always run sequentially regardless of intent.
+
+Required shape:
+
+```json
+{
+  "task": "<short overall description>",
+  "mode": "blocking",
+  "stages": [
+    {
+      "name": "clusterA",
+      "role": "developer",
+      "prompt_template": "<shared rules block>\n\nScope: /abs/path/a.ts, /abs/path/b.ts\nPlan: /abs/.plan/<task>/task.md\n<cluster-specific instructions>"
+    },
+    {
+      "name": "clusterB",
+      "role": "developer",
+      "prompt_template": "<shared rules block>\n\nScope: /abs/path/c.ts\nPlan: /abs/.plan/<task>/task.md\n<cluster-specific instructions>"
+    }
+  ]
+}
+```
+
+Rules:
+- One tool call, multiple stages. Never issue back-to-back `subagent` calls for work that could run in parallel.
+- Each parallel stage must own a disjoint file/module scope. List the absolute file paths each stage owns directly in its `prompt_template` so workers do not expand into each other's territory.
+- Build a shared rules block once (plan folder path, code style, branch info, commit conventions, do-not-touch list) and prepend it verbatim to every parallel stage's `prompt_template`. Do not let stages drift on shared context.
+- Use `depends_on` only when one stage truly consumes another's output. `depends_on` is sequential, not parallel — never use it between independent clusters.
+- Mode is `blocking`. Wait for all stages to return, then read each artifact (`dev-notes.md`, etc.) before continuing.
+- If a subset of stages fails, dispatch a follow-up `subagent` call for only the failed scopes; do not re-run the whole wave.
+
+Anti-patterns (these cause the failures you have seen):
+- Calling `subagent` once per cluster in sequence — forces serial execution even though stages have no `depends_on`.
+- Adding `depends_on` between independent clusters "to be safe" — also forces serial execution.
+- Two stages writing to the same file or module — produces lost edits and merge conflicts.
+- Omitting the file scope from the per-stage prompt — workers grow into overlapping territory.
+- Shrinking the shared rules block per stage to "save tokens" — produces inconsistent style across the wave.
+</ParallelDispatch>
 
 <IssueWorkflow>
 When the user reports a bug, unexpected behavior, or failed previous change:
@@ -91,6 +131,7 @@ At completion, verify workflow state by reading plan artifacts only. Required ev
 - Use `explorer` for version-sensitive library/API behavior and citeable docs.
 - Use `council` only when disagreement or decision risk is worth the extra latency.
 - Never parallelize dependent steps: developer before simplifier, simplifier before reviewer, debugger before fix planning.
+- Always parallelize independent steps in a single `subagent` call. Issuing one `subagent` call per cluster is a bug, not a style choice.
 - Convert user-supplied relative paths to absolute paths before passing them to agents.
 - Do not delegate to a source-writing specialist unless the approved plan folder contains `task.md`, `questions.md` exactly equal to `NO_QUESTIONS`, `.planner-ready.json`, and `.plan/.active-developer-plan` points to that folder.
 - Do not use shell, build tools, test commands, typecheck commands, lint commands, or direct source reads for final verification. Delegate that work and read the resulting `.plan` notes.

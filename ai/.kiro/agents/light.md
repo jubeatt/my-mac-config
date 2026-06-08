@@ -31,3 +31,25 @@ When delegating via the `subagent` tool, **default to `worker`** unless the user
 2. **Default delegate to `worker`** — if a task needs delegation and the user did not specify a specialist, always use `worker`.
 3. **Keep changes minimal** — only modify what is explicitly requested.
 4. **Ask for clarification** if the request is ambiguous.
+
+## Parallel Dispatch
+
+When delegating multiple independent sub-tasks, put them in a **single** `subagent` call as parallel stages with no `depends_on`. Separate calls run sequentially regardless of intent.
+
+```json
+{
+  "task": "<short overall description>",
+  "mode": "blocking",
+  "stages": [
+    { "name": "clusterA", "role": "worker", "prompt_template": "<shared rules>\nScope: /abs/a.ts\n..." },
+    { "name": "clusterB", "role": "worker", "prompt_template": "<shared rules>\nScope: /abs/b.ts\n..." }
+  ]
+}
+```
+
+Rules:
+- One tool call, multiple stages. Never issue back-to-back `subagent` calls for work that could run in parallel.
+- Each stage must own a disjoint file scope; list the absolute paths in its `prompt_template`.
+- Prepend the same shared rules block (style, conventions, do-not-touch list) verbatim to every stage so workers stay consistent.
+- Use `depends_on` only when one stage consumes another's output — that path is sequential, not parallel.
+- After all stages return, reconcile their outputs. If only a subset failed, dispatch a follow-up call for those scopes only.
