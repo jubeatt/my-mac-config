@@ -24,10 +24,10 @@ The following agents are pre-configured with different models in `~/.kiro/agents
 
 | Agent | Model | Role |
 |-------|-------|------|
-| `councillor-a` | `claude-opus-4.7` | Strong reasoning, deep analysis |
+| `councillor-a` | `claude-opus-4.8` | Strong reasoning, deep analysis |
 | `councillor-b` | `glm-5` | Different training data, different biases |
 | `councillor-c` | `claude-sonnet-4.6` | Balanced reasoning, prior generation perspective |
-| `council-master` | `claude-opus-4.7` | Synthesizes all councillor outputs |
+| `council-master` | `claude-opus-4.8` | Synthesizes all councillor outputs |
 
 All councillors are read-only (can read files, grep, glob but cannot edit). The council-master is pure synthesis.
 
