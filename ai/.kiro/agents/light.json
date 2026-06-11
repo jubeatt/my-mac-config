@@ -12,7 +12,8 @@
     "@exa",
     "@atlassian",
     "@figma-developer-mcp",
-    "@git"
+    "@git",
+    "@chrome-devtools"
   ],
   "toolsSettings": {
     "subagent": {
