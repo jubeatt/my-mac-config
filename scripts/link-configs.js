@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Create symlinks from config files in this repo to their expected locations.
-// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--kiro-cli] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit]
+// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--kiro-cli] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit] [--bins]
 
 import {
   existsSync,
@@ -81,6 +81,12 @@ const CONFIGS = {
     target: `${home}/Library/Application Support/lazygit`,
     files: ["config.yml"],
   },
+  bins: {
+    flag: "--bins",
+    source: resolve(__dirname, "../bins"),
+    target: `${home}/.local/bin`,
+    linkAll: true,
+  },
 }
 
 const CONFIG_NAMES = Object.keys(CONFIGS)
@@ -112,7 +118,7 @@ function parseArgs() {
 
 // Returns: { linked: number, failed: number, skipped: boolean }
 function linkConfig(name) {
-  const { source, target, files } = CONFIGS[name]
+  const { source, target, files, linkAll } = CONFIGS[name]
   const result = { linked: 0, failed: 0, skipped: false }
 
   console.log(`\n[${name}]`)
@@ -123,7 +129,11 @@ function linkConfig(name) {
     return result
   }
 
-  const available = readdirSync(source).filter((f) => files.includes(f))
+  const available = linkAll
+    ? readdirSync(source).filter(
+        (f) => !f.startsWith(".") && lstatSync(resolve(source, f)).isFile(),
+      )
+    : readdirSync(source).filter((f) => files.includes(f))
 
   for (const file of available) {
     const src = resolve(source, file)

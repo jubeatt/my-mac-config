@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# pr-of <commit-ish> [<commit-ish> ...]
+# Find the GitHub PR(s) that introduced the given commit(s).
+# Prints: PR #<number>  <title>  <url>
+set -euo pipefail
+
+if [ "$#" -eq 0 ]; then
+  echo "usage: pr-of <commit-ish> [<commit-ish> ...]" >&2
+  exit 1
+fi
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "error: gh (GitHub CLI) not found" >&2
+  exit 1
+fi
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "error: not inside a git repository" >&2
+  exit 1
+fi
+
+repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+
+status=0
+for ref in "$@"; do
+  full=$(git rev-parse --verify --quiet "${ref}^{commit}" 2>/dev/null) || {
+    echo "$ref: not a known commit in this repo" >&2
+    status=1
+    continue
+  }
+
+  out=$(gh api "repos/$repo/commits/$full/pulls" \
+    --jq '.[] | "PR #\(.number)\t\(.title)\t\(.html_url)"' 2>/dev/null) || true
+
+  if [ -z "$out" ]; then
+    echo "$ref: no associated PR found" >&2
+    status=1
+    continue
+  fi
+  echo "$out"
+done
+
+exit "$status"
