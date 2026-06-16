@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# pr-stack
+# Show `av tree` exactly as Aviator renders it, with each PR line annotated
+# with its GitHub review decision and state.
+#
+# Status legend:
+#   ✓ approved   ✗ changes requested   ⏳ review required   · no review
+#   draft / merged / closed shown where applicable
+set -euo pipefail
+
+for dep in av gh git; do
+  if ! command -v "$dep" >/dev/null 2>&1; then
+    echo "error: $dep not found" >&2
+    exit 1
+  fi
+done
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "error: not inside a git repository" >&2
+  exit 1
+fi
+
+tree=$(av tree "$@")
+
+use_color=0
+[ -t 1 ] && use_color=1
+
+color() { # <ansi-code> <text>
+  if [ "$use_color" = 1 ]; then
+    printf '\033[%sm%s\033[0m' "$1" "$2"
+  else
+    printf '%s' "$2"
+  fi
+}
+
+# Fetch PR status for every PR number referenced in the tree, in parallel.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+pr_numbers=$(printf '%s\n' "$tree" | grep -oE 'pull/[0-9]+' | grep -oE '[0-9]+' | sort -u || true)
+for num in $pr_numbers; do
+  gh pr view "$num" --json state,reviewDecision,isDraft \
+    --jq '[.state, (.reviewDecision // ""), (.isDraft | tostring)] | join("\u001f")' \
+    >"$tmp/$num" 2>/dev/null &
+done
+wait
+
+fmt_status() { # <state> <decision> <draft>
+  local state="$1" decision="$2" draft="$3"
+  case "$state" in
+    MERGED) color 35 "merged"; return ;;
+    CLOSED) color 2 "closed"; return ;;
+  esac
+  local out=""
+  [ "$draft" = "true" ] && out="$(color 2 "draft") "
+  case "$decision" in
+    APPROVED)          out+="$(color 32 "✓ approved")" ;;
+    CHANGES_REQUESTED) out+="$(color 31 "✗ changes requested")" ;;
+    REVIEW_REQUIRED)   out+="$(color 33 "⏳ review required")" ;;
+    *)                 out+="$(color 2 "· no review")" ;;
+  esac
+  printf '%s' "$out"
+}
+
+printf '%s\n' "$tree" | while IFS= read -r line; do
+  # Trim trailing padding that av adds to every line.
+  trimmed="${line%"${line##*[![:space:]]}"}"
+
+  num=$(printf '%s' "$line" | grep -oE 'pull/[0-9]+' | grep -oE '[0-9]+' || true)
+  if [ -z "$num" ]; then
+    printf '%s\n' "$trimmed"
+    continue
+  fi
+
+  if [ -s "$tmp/$num" ]; then
+    IFS=$'\037' read -r st dec dr <"$tmp/$num"
+    printf '%s  %s\n' "$trimmed" "$(fmt_status "$st" "$dec" "$dr")"
+  else
+    printf '%s  %s\n' "$trimmed" "$(color 2 "?")"
+  fi
+done
