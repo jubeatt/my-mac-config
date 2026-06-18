@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+# pr-comments
+# Collect today's PR comments from a fixed set of authors, across every PR in
+# the current repo. Covers all three comment kinds:
+#   - issue comments   (the PR conversation thread)
+#   - review comments  (inline code comments)
+#   - review summaries (the body attached to a submitted review)
+#
+# Prints one line per PR that has matching comments:
+#   <pr-url>  <pr-status>  <comment-count>
+#
+# Writes the full comment bodies to ./pr-comment.md
+#
+# "Today" means the local-day window 00:00:00 .. 23:59:59, matched against each
+# comment's creation time.
+set -euo pipefail
+
+AUTHORS=(tp6gw94 hismax-Ryan jubeatt chad0921 smax-ashi smax-Ted)
+
+for dep in gh jq git; do
+  if ! command -v "$dep" >/dev/null 2>&1; then
+    echo "error: $dep not found" >&2
+    exit 1
+  fi
+done
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "error: not inside a git repository" >&2
+  exit 1
+fi
+
+repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+
+# Local-day boundaries expressed as (UTC) epoch seconds. jq's fromdateiso8601
+# also yields UTC epoch, so the comparison is timezone-correct.
+today=$(date +%Y-%m-%d)
+start=$(date -j -f "%Y-%m-%d %H:%M:%S" "$today 00:00:00" +%s)
+end=$(date -j -f "%Y-%m-%d %H:%M:%S" "$today 23:59:59" +%s)
+
+authors_json=$(jq -nc '$ARGS.positional' --args "${AUTHORS[@]}")
+
+# Progress feedback goes to stderr and only when it is a terminal, so piping or
+# redirecting stdout still yields clean, parseable result lines.
+is_tty=0
+[ -t 2 ] && is_tty=1
+progress() { # <current> <total> <label>
+  [ "$is_tty" = 1 ] || return 0
+  printf '\r\033[K  [%s/%s] %s' "$1" "$2" "$3" >&2
+}
+status() { # <message>
+  [ "$is_tty" = 1 ] || return 0
+  printf '\r\033[K  %s' "$1" >&2
+}
+clear_line() { [ "$is_tty" = 1 ] && printf '\r\033[K' >&2 || true; }
+
+# Candidate PRs: anything touched today. Commenting always bumps updatedAt, so
+# this captures every PR that could hold a matching comment, regardless of state.
+status "searching PRs updated today…"
+prs_json=$(gh pr list --repo "$repo" --state all \
+  --search "updated:>=$today" \
+  --json number,url,state,isDraft,title \
+  --limit 1000)
+total=$(printf '%s' "$prs_json" | jq 'length')
+clear_line
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+records="$tmp/records.tsv" # num \t epoch \t author \t kind \t url \t bodyBase64
+: >"$records"
+
+# Each parallel job writes ONLY to its own $recdir/<num> file, so concurrent
+# jobs never touch a shared file — no interleaving/corruption race. Results are
+# concatenated afterwards. $done_dir holds one marker per finished job, which
+# the main shell polls to drive the progress counter.
+recdir="$tmp/rec"
+done_dir="$tmp/done"
+mkdir -p "$recdir" "$done_dir"
+
+# Per-PR metadata is kept in $tmp/meta.<num> as "url\tstatus\ttitle".
+# (Avoids `declare -A`, which macOS's stock bash 3.2 does not support.)
+meta_url()    { cut -f1 "$tmp/meta.$1"; }
+meta_status() { cut -f2 "$tmp/meta.$1"; }
+meta_title()  { cut -f3 "$tmp/meta.$1"; }
+
+fmt_status() { # <state> <isDraft>
+  local state="$1" draft="$2"
+  case "$state" in
+    MERGED) echo "merged" ;;
+    CLOSED) echo "closed" ;;
+    OPEN)   [ "$draft" = "true" ] && echo "draft" || echo "open" ;;
+    *)      echo "$state" ;;
+  esac
+}
+
+# jq programs emit TSV records, filtered by author + time window. Bodies are
+# base64-encoded so they survive embedded newlines/tabs in the TSV.
+jq_issue='.[]
+  | select(.user.login as $a | $authors | index($a))
+  | (.created_at | fromdateiso8601) as $t
+  | select($t >= $start and $t <= $end)
+  | [$num, $t, .user.login, "comment", .html_url, (.body // "" | @base64)] | @tsv'
+
+jq_review_comment='.[]
+  | select(.user.login as $a | $authors | index($a))
+  | (.created_at | fromdateiso8601) as $t
+  | select($t >= $start and $t <= $end)
+  | [$num, $t, .user.login, "review comment", .html_url, (.body // "" | @base64)] | @tsv'
+
+jq_review='.[]
+  | select(.user.login as $a | $authors | index($a))
+  | select((.body // "") != "")
+  | (.submitted_at | fromdateiso8601) as $t
+  | select($t >= $start and $t <= $end)
+  | [$num, $t, .user.login, "review summary", .html_url, (.body | @base64)] | @tsv'
+
+# Fetch all three comment kinds for one PR into its own record file, then drop
+# a done-marker. Runs as a background job (a subshell), so `set +e` here keeps a
+# failing API call from killing the job before the marker is written; it does
+# not affect the main shell's errexit.
+fetch_pr() { # <num>
+  local num="$1"
+  set +e
+  {
+    gh api --paginate "repos/$repo/issues/$num/comments" 2>/dev/null \
+      | jq -r --argjson authors "$authors_json" --argjson start "$start" \
+              --argjson end "$end" --argjson num "$num" "$jq_issue"
+    gh api --paginate "repos/$repo/pulls/$num/comments" 2>/dev/null \
+      | jq -r --argjson authors "$authors_json" --argjson start "$start" \
+              --argjson end "$end" --argjson num "$num" "$jq_review_comment"
+    gh api --paginate "repos/$repo/pulls/$num/reviews" 2>/dev/null \
+      | jq -r --argjson authors "$authors_json" --argjson start "$start" \
+              --argjson end "$end" --argjson num "$num" "$jq_review"
+  } >"$recdir/$num" 2>/dev/null
+  : >"$done_dir/$num"
+}
+
+# Pass 1: write per-PR metadata synchronously (cheap, no API calls, race-free).
+while IFS=$'\t' read -r num url state isdraft title; do
+  [ -n "$num" ] || continue
+  printf '%s\t%s\t%s\n' "$url" "$(fmt_status "$state" "$isdraft")" "$title" >"$tmp/meta.$num"
+done < <(printf '%s' "$prs_json" | jq -r '.[] | [.number, .url, .state, (.isDraft | tostring), .title] | @tsv')
+
+# Pass 2: fetch comments in parallel, capped at $max_jobs concurrent jobs to
+# stay clear of GitHub's secondary rate limits. The main shell polls $done_dir
+# to keep the progress counter live while jobs run.
+max_jobs=8
+running_jobs() { jobs -r | wc -l | tr -d ' '; }
+done_count()   { ls "$done_dir" 2>/dev/null | wc -l | tr -d ' '; }
+
+nums=$(printf '%s' "$prs_json" | jq -r '.[].number')
+for num in $nums; do
+  fetch_pr "$num" &
+  while [ "$(running_jobs)" -ge "$max_jobs" ]; do
+    progress "$(done_count)" "$total" "fetching comments"
+    sleep 0.1
+  done
+done
+while [ "$(running_jobs)" -gt 0 ]; do
+  progress "$(done_count)" "$total" "fetching comments"
+  sleep 0.1
+done
+wait
+
+clear_line
+
+# Assemble per-PR files. Order is irrelevant — records are sorted by PR number
+# and then by timestamp downstream.
+cat "$recdir"/* >>"$records" 2>/dev/null || true
+
+pr_order=$(cut -f1 "$records" | sort -un)
+
+count_for() { awk -F'\t' -v n="$1" '$1==n{c++} END{print c+0}' "$records"; }
+
+# Console summary: <pr-url>  <pr-status>  <comment-count>
+for num in $pr_order; do
+  printf '%s  %s  %s\n' "$(meta_url "$num")" "$(meta_status "$num")" "$(count_for "$num")"
+done
+
+# Markdown report.
+md="pr-comment.md"
+{
+  echo "# PR Comments — $today"
+  echo
+  echo "> Repo: \`$repo\`"
+  echo "> Authors: ${AUTHORS[*]}"
+  echo "> Window: $today 00:00–23:59 (local)"
+  echo "> Generated: $(date '+%Y-%m-%d %H:%M')"
+  echo
+
+  if [ ! -s "$records" ]; then
+    echo "_No comments from the specified authors today._"
+  else
+    for num in $pr_order; do
+      echo "---"
+      echo
+      echo "## [#$num $(meta_title "$num")]($(meta_url "$num")) — $(meta_status "$num") · $(count_for "$num") comment(s)"
+      echo
+      awk -F'\t' -v n="$num" '$1==n' "$records" | sort -t$'\t' -k2,2n \
+        | while IFS=$'\t' read -r _num epoch author kind curl bodyb64; do
+            ltime=$(date -r "$epoch" '+%Y-%m-%d %H:%M')
+            echo "### @$author · $ltime · $kind"
+            echo
+            echo "<$curl>"
+            echo
+            jq -rn --arg s "$bodyb64" '$s | @base64d'
+            echo
+          done
+    done
+  fi
+} >"$md"
+
+written=$(wc -l <"$records" | tr -d ' ')
+pr_count=$(printf '%s\n' "$pr_order" | grep -c . || true)
+echo "→ wrote $written comment(s) across $pr_count PR(s) to $md" >&2
