@@ -1,4 +1,4 @@
-# my-config
+# my-mac-config
 
 個人開發環境設定檔，透過 symlink 和自動化 script 管理，換電腦時可以快速還原。
 
