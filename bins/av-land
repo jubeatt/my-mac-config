@@ -1,0 +1,273 @@
+#!/usr/bin/env bash
+# av-land
+# Land an av-managed stacked-PR series into trunk and clean up.
+#
+# Run while checked out on the TOP branch of the (sub-)stack. It reads the stack
+# chain from av's database, makes sure the top PR is merged (merging it for you
+# if needed), then closes the lower PRs, deletes their branches, and removes
+# them from av tracking. Executes by default; pass --dryrun to preview.
+#
+# Usage:
+#   av-land [--dryrun]
+#
+# Branch deletion is done explicitly (not via `gh pr close --delete-branch`) and
+# AFTER `av orphan`, so it never races with av needing the local refs. Each
+# branch is verified fully contained in trunk via patch-id (git cherry), so
+# rebase-merged stacks are detected correctly.
+set -euo pipefail
+
+DRYRUN=0
+
+usage() {
+  cat <<'EOF'
+av-land — land an av-managed stacked-PR series into trunk and clean up.
+
+Run while checked out on the TOP branch of the (sub-)stack.
+
+USAGE
+  av-land [--dryrun]
+
+FLAGS
+  --dryrun              Only print the commands that would run; change nothing.
+  -h, --help            Show this help and exit.
+
+EXAMPLES
+  git checkout <top-branch>
+  av-land --dryrun         # preview the full plan
+  av-land                  # land the stack and clean up
+
+WHAT IT DOES
+  1. If the top PR isn't merged, retarget its base to trunk and rebase-merge it
+     (keeps trunk history linear and preserves per-commit patch-ids).
+  2. Verify every branch is fully contained in origin/<trunk> via patch-id
+     (git cherry); aborts if anything is not actually landed.
+  3. Close the still-open lower PRs.
+  4. `av orphan` the stack and delete the local branches.
+  5. Delete the remote branches.
+  6. `av sync` to finish (skipped when HEAD is detached in a worktree).
+
+REQUIREMENTS
+  jq, gh (authenticated), av; the repo must be av-initialized.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dryrun) DRYRUN=1 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "unknown arg: $1" >&2; usage; exit 1 ;;
+  esac
+  shift
+done
+
+# Check all dependencies up front and report the full picture at once, so the
+# user can install everything in one go instead of hitting one error at a time.
+REQUIRED_DEPS=(av gh git jq)
+missing_deps=()
+for dep in "${REQUIRED_DEPS[@]}"; do
+  command -v "$dep" >/dev/null 2>&1 || missing_deps+=("$dep")
+done
+if [[ ${#missing_deps[@]} -gt 0 ]]; then
+  echo "error: missing required dependencies." >&2
+  echo "  required: ${REQUIRED_DEPS[*]}" >&2
+  echo "  missing:  ${missing_deps[*]}" >&2
+  echo "  install hints: brew (macOS) / apt (WSL) / winget|scoop (Windows); 'av' is Aviator's CLI." >&2
+  exit 1
+fi
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "error: not inside a git repository" >&2
+  exit 1
+fi
+
+run() { echo "+ $*"; if [[ $DRYRUN -eq 0 ]]; then "$@"; fi; }
+# Like run(), but tolerates failure (e.g. a branch that is already gone).
+run_soft() { echo "+ $*"; if [[ $DRYRUN -eq 0 ]]; then "$@" || true; fi; }
+# Move HEAD off the stack branches so they can be deleted. Prefer attaching to
+# trunk, but fall back to a detached checkout when trunk is checked out in
+# another worktree (git refuses to attach the same branch in two worktrees).
+goto_trunk() {
+  if [[ $DRYRUN -eq 1 ]]; then
+    echo "+ git checkout $trunk  (detached fallback if trunk is busy elsewhere)"
+    return
+  fi
+  if git checkout "$trunk" 2>/dev/null; then
+    echo "+ git checkout $trunk"
+  else
+    git checkout --detach "$trunk"
+    echo "+ git checkout --detach $trunk  (trunk busy in another worktree)"
+  fi
+}
+
+GIT_DIR=$(git rev-parse --git-common-dir)
+DB="$GIT_DIR/av/av.db"
+[[ -f "$DB" ]] || { echo "error: av.db not found at $DB; repo not av-initialized?" >&2; exit 1; }
+
+TOP=$(git branch --show-current)
+[[ -n "$TOP" ]] || { echo "error: detached HEAD; checkout the top branch first" >&2; exit 1; }
+
+# Build the stack chain from TOP down to the trunk-parented branch.
+chain=(); trunk=""; b="$TOP"
+while :; do
+  jq -e --arg b "$b" '.branches[$b]' "$DB" >/dev/null 2>&1 \
+    || { echo "error: branch '$b' is not tracked by av" >&2; exit 1; }
+  chain+=("$b")
+  if [[ "$(jq -r --arg b "$b" '.branches[$b].parent.trunk // false' "$DB")" == "true" ]]; then
+    trunk=$(jq -r --arg b "$b" '.branches[$b].parent.name' "$DB"); break
+  fi
+  b=$(jq -r --arg b "$b" '.branches[$b].parent.name' "$DB")
+done
+
+echo "Trunk: $trunk"
+echo "Stack (top→bottom): ${chain[*]}"
+[[ $DRYRUN -eq 1 ]] && echo "(dry-run)"
+echo
+
+# Guard: refuse to run unless the current branch is the TOP of its stack.
+# The chain is discovered upward (toward trunk), so standing too low would
+# silently land only a sub-stack while `av orphan` still drops all children.
+children=$(jq -r --arg t "$TOP" \
+  '[.branches[] | select(.parent.name == $t) | .name] | sort | .[]' "$DB")
+if [[ -n "$children" ]]; then
+  echo "ABORT: '$TOP' is not the top of its stack; these branches are stacked on it:" >&2
+  echo "$children" | sed 's/^/   - /' >&2
+  echo "Checkout the topmost branch (e.g. \`av next --last\`) and re-run." >&2
+  exit 1
+fi
+
+# Refresh remote-tracking refs so the patch-id verification below sees the
+# freshly-merged trunk. Skipped in dry-run to honor the "change nothing"
+# contract; the verify step there already degrades to a WARN.
+if [[ $DRYRUN -eq 0 ]]; then
+  git fetch origin --prune >/dev/null 2>&1 \
+    || echo "   WARN: git fetch failed; verification uses possibly-stale origin refs" >&2
+else
+  echo "+ git fetch origin --prune  (skipped in dry-run)"
+fi
+pr_of() { jq -r --arg b "$1" '.branches[$b].pullRequest.number // empty' "$DB"; }
+
+# Capture PR numbers up front: `av orphan` (below) drops these branches from
+# av.db, after which pr_of() can no longer resolve them. Index 0 is the top.
+prs=()
+for b in "${chain[@]}"; do prs+=("$(pr_of "$b")"); done
+
+# 1. ensure the top PR is landed; merge it if it isn't already.
+top_pr="${prs[0]}"
+if [[ -z "$top_pr" ]]; then
+  echo ">> Top branch $TOP has no PR on record; assuming already landed (verified below)"
+else
+  top_state=$(gh pr view "$top_pr" --json state -q .state 2>/dev/null || echo "")
+  case "$top_state" in
+    MERGED)
+      echo ">> Top PR #$top_pr ($TOP) already merged into $trunk" ;;
+    OPEN)
+      echo ">> Merging top PR #$top_pr ($TOP) into $trunk via rebase"
+      run gh pr edit "$top_pr" --base "$trunk"
+      run gh pr merge "$top_pr" --rebase
+      run git fetch origin --prune ;;
+    *)
+      echo "ABORT: top PR #$top_pr is '${top_state:-unknown}' (expected OPEN or MERGED)" >&2
+      exit 1 ;;
+  esac
+fi
+echo
+
+# 2. safety: every branch must be fully contained in origin/<trunk>
+echo ">> Verifying each branch is fully merged into origin/$trunk"
+# Fail closed: if origin/<trunk> is missing locally we cannot verify anything,
+# so abort rather than let the gate pass and force-delete unmerged branches.
+if ! git rev-parse --verify --quiet "refs/remotes/origin/$trunk" >/dev/null; then
+  if [[ $DRYRUN -eq 1 ]]; then
+    echo "   WARN: origin/$trunk not found locally; skipping verification (dry-run)"
+  else
+    echo "ABORT: origin/$trunk not found locally; cannot verify merge state." >&2
+    echo "       run: git fetch origin --prune" >&2
+    exit 1
+  fi
+else
+  for b in "${chain[@]}"; do
+    # Separate cherry's exit code from its output: a cherry failure must abort,
+    # never be silently read as "0 unmerged commits" (fail-open).
+    if ! cherry_out=$(git cherry "origin/$trunk" "$b" 2>/dev/null); then
+      echo "ABORT: 'git cherry origin/$trunk $b' failed; cannot verify $b." >&2
+      echo "       inspect: git cherry origin/$trunk $b" >&2
+      exit 1
+    fi
+    unmerged=$(printf '%s\n' "$cherry_out" | grep -c '^+' || true)
+    if [[ "$unmerged" -ne 0 ]]; then
+      if [[ $DRYRUN -eq 1 ]]; then
+        # In dry-run the merge above was only printed, so the top isn't actually
+        # landed yet — warn and keep previewing the rest of the plan.
+        echo "   WARN: $b has $unmerged commit(s) not yet in origin/$trunk (dry-run, continuing)"
+        continue
+      fi
+      echo "ABORT: '$b' has $unmerged commit(s) not in origin/$trunk" >&2
+      echo "       The top PR did not land it (or there is no PR for it)." >&2
+      echo "       inspect: git cherry origin/$trunk $b" >&2
+      exit 1
+    fi
+    echo "   ok: $b"
+  done
+fi
+echo
+
+# 3. close the still-open lower PRs (skip index 0 — the top was merged above).
+echo ">> Closing lower PRs"
+# Reference the top PR by number so GitHub auto-links it (#123). Fall back to a
+# generic message when the top branch has no PR on record (top_pr empty).
+if [[ -n "$top_pr" ]]; then
+  close_msg="Landed into $trunk together with the top PR (#$top_pr)."
+else
+  close_msg="Landed into $trunk together with the rest of the stack."
+fi
+for idx in "${!chain[@]}"; do
+  [[ $idx -eq 0 ]] && continue
+  b="${chain[$idx]}"; pr="${prs[$idx]}"
+  [[ -n "$pr" ]] || continue
+  state=$(gh pr view "$pr" --json state -q .state 2>/dev/null || echo "")
+  if [[ "$state" == "OPEN" ]]; then
+    run gh pr close "$pr" --comment "$close_msg"
+  else
+    echo "   PR #$pr ($b) already ${state:-unknown}"
+  fi
+done
+echo
+
+# 4. orphan from av + delete local branches, while the local refs still exist.
+echo ">> Removing branches from av and deleting local refs"
+bottom="${chain[${#chain[@]}-1]}"
+run git checkout "$bottom"
+run av orphan
+goto_trunk
+for b in "${chain[@]}"; do
+  if git show-ref --verify --quiet "refs/heads/$b"; then
+    run_soft git branch -D "$b"
+  else
+    echo "   (local $b already gone)"
+  fi
+done
+echo
+
+# 5. delete the remote branches that still exist (the top branch's remote may
+#    already be gone if it was merged with auto-delete enabled). Existence is
+#    checked against the local remote-tracking refs (refreshed by the earlier
+#    `git fetch --prune`) to avoid a per-branch network round-trip.
+echo ">> Deleting remote branches"
+for b in "${chain[@]}"; do
+  if git show-ref --verify --quiet "refs/remotes/origin/$b"; then
+    run_soft git push origin --delete "$b"
+  else
+    echo "   (remote $b already gone)"
+  fi
+done
+echo
+
+# Final housekeeping. `av sync` must be on a branch, which isn't possible when
+# we fell back to a detached checkout (trunk busy in another worktree); skip it
+# then — the stack branches were already removed from av.db above.
+if git symbolic-ref -q HEAD >/dev/null 2>&1; then
+  run av sync --all --push=no --prune=yes
+else
+  echo "+ (skipping 'av sync': detached HEAD — trunk is checked out in another worktree)"
+fi
+echo "Done."
