@@ -12,7 +12,6 @@
 
 ```
 .
-├── ai/.kiro/            # Kiro CLI 設定（agents, skills, steering, hooks）
 ├── ide/
 │   ├── vscode/          # VS Code settings, keybindings, extensions
 │   └── kiro/            # Kiro IDE settings, keybindings, extensions
@@ -63,7 +62,6 @@ node scripts/link-configs.js --kiro
 node scripts/link-configs.js --vim
 node scripts/link-configs.js --git
 node scripts/link-configs.js --zsh
-node scripts/link-configs.js --kiro-cli
 node scripts/link-configs.js --ghostty
 node scripts/link-configs.js --cmux
 node scripts/link-configs.js --lazygit
@@ -102,7 +100,6 @@ node scripts/gen-vscode-extensions.js --codium --dryrun
 | VS Code | `ide/vscode/` | `~/Library/Application Support/Code/User/` |
 | VSCodium | `ide/vscode/` | `~/Library/Application Support/VSCodium/User/` |
 | Kiro IDE | `ide/kiro/` | `~/Library/Application Support/Kiro/User/` |
-| Kiro CLI | `ai/.kiro/` | `~/.kiro/` |
 | Vim | `.vimrc` | `~/.vimrc` |
 | Git | `.gitconfig` | `~/.gitconfig` |
 | Zsh | `.zshrc` | `~/.zshrc` |

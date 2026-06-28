@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Create symlinks from config files in this repo to their expected locations.
-// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--kiro-cli] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit] [--bins]
+// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit] [--bins]
 
 import {
   existsSync,
@@ -18,7 +18,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const home = process.env.HOME
 
 const IDE_LINK_FILES = ["settings.json", "keybindings.json"]
-const KIRO_CLI_DIRS = ["agents", "skills", "steering", "hooks"]
 
 const CONFIGS = {
   vscode: {
@@ -56,12 +55,6 @@ const CONFIGS = {
     source: resolve(__dirname, ".."),
     target: home,
     files: [".zshrc"],
-  },
-  "kiro-cli": {
-    flag: "--kiro-cli",
-    source: resolve(__dirname, "../ai/.kiro"),
-    target: `${home}/.kiro`,
-    files: KIRO_CLI_DIRS,
   },
   ghostty: {
     flag: "--ghostty",
