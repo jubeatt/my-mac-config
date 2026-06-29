@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Create symlinks from config files in this repo to their expected locations.
-// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit] [--bins]
+// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit] [--bin]
 
 import {
   existsSync,
@@ -74,9 +74,9 @@ const CONFIGS = {
     target: `${home}/Library/Application Support/lazygit`,
     files: ["config.yml"],
   },
-  bins: {
-    flag: "--bins",
-    source: resolve(__dirname, "../bins"),
+  bin: {
+    flag: "--bin",
+    source: resolve(__dirname, "../bin"),
     target: `${home}/.local/bin`,
     linkAll: true,
   },
