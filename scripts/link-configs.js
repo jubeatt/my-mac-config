@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 // Create symlinks from config files in this repo to their expected locations.
-// Usage: node scripts/link-configs.js [--all] [--vscode] [--codium] [--kiro] [--vim] [--zsh] [--ghostty] [--cmux] [--lazygit] [--bin]
+// Links every config; entries whose target directory does not exist are skipped.
+// Usage: node scripts/link-configs.js
 
 import {
   existsSync,
@@ -11,7 +12,6 @@ import {
   unlinkSync,
 } from "node:fs"
 import { dirname, resolve } from "node:path"
-import { createInterface } from "node:readline/promises"
 import { fileURLToPath } from "node:url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -21,61 +21,51 @@ const IDE_LINK_FILES = ["settings.json", "keybindings.json"]
 
 const CONFIGS = {
   vscode: {
-    flag: "--vscode",
     source: resolve(__dirname, "../ide/vscode"),
     target: `${home}/Library/Application Support/Code/User`,
     files: IDE_LINK_FILES,
   },
   codium: {
-    flag: "--codium",
     source: resolve(__dirname, "../ide/vscode"),
     target: `${home}/Library/Application Support/VSCodium/User`,
     files: IDE_LINK_FILES,
   },
   kiro: {
-    flag: "--kiro",
     source: resolve(__dirname, "../ide/kiro"),
     target: `${home}/Library/Application Support/Kiro/User`,
     files: IDE_LINK_FILES,
   },
   vim: {
-    flag: "--vim",
     source: resolve(__dirname, ".."),
     target: home,
     files: [".vimrc"],
   },
   git: {
-    flag: "--git",
     source: resolve(__dirname, ".."),
     target: home,
     files: [".gitconfig"],
   },
   zsh: {
-    flag: "--zsh",
     source: resolve(__dirname, ".."),
     target: home,
     files: [".zshrc"],
   },
   ghostty: {
-    flag: "--ghostty",
     source: resolve(__dirname, "../terminal/ghostty"),
     target: `${home}/.config/ghostty`,
     files: ["config"],
   },
   cmux: {
-    flag: "--cmux",
     source: resolve(__dirname, "../terminal/cmux"),
     target: `${home}/.config/cmux`,
     files: ["cmux.json"],
   },
   lazygit: {
-    flag: "--lazygit",
     source: resolve(__dirname, "../terminal/lazygit"),
     target: `${home}/Library/Application Support/lazygit`,
     files: ["config.yml"],
   },
   bin: {
-    flag: "--bin",
     source: resolve(__dirname, "../bin"),
     target: `${home}/.local/bin`,
     linkAll: true,
@@ -83,31 +73,6 @@ const CONFIGS = {
 }
 
 const CONFIG_NAMES = Object.keys(CONFIGS)
-
-async function promptConfig() {
-  const rl = createInterface({ input: process.stdin, output: process.stdout })
-  try {
-    const choices = CONFIG_NAMES.map((name, i) => `(${i + 1}) ${name}`).join(
-      "  ",
-    )
-    const answer = await rl.question(`Which config? ${choices}  (a) all: `)
-    const choice = answer.trim().toLowerCase()
-    if (choice === "a") return CONFIG_NAMES
-    const index = Number.parseInt(choice, 10) - 1
-    if (index >= 0 && index < CONFIG_NAMES.length) return [CONFIG_NAMES[index]]
-    console.error("Invalid choice.")
-    process.exit(1)
-  } finally {
-    rl.close()
-  }
-}
-
-function parseArgs() {
-  if (process.argv.includes("--all")) return CONFIG_NAMES
-  return Object.entries(CONFIGS)
-    .filter(([, { flag }]) => process.argv.includes(flag))
-    .map(([name]) => name)
-}
 
 // Returns: { linked: number, failed: number, skipped: boolean }
 function linkConfig(name) {
@@ -152,17 +117,12 @@ function linkConfig(name) {
   return result
 }
 
-async function main() {
-  let configs = parseArgs()
-  if (configs.length === 0) {
-    configs = await promptConfig()
-  }
-
+function main() {
   let totalLinked = 0
   let totalFailed = 0
   let totalSkipped = 0
 
-  for (const name of configs) {
+  for (const name of CONFIG_NAMES) {
     const { linked, failed, skipped } = linkConfig(name)
     totalLinked += linked
     totalFailed += failed
