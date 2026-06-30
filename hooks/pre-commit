@@ -1,7 +1,29 @@
 #!/bin/sh
 
-# Pre-commit hook: auto-format staged files with Biome
+# Pre-commit hook:
+#   1. Strip volatile Playwright extension toggle keys from settings.json
+#   2. Auto-format staged files with Biome
 
+# --- 1. Strip Playwright toggle keys ---------------------------------------
+# The Playwright VSCode extension always writes "playwright.reuseBrowser" and
+# "playwright.showTrace" to user settings whenever the sidebar checkboxes are
+# toggled. Keep them out of version control to avoid noisy diffs.
+if command -v jq >/dev/null 2>&1; then
+  SETTINGS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(^|/)settings\.json$')
+  for f in $SETTINGS; do
+    [ -f "$f" ] || continue
+    # jq only handles strict JSON; skip files it can't parse (e.g. JSONC with comments)
+    if jq empty "$f" >/dev/null 2>&1; then
+      stripped=$(jq 'del(."playwright.reuseBrowser", ."playwright.showTrace")' "$f")
+      if [ "$stripped" != "$(cat "$f")" ]; then
+        printf '%s\n' "$stripped" >"$f"
+        git add "$f"
+      fi
+    fi
+  done
+fi
+
+# --- 2. Biome format --------------------------------------------------------
 # Get staged files that Biome can handle (js, ts, jsx, tsx, json, jsonc)
 STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|jsx|tsx|json|jsonc)$')
 
