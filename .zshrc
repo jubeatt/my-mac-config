@@ -151,6 +151,21 @@ cm() {
   esac
 }
 
+# av shortcuts
+av() {
+    case "$1" in
+        sy) shift; command av sync "$@" ;;
+        st) shift; command av sync --rebase-to-trunk "$@" ;;
+        sp) shift; command av sync --push=yes "$@" ;;
+        cm) shift; command av commit "$@" ;;
+        ck) shift; command av switch "$@" ;;
+        tr) shift; command av tree "$@" ;;
+        br) shift; command av branch "$@" ;;
+        re) shift; command av restack "$@" ;;
+        *)  command av "$@" ;;
+    esac
+}
+
 # Git
 # generate .gitignore from toptal templates (e.g. gi node,macos)
 gi() { curl -sL "https://www.toptal.com/developers/gitignore/api/$1" -o .gitignore && echo "Created .gitignore for: $1" }
