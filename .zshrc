@@ -44,7 +44,7 @@ ZSH_THEME="tonotdo"
 # zstyle ':omz:update' frequency 13
 
 # Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
+DISABLE_MAGIC_FUNCTIONS="true"
 
 # Uncomment the following line to disable colors in ls.
 # DISABLE_LS_COLORS="true"
@@ -128,6 +128,11 @@ alias pn="pnpm"
 # lazygit project switcher
 alias pj='cd $(find ~/Projects -maxdepth 1 -type d | fzf)'
 alias lgp='pj && lazygit'
+
+# download youtube music
+yt() {
+  yt-dlp --no-playlist -x --audio-format mp3 --embed-thumbnail --add-metadata "$@"
+}
 
 # find file in current dir, cd to its parent
 pf() {
