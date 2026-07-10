@@ -6,7 +6,6 @@
     "dsznajder.es7-react-js-snippets",
     "eamodio.gitlens",
     "editorconfig.editorconfig",
-    "github.copilot-chat",
     "github.vscode-github-actions",
     "jock.svg",
     "johnpapa.winteriscoming",
@@ -15,8 +14,10 @@
     "ritwickdey.liveserver",
     "sleistner.vscode-fileutils",
     "streetsidesoftware.code-spell-checker",
+    "typescriptteam.native-preview",
     "tyriar.sort-lines",
     "unifiedjs.vscode-mdx",
+    "vitest.explorer",
     "wayou.vscode-todo-highlight",
     "wmaurer.change-case",
     "yzhang.markdown-all-in-one"
