@@ -5,11 +5,11 @@ gui:
     selectedLineBgColor:
       - "#444444"
 os:
-  edit: 'codium --goto {{filename}}'
-  editAtLine: 'codium --goto {{filename}}:{{line}}'
-  editAtLineAndWait: 'codium --goto --wait {{filename}}:{{line}}'
+  edit: 'code --goto {{filename}}'
+  editAtLine: 'code --goto {{filename}}:{{line}}'
+  editAtLineAndWait: 'code --goto --wait {{filename}}:{{line}}'
   editInTerminal: false
-  openDirInEditor: 'codium {{dir}}'
+  openDirInEditor: 'code {{dir}}'
 customCommands:
   - key: "A"
     command: git commit --amend {{.Form.V}} --no-edit
