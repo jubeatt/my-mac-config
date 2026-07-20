@@ -108,5 +108,7 @@
   },
   "playwright.env": {
     "E2E_API_ENDPOINT": "https://dev-be-his.southmax.com"
-  }
+  },
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "workbench.experimental.modernUI": true
 }
