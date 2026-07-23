@@ -162,7 +162,7 @@ cm() {
 av() {
     case "$1" in
         sy) shift; command av sync "$@" ;;
-        st) shift; command av sync --rebase-to-trunk "$@" ;;
+        st) shift; [[ "$*" == *"--push"* ]] && command av sync --rebase-to-trunk "$@" || command av sync --rebase-to-trunk --push=no "$@" ;;
         sp) shift; command av sync --push=yes "$@" ;;
         cm) shift; command av commit "$@" ;;
         ck) shift; command av switch "$@" ;;
