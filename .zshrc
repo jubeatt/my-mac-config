@@ -168,7 +168,7 @@ av() {
         ck) shift; command av switch "$@" ;;
         tr) shift; command av tree "$@" ;;
         br) shift; command av branch "$@" ;;
-        re) shift; command av restack "$@" ;;
+        rs) shift; command av restack "$@" ;;
         ad) shift; command av adopt --parent main "$@" ;;
         last)  shift; command av next --last "$@" ;;
         first) shift; command av prev --first "$@" ;;
