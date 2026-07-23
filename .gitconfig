@@ -14,6 +14,8 @@
   lg = log --oneline --graph
   wk = worktree
 	find = !git branch -a --contains
+	bd = "!f() { git branch | grep \"$1\" | xargs git branch -D; }; f"
+	gp = "!f() { git branch | grep \"$1\"; }; f"
 
 [core]
 	autocrlf = input
