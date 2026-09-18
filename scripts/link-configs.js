@@ -40,7 +40,7 @@ const CONFIGS = {
   git: {
     source: resolve(__dirname, ".."),
     target: home,
-    files: [".gitconfig"],
+    files: [".gitconfig", ".gitignore_global"],
   },
   zsh: {
     source: resolve(__dirname, ".."),

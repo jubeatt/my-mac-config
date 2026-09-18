@@ -29,6 +29,7 @@
 ├── .zshrc               # zsh 設定
 ├── .vimrc               # Vim 設定
 ├── .gitconfig            # Git 設定
+├── .gitignore_global     # Git global ignore 設定
 ├── .editorconfig         # EditorConfig
 ├── Brewfile              # Homebrew 套件清單
 └── biome.json            # Biome formatter/linter 設定
@@ -89,6 +90,7 @@ node scripts/gen-vscode-extensions.js --vscode --dryrun
 | Kiro IDE  | `ide/kiro/`                                | `~/Library/Application Support/Kiro/User/`         |
 | Vim       | `.vimrc`                                   | `~/.vimrc`                                         |
 | Git       | `.gitconfig`                               | `~/.gitconfig`                                     |
+| Git ignore | `.gitignore_global`                        | `~/.gitignore_global`                              |
 | Zsh       | `.zshrc`                                   | `~/.zshrc`                                         |
 | Zsh Theme | `terminal/oh-my-zsh/tonotdo.zsh-theme`     | `~/.oh-my-zsh/custom/themes/`                      |
 | iTerm2    | `terminal/iterm2/`                         | iTerm2 Preferences → Custom Folder                 |
