@@ -120,6 +120,9 @@ alias pb="pbpaste > "
 alias rp="realpath"
 alias so="source ~/.zshrc"
 alias kc="kiro-cli"
+kcc() {
+  kiro-cli chat --no-interactive --trust-all-tools "$*"
+}
 alias lg="lazygit"
 alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
 alias vs="code"
