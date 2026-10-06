@@ -1,6 +1,6 @@
 gui:
   language: "en"
-  useHunkModeInStagingView: true
+  useHunkModeInDiffView: true
   theme:
     selectedLineBgColor:
       - "#444444"
