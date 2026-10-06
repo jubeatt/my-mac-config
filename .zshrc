@@ -128,6 +128,7 @@ alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
 alias vs="code"
 alias pn="pnpm"
 alias co="codex"
+alias hd='herdr'
 
 # lazygit project switcher
 alias pj='cd $(find ~/Projects -maxdepth 1 -type d | fzf)'

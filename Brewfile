@@ -16,6 +16,8 @@ brew "fzf"
 brew "gh"
 # Distributed revision control system
 brew "git"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
 # Simple terminal UI for git commands
 brew "lazygit"
 # SSL/TLS VPN implementing OSI layer 2 or 3 secure network extension

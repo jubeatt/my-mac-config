@@ -57,6 +57,11 @@ const CONFIGS = {
     target: `${home}/.config/cmux`,
     files: ["cmux.json"],
   },
+  herdr: {
+    source: resolve(__dirname, "../terminal/herdr"),
+    target: `${home}/.config/herdr`,
+    files: ["config.toml"],
+  },
   lazygit: {
     source: resolve(__dirname, "../terminal/lazygit"),
     target: `${home}/Library/Application Support/lazygit`,
