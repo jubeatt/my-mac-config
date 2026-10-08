@@ -2,6 +2,14 @@ onboarding = false
 
 [keys]
 clear_pane = "prefix+ctrl+k"
+focus_pane_left = "prefix+left"
+focus_pane_down = "prefix+down"
+focus_pane_up = "prefix+up"
+focus_pane_right = "prefix+right"
+swap_pane_left = "prefix+shift+left"
+swap_pane_down = "prefix+shift+down"
+swap_pane_up = "prefix+shift+up"
+swap_pane_right = "prefix+shift+right"
 
 [ui]
 copy_on_select = false
