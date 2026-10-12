@@ -12,7 +12,7 @@ swap_pane_up = "prefix+shift+up"
 swap_pane_right = "prefix+shift+right"
 
 [ui]
-copy_on_select = false
+copy_on_select = true
 
 [ui.sidebar.agents]
 row_gap = 1
