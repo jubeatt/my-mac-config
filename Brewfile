@@ -2,8 +2,14 @@ tap "aviator-co/tap"
 tap "ejoffe/tap"
 # Toolchain of the web
 brew "biome"
+# Image format providing lossless and lossy compression for web images
+brew "webp"
+# TIFF library and utilities
+brew "libtiff"
 # Select default apps for documents and URL schemes on macOS
 brew "duti"
+# Codebase intelligence for TypeScript and JavaScript
+brew "fallow"
 # Simple, fast and user-friendly alternative to find
 brew "fd"
 # Play, record, convert, and stream select audio and video codecs
@@ -41,9 +47,13 @@ cask "cmux"
 cask "codex"
 # Window peeking utility app
 cask "dockdoor"
+# App to build and share containerised applications and microservices
+cask "docker-desktop"
 cask "font-jetbrains-mono-nerd-font"
 # GIT client
 cask "fork"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
 # Open-source code editor
 cask "visual-studio-code"
 npm "corepack"
