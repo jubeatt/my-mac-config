@@ -13,6 +13,7 @@ swap_pane_right = "prefix+shift+right"
 
 [ui]
 copy_on_select = true
+mouse_scroll_lines = 1
 
 [ui.sidebar.agents]
 row_gap = 1
