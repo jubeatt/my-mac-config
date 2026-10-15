@@ -13,8 +13,7 @@
 ```
 .
 ├── ide/
-│   ├── vscode/          # VS Code settings, keybindings, extensions
-│   └── kiro/            # Kiro IDE settings, keybindings, extensions
+│   └── vscode/          # VS Code settings, keybindings, extensions
 ├── terminal/
 │   ├── iterm2/          # iTerm2 設定（自動同步）
 │   ├── oh-my-zsh/       # 自訂 zsh theme
@@ -25,8 +24,8 @@
 ├── scripts/
 │   ├── link-configs.js  # 建立 symlink
 │   ├── setup-terminal.sh        # 終端環境一鍵設定
-│   ├── install-extensions.js    # 安裝 IDE extensions
-│   └── gen-vscode-extensions.js # 同步 IDE extensions 清單
+│   ├── install-extensions.js    # 安裝 VS Code extensions
+│   └── gen-vscode-extensions.js # 同步 VS Code extensions 清單
 ├── .zshrc               # zsh 設定
 ├── .vimrc               # Vim 設定
 ├── .gitconfig            # Git 設定
@@ -65,22 +64,20 @@ node scripts/link-configs.js
 ### 4. 安裝 IDE Extensions
 
 ```bash
-node scripts/install-extensions.js --vscode
-node scripts/install-extensions.js --kiro
+node scripts/install-extensions.js
 ```
 
 ## 其他 Script
 
 ### 同步 Extensions 清單
 
-以目前 IDE 已安裝的 extensions 為主，更新 `ide/<editor>/extensions.json`：
+以目前 VS Code 已安裝的 extensions 為主，更新 `ide/vscode/extensions.json`：
 
 ```bash
-node scripts/gen-vscode-extensions.js --vscode
-node scripts/gen-vscode-extensions.js --kiro
+node scripts/gen-vscode-extensions.js
 
 # 預覽變更，不寫入檔案
-node scripts/gen-vscode-extensions.js --vscode --dryrun
+node scripts/gen-vscode-extensions.js --dryrun
 ```
 
 ## Symlink 對照表
@@ -88,7 +85,6 @@ node scripts/gen-vscode-extensions.js --vscode --dryrun
 | 設定      | Repo 位置                                  | 目標位置                                           |
 | --------- | ------------------------------------------ | -------------------------------------------------- |
 | VS Code   | `ide/vscode/`                              | `~/Library/Application Support/Code/User/`         |
-| Kiro IDE  | `ide/kiro/`                                | `~/Library/Application Support/Kiro/User/`         |
 | Vim       | `.vimrc`                                   | `~/.vimrc`                                         |
 | Git       | `.gitconfig`                               | `~/.gitconfig`                                     |
 | Git ignore | `.gitignore_global`                        | `~/.gitignore_global`                              |
