@@ -28,3 +28,6 @@ rows = [
   ["state_icon", "workspace"],
   ["state_text", "agent"],
 ]
+
+[ui.toast]
+delivery = "terminal"
