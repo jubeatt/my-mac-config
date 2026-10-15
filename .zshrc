@@ -128,6 +128,7 @@ alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
 alias vs="code"
 alias pn="pnpm"
 alias co="codex"
+alias cc="claude"
 alias hd='herdr'
 
 # lazygit project switcher
