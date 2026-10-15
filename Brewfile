@@ -54,6 +54,8 @@ cask "font-jetbrains-mono-nerd-font"
 cask "fork"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
+# Utility to hide menu bar items
+cask "hiddenbar"
 # Open-source code editor
 cask "visual-studio-code"
 npm "corepack"
