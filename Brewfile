@@ -1,5 +1,7 @@
 tap "aviator-co/tap"
 tap "ejoffe/tap"
+# Clone of cat(1) with syntax highlighting and Git integration
+brew "bat"
 # Toolchain of the web
 brew "biome"
 # Image format providing lossless and lossy compression for web images
@@ -22,6 +24,10 @@ brew "fzf"
 brew "gh"
 # Distributed revision control system
 brew "git"
+# Syntax-highlighting pager for git and diff output
+brew "git-delta"
+# Render markdown on the CLI
+brew "glow"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
 # Simple terminal UI for git commands
