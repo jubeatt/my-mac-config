@@ -140,10 +140,58 @@ yt() {
   yt-dlp --no-playlist -x --audio-format mp3 --embed-thumbnail --add-metadata "$@"
 }
 
-# find file in current dir, cd to its parent
+# Find files, then navigate, edit, or copy their paths.
 pf() {
-  local file
-  file=$(fd --type f --hidden --exclude .git | fzf) && cd "$(dirname "$file")"
+  local result file
+  local -a selection
+  local search_header='輸入檔名或路徑以篩選 · ↑/↓ 選擇結果'
+  local action_header='v: Vim · y: 複製相對路徑 · Y: 複製絕對路徑 · j: 切換資料夾'
+
+  # Skip global Git ignores while preserving project and fd ignore rules.
+  # Keep paths NUL-delimited so spaces and newlines are preserved.
+  result=$(
+    GIT_CONFIG_GLOBAL=<(printf '[core]\nexcludesFile = /dev/null\n') \
+      command fd --type f --hidden --exclude .git --print0 --strip-cwd-prefix |
+      FZF_DEFAULT_OPTS= FZF_DEFAULT_OPTS_FILE= command fzf \
+        --read0 --print0 --height=60% --layout=reverse --border \
+        --border-label=' Find files · 搜尋模式 ' \
+        --prompt='search: ' --query="$*" --header="$search_header" \
+        --preview-window='right,50%,border-rounded,wrap' \
+        --preview-label=' 預覽 · Shift+↑/↓ ' \
+        --preview='
+          if [ ! -r {} ]; then
+            printf "%s\n" "無法讀取檔案"
+          elif [ ! -s {} ]; then
+            printf "%s\n" "空白檔案"
+          elif [ "$(file --brief --mime-encoding -- {})" = binary ]; then
+            printf "%s\n" "二進位檔案"
+            file --brief -- {}
+          else
+            head -c 262144 -- {} | head -n 300
+          fi' \
+        --footer='Enter: open · Tab: 切換模式 · Esc: 取消' \
+        --bind='start:unbind(v,y,Y,j),enter:print(open)+accept,esc:abort,ctrl-k:clear-query' \
+        --bind='v:print(vim)+accept,y:print(relative)+accept,Y:print(absolute)+accept,j:print(cd)+accept' \
+        --bind="tab:transform:
+          if [ \"\$FZF_INPUT_STATE\" = hidden ]; then
+            printf '%s' 'show-input+unbind(v,y,Y,j)+change-border-label( Find files · 搜尋模式 )+change-header($search_header)'
+          else
+            printf '%s' 'hide-input+rebind(v,y,Y,j)+change-border-label( Find files · 操作模式 )+change-header($action_header)'
+          fi"
+  ) || return $?
+
+  selection=("${(@0)result}")
+  (( ${#selection} >= 2 )) || return 1
+  file=${selection[2]}
+  [[ -n "$file" ]] || return 1
+
+  case "${selection[1]}" in
+    cd) builtin cd -- "${file:a:h}" ;;
+    vim) command vim -- "$file" ;;
+    open) command open "${file:a}" ;;
+    relative) printf '%s' "$file" | command pbcopy ;;
+    absolute) printf '%s' "${file:a}" | command pbcopy ;;
+  esac
 }
 
 # cmux shortcuts
