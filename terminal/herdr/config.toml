@@ -75,6 +75,12 @@ type = "plugin_action"
 command = "annotate.last-newest"
 description = "review the agent's newest reply"
 
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "annotate.terminal"
+description = "review this pane's recent terminal output"
+
 [ui]
 copy_on_select = true
 mouse_scroll_lines = 1
