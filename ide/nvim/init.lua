@@ -23,6 +23,9 @@ vim.o.expandtab = true
 -- Ask to save instead of failing with E37, e.g. after grn edits other files.
 vim.o.confirm = true
 
+-- Idle time before CursorHold fires (default 4000ms); drives symbol highlighting.
+vim.o.updatetime = 250
+
 -- Move between windows (tree, editor, quickfix) without the <C-w> prefix.
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Focus left window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Focus lower window" })
@@ -170,5 +173,29 @@ vim.api.nvim_create_autocmd("LspAttach", {
       { buffer = ev.buf, desc = "Remove unused imports" }
     )
     vim.keymap.set("n", "<leader>cD", source_action("source.fixAll"), { buffer = ev.buf, desc = "Fix all" })
+
+    -- Highlight other references of the symbol under the cursor while it rests.
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client:supports_method("textDocument/documentHighlight", ev.buf) then
+      local group = vim.api.nvim_create_augroup("lsp-document-highlight", { clear = false })
+      vim.api.nvim_clear_autocmds({ group = group, buffer = ev.buf })
+      vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+        group = group,
+        buffer = ev.buf,
+        callback = vim.lsp.buf.document_highlight,
+      })
+      vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+        group = group,
+        buffer = ev.buf,
+        callback = vim.lsp.buf.clear_references,
+      })
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("LspDetach", {
+  callback = function(ev)
+    vim.lsp.buf.clear_references()
+    pcall(vim.api.nvim_clear_autocmds, { group = "lsp-document-highlight", buffer = ev.buf })
   end,
 })
