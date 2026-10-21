@@ -13,6 +13,7 @@
 ```
 .
 ├── ide/
+│   ├── nvim/            # Neovim 設定（init.lua、vim.pack lockfile）
 │   └── vscode/          # VS Code settings, keybindings, extensions
 ├── terminal/
 │   ├── iterm2/          # iTerm2 設定（自動同步）
@@ -27,7 +28,6 @@
 │   ├── install-extensions.js    # 安裝 VS Code extensions
 │   └── gen-vscode-extensions.js # 同步 VS Code extensions 清單
 ├── .zshrc               # zsh 設定
-├── .vimrc               # Vim 設定
 ├── .gitconfig            # Git 設定
 ├── .gitignore_global     # Git global ignore 設定
 ├── .editorconfig         # EditorConfig
@@ -85,7 +85,7 @@ node scripts/gen-vscode-extensions.js --dryrun
 | 設定      | Repo 位置                                  | 目標位置                                           |
 | --------- | ------------------------------------------ | -------------------------------------------------- |
 | VS Code   | `ide/vscode/`                              | `~/Library/Application Support/Code/User/`         |
-| Vim       | `.vimrc`                                   | `~/.vimrc`                                         |
+| Neovim    | `ide/nvim/`                                | `~/.config/nvim`                                   |
 | Git       | `.gitconfig`                               | `~/.gitconfig`                                     |
 | Git ignore | `.gitignore_global`                        | `~/.gitignore_global`                              |
 | Zsh       | `.zshrc`                                   | `~/.zshrc`                                         |

@@ -26,14 +26,22 @@ brew "git"
 brew "herdr"
 # Simple terminal UI for git commands
 brew "lazygit"
+# Ambitious Vim-fork focused on extensibility and agility
+brew "neovim"
 # SSL/TLS VPN implementing OSI layer 2 or 3 secure network extension
 brew "openvpn"
 # CLI for Playwright: record/generate code, inspect selectors, take screenshots
 brew "playwright-cli"
 # Fast, disk space efficient package manager
 brew "pnpm"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Parser generator tool
+brew "tree-sitter-cli"
+# Language for application scale JavaScript development
+brew "typescript"
 # Extremely fast Python package installer and resolver, written in Rust
 brew "uv"
 # Feature-rich command-line audio/video downloader

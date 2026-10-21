@@ -27,10 +27,10 @@ const CONFIGS = {
     target: `${home}/Library/Application Support/Code/User`,
     files: IDE_LINK_FILES,
   },
-  vim: {
-    source: resolve(__dirname, ".."),
-    target: home,
-    files: [".vimrc"],
+  nvim: {
+    source: resolve(__dirname, "../ide"),
+    target: `${home}/.config`,
+    files: ["nvim"],
   },
   git: {
     source: resolve(__dirname, ".."),

@@ -126,6 +126,7 @@ kcc() {
 alias lg="lazygit"
 alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
 alias vs="code"
+alias nv="nvim"
 alias pn="pnpm"
 alias co="codex"
 alias cc="claude"
@@ -145,7 +146,7 @@ pf() {
   local result file prompt='search: '
   local -a selection fd_args=(--type f --hidden --exclude .git --print0)
   local search_header='輸入檔名或路徑以篩選 · ↑/↓ 選擇結果'
-  local action_header='v: Vim · c: VS Code · y: 複製相對路徑 · Y: 複製絕對路徑 · j: 切換資料夾'
+  local action_header='v: Neovim · c: VS Code · y: 複製相對路徑 · Y: 複製絕對路徑 · j: 切換資料夾'
 
   # -n: search only ./node_modules, which ignore rules would otherwise hide.
   if [[ "$1" == -n ]]; then
@@ -181,7 +182,7 @@ pf() {
           fi' \
         --footer='Enter: open · Tab: 切換模式 · Esc: 取消' \
         --bind='start:unbind(v,c,y,Y,j),enter:print(open)+accept,esc:abort,ctrl-k:clear-query' \
-        --bind='v:print(vim)+accept,c:print(code)+accept,y:print(relative)+accept,Y:print(absolute)+accept,j:print(cd)+accept' \
+        --bind='v:print(nvim)+accept,c:print(code)+accept,y:print(relative)+accept,Y:print(absolute)+accept,j:print(cd)+accept' \
         --bind="tab:transform:
           if [ \"\$FZF_INPUT_STATE\" = hidden ]; then
             printf '%s' 'show-input+unbind(v,c,y,Y,j)+change-border-label( Find files · 搜尋模式 )+change-header($search_header)'
@@ -197,7 +198,7 @@ pf() {
 
   case "${selection[1]}" in
     cd) builtin cd -- "${file:a:h}" ;;
-    vim) command vim -- "$file" ;;
+    nvim) command nvim -- "$file" ;;
     code) command code "${file:a}" ;;
     open) command open "${file:a}" ;;
     relative) printf '%s' "$file" | command pbcopy ;;
