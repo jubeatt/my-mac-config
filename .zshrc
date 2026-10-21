@@ -142,20 +142,30 @@ yt() {
 
 # Find files, then navigate, edit, or copy their paths.
 pf() {
-  local result file
-  local -a selection
+  local result file prompt='search: '
+  local -a selection fd_args=(--type f --hidden --exclude .git --print0)
   local search_header='輸入檔名或路徑以篩選 · ↑/↓ 選擇結果'
-  local action_header='v: Vim · y: 複製相對路徑 · Y: 複製絕對路徑 · j: 切換資料夾'
+  local action_header='v: Vim · c: VS Code · y: 複製相對路徑 · Y: 複製絕對路徑 · j: 切換資料夾'
+
+  # -n: search only ./node_modules, which ignore rules would otherwise hide.
+  if [[ "$1" == -n ]]; then
+    shift
+    [[ -d node_modules ]] || { print -u2 'pf: 目前目錄沒有 node_modules'; return 1; }
+    fd_args+=(--no-ignore --search-path node_modules)
+    prompt='node_modules: '
+  else
+    fd_args+=(--strip-cwd-prefix)
+  fi
 
   # Skip global Git ignores while preserving project and fd ignore rules.
   # Keep paths NUL-delimited so spaces and newlines are preserved.
   result=$(
     GIT_CONFIG_GLOBAL=<(printf '[core]\nexcludesFile = /dev/null\n') \
-      command fd --type f --hidden --exclude .git --print0 --strip-cwd-prefix |
+      command fd "${fd_args[@]}" |
       FZF_DEFAULT_OPTS= FZF_DEFAULT_OPTS_FILE= command fzf \
         --read0 --print0 --height=60% --layout=reverse --border \
         --border-label=' Find files · 搜尋模式 ' \
-        --prompt='search: ' --query="$*" --header="$search_header" \
+        --prompt="$prompt" --query="$*" --header="$search_header" \
         --preview-window='right,50%,border-rounded,wrap' \
         --preview-label=' 預覽 · Shift+↑/↓ ' \
         --preview='
@@ -170,13 +180,13 @@ pf() {
             head -c 262144 -- {} | head -n 300
           fi' \
         --footer='Enter: open · Tab: 切換模式 · Esc: 取消' \
-        --bind='start:unbind(v,y,Y,j),enter:print(open)+accept,esc:abort,ctrl-k:clear-query' \
-        --bind='v:print(vim)+accept,y:print(relative)+accept,Y:print(absolute)+accept,j:print(cd)+accept' \
+        --bind='start:unbind(v,c,y,Y,j),enter:print(open)+accept,esc:abort,ctrl-k:clear-query' \
+        --bind='v:print(vim)+accept,c:print(code)+accept,y:print(relative)+accept,Y:print(absolute)+accept,j:print(cd)+accept' \
         --bind="tab:transform:
           if [ \"\$FZF_INPUT_STATE\" = hidden ]; then
-            printf '%s' 'show-input+unbind(v,y,Y,j)+change-border-label( Find files · 搜尋模式 )+change-header($search_header)'
+            printf '%s' 'show-input+unbind(v,c,y,Y,j)+change-border-label( Find files · 搜尋模式 )+change-header($search_header)'
           else
-            printf '%s' 'hide-input+rebind(v,y,Y,j)+change-border-label( Find files · 操作模式 )+change-header($action_header)'
+            printf '%s' 'hide-input+rebind(v,c,y,Y,j)+change-border-label( Find files · 操作模式 )+change-header($action_header)'
           fi"
   ) || return $?
 
@@ -188,6 +198,7 @@ pf() {
   case "${selection[1]}" in
     cd) builtin cd -- "${file:a:h}" ;;
     vim) command vim -- "$file" ;;
+    code) command code "${file:a}" ;;
     open) command open "${file:a}" ;;
     relative) printf '%s' "$file" | command pbcopy ;;
     absolute) printf '%s' "${file:a}" | command pbcopy ;;
