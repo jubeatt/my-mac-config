@@ -105,7 +105,6 @@ vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "To
 -- Built-in keymaps: K hover, grr references, grn rename, gra code action,
 -- gri implementation, grt type definition, <C-w>d diagnostic at cursor.
 vim.diagnostic.config({
-  virtual_text = true,
   -- Show the full message when jumping with ]d / [d.
   jump = {
     on_jump = function(diagnostic, bufnr)
