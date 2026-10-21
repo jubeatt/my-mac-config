@@ -64,6 +64,7 @@ vim.pack.add({
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/nvim-tree/nvim-tree.lua",
   "https://github.com/nvim-tree/nvim-web-devicons",
+  "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mason-org/mason.nvim",
   "https://github.com/mason-org/mason-lspconfig.nvim",
@@ -73,6 +74,9 @@ vim.pack.add({
 
 -- Colorscheme
 vim.cmd.colorscheme("tokyonight-night")
+
+-- Statusline
+require("lualine").setup({ options = { theme = "nightfly" } })
 
 -- Async and a no-op for parsers that are already installed.
 require("nvim-treesitter").install(parsers)
