@@ -258,7 +258,7 @@
           <tr><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
           <tr><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
           <tr><td><code>blink.cmp</code>（v1）</td><td>自動補全，只用 LSP 來源</td></tr>
-          <tr><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls），裝好的自動啟用</td></tr>
+          <tr><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls），裝好的自動啟用</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -271,6 +271,7 @@
           <tr><td><code>tsc</code>（TypeScript 7）</td><td>TypeScript / JavaScript。專案有 TS7 以上用專案的，否則用 Homebrew 的全域版本；不經 mason 安裝。沒有重構類 code action（extract、move to file）</td></tr>
           <tr><td><code>tailwindcss</code></td><td>Tailwind class 提示與 hover</td></tr>
           <tr><td><code>lua_ls</code></td><td>編輯 <code>init.lua</code>，已設定認得 <code>vim.*</code> API</td></tr>
+          <tr><td><code>jsonls</code></td><td>JSON 補全、hover、語法與 schema 檢查，schema 讀檔案裡的 <code>$schema</code></td></tr>
         </tbody>
       </table></div>
       <p>Treesitter parser（新增語言時加進 <code>init.lua</code> 的 <code>parsers</code> 清單）：</p>

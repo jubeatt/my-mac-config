@@ -177,7 +177,7 @@ vim.lsp.config("lua_ls", {
 require("mason").setup()
 -- Installed servers are enabled automatically.
 require("mason-lspconfig").setup({
-  ensure_installed = { "tailwindcss", "lua_ls" },
+  ensure_installed = { "tailwindcss", "lua_ls", "jsonls" },
 })
 
 -- TypeScript 7 native LSP: uses the project's tsc when it is 7+, otherwise the
