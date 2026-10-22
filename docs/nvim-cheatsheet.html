@@ -227,7 +227,7 @@
   <main>
     <header>
       <h1>Neovim 設定速查</h1>
-      <p>對應 <code>ide/nvim/init.lua</code> 目前的內容（2026-10-22）。Leader 鍵是空白鍵，下表寫成 <kbd>Space</kbd>。</p>
+      <p>對應 <code>ide/nvim/init.lua</code> 目前的內容。Leader 鍵是空白鍵，下表寫成 <kbd>Space</kbd>。</p>
     </header>
 
     <h2>架構</h2>
@@ -352,6 +352,7 @@
     { id: "k-files", title: "檔案與搜尋", rows: [
       ["`Space` `f` `f`", "搜尋檔案（fd，含隱藏檔，排除 `.git`）", "new"],
       ["`Space` `f` `g`", "搜尋內容（ripgrep，邊打邊搜）", "new"],
+      ["`Space` `f` `d`", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
       ["`Space` `e`", "開關左側檔案樹，並定位到目前檔案", "new"],
     ]},
     { id: "k-lsp", title: "LSP", rows: [
