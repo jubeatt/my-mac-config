@@ -208,6 +208,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- fzf-lua pickers with preview instead of the built-in quickfix / location lists.
     vim.keymap.set("n", "grr", "<cmd>FzfLua lsp_references<cr>", { buffer = ev.buf, desc = "References" })
     vim.keymap.set("n", "gO", "<cmd>FzfLua lsp_document_symbols<cr>", { buffer = ev.buf, desc = "Document symbols" })
+    -- Live variant re-queries the server on every keystroke, like VS Code's `#` symbol search.
+    vim.keymap.set(
+      "n",
+      "<leader>fs",
+      "<cmd>FzfLua lsp_live_workspace_symbols<cr>",
+      { buffer = ev.buf, desc = "Workspace symbols" }
+    )
     vim.keymap.set(
       "n",
       "<leader>cu",
