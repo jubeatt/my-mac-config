@@ -2,6 +2,7 @@ onboarding = false
 
 [keys]
 clear_pane = "prefix+ctrl+k"
+last_pane = "prefix+l"
 focus_pane_left = "prefix+left"
 focus_pane_down = "prefix+down"
 focus_pane_up = "prefix+up"
