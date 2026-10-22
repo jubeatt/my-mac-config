@@ -68,6 +68,8 @@ vim.pack.add({
   "https://github.com/nvim-tree/nvim-tree.lua",
   "https://github.com/nvim-tree/nvim-web-devicons",
   "https://github.com/nvim-lualine/lualine.nvim",
+  "https://github.com/lewis6991/gitsigns.nvim",
+  "https://github.com/sindrets/diffview.nvim",
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mason-org/mason.nvim",
   "https://github.com/mason-org/mason-lspconfig.nvim",
@@ -107,6 +109,39 @@ vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Search 
 -- File explorer
 require("nvim-tree").setup()
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
+
+-- Git: change markers in the sign column, hunk navigation and line blame.
+require("gitsigns").setup({
+  on_attach = function(bufnr)
+    local gitsigns = require("gitsigns")
+
+    -- Keep the built-in ]c / [c behaviour inside diff mode (e.g. diffview).
+    vim.keymap.set("n", "]c", function()
+      if vim.wo.diff then
+        vim.cmd.normal({ "]c", bang = true })
+      else
+        gitsigns.nav_hunk("next")
+      end
+    end, { buffer = bufnr, desc = "Next git hunk" })
+    vim.keymap.set("n", "[c", function()
+      if vim.wo.diff then
+        vim.cmd.normal({ "[c", bang = true })
+      else
+        gitsigns.nav_hunk("prev")
+      end
+    end, { buffer = bufnr, desc = "Previous git hunk" })
+
+    vim.keymap.set("n", "<leader>gp", gitsigns.preview_hunk, { buffer = bufnr, desc = "Preview git hunk" })
+    vim.keymap.set("n", "<leader>gb", function()
+      gitsigns.blame_line({ full = true })
+    end, { buffer = bufnr, desc = "Blame line" })
+  end,
+})
+
+-- Side-by-side diff of the working tree, and per-file commit history.
+vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open git diff view" })
+vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "Current file git history" })
+vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close git diff view" })
 
 -- LSP
 -- Built-in keymaps: K hover, grr references, grn rename, gra code action,
