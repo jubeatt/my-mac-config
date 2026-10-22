@@ -12,6 +12,8 @@
 
 ```
 .
+├── ai/
+│   └── AGENTS.md        # Claude Code / Codex 共用的全域 rules
 ├── ide/
 │   ├── nvim/            # Neovim 設定（init.lua、vim.pack lockfile）
 │   └── vscode/          # VS Code settings, keybindings, extensions
@@ -59,7 +61,7 @@ bash scripts/setup-terminal.sh
 node scripts/link-configs.js
 ```
 
-> 會一次建立所有設定的 symlink，目標目錄不存在的設定會自動跳過。
+> 會一次建立所有設定的 symlink，目標目錄不存在時會自動建立。目標位置已有的檔案會直接被覆寫。
 
 ### 4. 安裝 IDE Extensions
 

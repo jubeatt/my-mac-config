@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 // Create symlinks from config files in this repo to their expected locations.
-// Links every config; entries whose target directory does not exist are skipped.
+// Links every config; missing target directories are created first.
+// A `files` entry is either a filename or { from, to } to link under a different name.
 // Usage: node scripts/link-configs.js
 
 import {
   chmodSync,
   existsSync,
   lstatSync,
+  mkdirSync,
   readdirSync,
   statSync,
   symlinkSync,
@@ -57,6 +59,16 @@ const CONFIGS = {
     target: `${home}/.config/herdr`,
     files: ["config.toml"],
   },
+  claude: {
+    source: resolve(__dirname, "../ai"),
+    target: `${home}/.claude`,
+    files: [{ from: "AGENTS.md", to: "CLAUDE.md" }],
+  },
+  codex: {
+    source: resolve(__dirname, "../ai"),
+    target: `${home}/.codex`,
+    files: ["AGENTS.md"],
+  },
   lazygit: {
     source: resolve(__dirname, "../terminal/lazygit"),
     target: `${home}/Library/Application Support/lazygit`,
@@ -72,28 +84,33 @@ const CONFIGS = {
 
 const CONFIG_NAMES = Object.keys(CONFIGS)
 
-// Returns: { linked: number, failed: number, skipped: boolean }
+// Normalizes a `files` entry to a { from, to } pair.
+const toPair = (file) =>
+  typeof file === "string" ? { from: file, to: file } : file
+
+// Returns: { linked: number, failed: number }
 function linkConfig(name) {
   const { source, target, files, linkAll, executable } = CONFIGS[name]
-  const result = { linked: 0, failed: 0, skipped: false }
+  const result = { linked: 0, failed: 0 }
 
   console.log(`\n[${name}]`)
 
   if (!existsSync(target)) {
-    console.log(`  ⚠ skipped — target directory does not exist: ${target}`)
-    result.skipped = true
-    return result
+    mkdirSync(target, { recursive: true })
+    console.log(`  + created ${target}`)
   }
 
-  const available = linkAll
-    ? readdirSync(source).filter(
-        (f) => !f.startsWith(".") && lstatSync(resolve(source, f)).isFile(),
-      )
-    : readdirSync(source).filter((f) => files.includes(f))
+  const pairs = linkAll
+    ? readdirSync(source)
+        .filter(
+          (f) => !f.startsWith(".") && lstatSync(resolve(source, f)).isFile(),
+        )
+        .map(toPair)
+    : files.map(toPair).filter(({ from }) => existsSync(resolve(source, from)))
 
-  for (const file of available) {
-    const src = resolve(source, file)
-    const dest = resolve(target, file)
+  for (const { from, to } of pairs) {
+    const src = resolve(source, from)
+    const dest = resolve(target, to)
 
     try {
       const stat = lstatSync(dest)
@@ -110,10 +127,10 @@ function linkConfig(name) {
         chmodSync(src, mode | 0o111)
       }
       symlinkSync(src, dest)
-      console.log(`  ✓ ${file} -> ${src}`)
+      console.log(`  ✓ ${to} -> ${src}`)
       result.linked++
     } catch (err) {
-      console.error(`  ✗ ${file}: ${err.message}`)
+      console.error(`  ✗ ${to}: ${err.message}`)
       result.failed++
     }
   }
@@ -124,17 +141,14 @@ function linkConfig(name) {
 function main() {
   let totalLinked = 0
   let totalFailed = 0
-  let totalSkipped = 0
 
   for (const name of CONFIG_NAMES) {
-    const { linked, failed, skipped } = linkConfig(name)
+    const { linked, failed } = linkConfig(name)
     totalLinked += linked
     totalFailed += failed
-    if (skipped) totalSkipped++
   }
 
   const parts = [`✓ ${totalLinked} linked`]
-  if (totalSkipped > 0) parts.push(`⚠ ${totalSkipped} skipped`)
   if (totalFailed > 0) parts.push(`✗ ${totalFailed} failed`)
   console.log(`\n${parts.join(", ")}`)
 }
