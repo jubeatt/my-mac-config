@@ -184,6 +184,10 @@ require("mason-lspconfig").setup({
 -- global one from Homebrew.
 vim.lsp.enable("tsc")
 
+-- Biome from Homebrew (or the project's node_modules); attaches only when a
+-- biome.json is found above the file.
+vim.lsp.enable("biome")
+
 -- Completion (LSP items only)
 require("blink.cmp").setup({
   -- Tab or Enter accepts, like VS Code.
@@ -199,6 +203,23 @@ require("blink.cmp").setup({
 local function source_action(kind)
   return function()
     vim.lsp.buf.code_action({ apply = true, context = { only = { kind }, diagnostics = {} } })
+  end
+end
+
+-- Synchronous variant for BufWritePre, where an async code action would land
+-- after the file is written.
+local function apply_source_action_sync(client, bufnr, kind)
+  local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
+  params.context = { only = { kind }, diagnostics = {} }
+  local res = client:request_sync("textDocument/codeAction", params, 1000, bufnr)
+  for _, action in ipairs(res and res.result or {}) do
+    if not action.edit and client:supports_method("codeAction/resolve", bufnr) then
+      local resolved = client:request_sync("codeAction/resolve", action, 1000, bufnr)
+      action = resolved and resolved.result or action
+    end
+    if action.edit then
+      vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
+    end
   end
 end
 
@@ -223,8 +244,27 @@ vim.api.nvim_create_autocmd("LspAttach", {
     )
     vim.keymap.set("n", "<leader>cD", source_action("source.fixAll"), { buffer = ev.buf, desc = "Fix all" })
 
-    -- Highlight other references of the symbol under the cursor while it rests.
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+    -- On save, apply Biome's safe fixes then format with Biome only, so tsc /
+    -- jsonls never touch the file. Same as VS Code's source.fixAll.biome + format on save.
+    if client and client.name == "biome" then
+      local group = vim.api.nvim_create_augroup("biome-on-save", { clear = false })
+      vim.api.nvim_clear_autocmds({ group = group, buffer = ev.buf })
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = group,
+        buffer = ev.buf,
+        callback = function()
+          apply_source_action_sync(client, ev.buf, "source.fixAll.biome")
+          -- Biome registers formatting dynamically, shortly after attaching.
+          if client:supports_method("textDocument/formatting", ev.buf) then
+            vim.lsp.buf.format({ bufnr = ev.buf, id = client.id })
+          end
+        end,
+      })
+    end
+
+    -- Highlight other references of the symbol under the cursor while it rests.
     if client and client:supports_method("textDocument/documentHighlight", ev.buf) then
       local group = vim.api.nvim_create_augroup("lsp-document-highlight", { clear = false })
       vim.api.nvim_clear_autocmds({ group = group, buffer = ev.buf })
@@ -246,5 +286,10 @@ vim.api.nvim_create_autocmd("LspDetach", {
   callback = function(ev)
     vim.lsp.buf.clear_references()
     pcall(vim.api.nvim_clear_autocmds, { group = "lsp-document-highlight", buffer = ev.buf })
+
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.name == "biome" then
+      pcall(vim.api.nvim_clear_autocmds, { group = "biome-on-save", buffer = ev.buf })
+    end
   end,
 })
