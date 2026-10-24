@@ -166,9 +166,11 @@
   th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
   tr + tr td { border-top: 1px solid var(--border); }
   tr:target td { background: var(--accent-tint); }
-  td.keys { width: 30%; }
+  td.keys { width: 24%; }
   td.keys kbd { margin: 1px 0; }
-  td.src { width: 26%; }
+  td.mn { width: 20%; color: var(--muted); font-size: 13px; }
+  td.mn b { color: var(--accent); }
+  td.src { width: 22%; }
   .note { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
   .term { color: inherit; text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
   .term:hover { color: var(--accent); }
@@ -363,6 +365,7 @@
     tr + tr { border-top: 1px solid var(--border); }
     tr + tr td { border-top: 0; }
     td { padding: 2px 0; }
+    td.mn:empty { display: none; }
   }
 </style>
 </head>
@@ -510,183 +513,185 @@
 </div>
 
 <script>
-  // Row format: [keys, description, kind, note?]. `x` renders as <kbd> in keys and <code> elsewhere;
+  // Row format: [keys, mnemonic, description, kind, note?]; mnemonic is "" when the key has none. `x` renders as <kbd> in keys and <code> elsewhere;
   // [[term]] links to the term's definition in TERMS.
   const SECTIONS = [
     { id: "k-files", title: "檔案與搜尋", rows: [
-      ["`Space` `f` `f`", "搜尋檔案（fd，含隱藏檔，排除 `.git`）", "new"],
-      ["`Space` `f` `b`", "列出已開啟的檔案，依最近使用排序，選取後切換", "new", "可輸入檔名篩選，按 `Enter` 開啟"],
-      ["`Space` `f` `g`", "搜尋內容（ripgrep，邊打邊搜）", "new"],
-      ["`Space` `f` `d`", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
-      ["`Space` `f` `o`", "用 macOS 預設應用程式開啟目前檔案（`open`）", "new", "開啟磁碟上的版本；先用 `Space` `w` 儲存修改，適用於 Markdown、HTML 等檔案"],
-      ["`Space` `e`", "開關左側檔案樹，並定位到目前檔案", "new"],
-      ["`Space` `y` `p`", "複製目前檔案的相對路徑到系統剪貼簿", "new", "相對於 Neovim 工作目錄，可用 `:pwd` 查看"],
-      ["`Space` `y` `P`", "複製目前檔案的絕對路徑到系統剪貼簿", "new", "大寫 `P`，按 `Shift-p`"],
-      ["`Space` `y` `n`", "複製目前檔案名稱到系統剪貼簿", "new", "含副檔名，不含資料夾路徑，例如 `init.lua`"],
+      ["`Space` `f` `f`", "*f*ind *f*iles", "搜尋檔案（fd，含隱藏檔，排除 `.git`）", "new"],
+      ["`Space` `f` `b`", "*f*ind *b*uffers", "列出已開啟的檔案，依最近使用排序，選取後切換", "new", "可輸入檔名篩選，按 `Enter` 開啟"],
+      ["`Space` `f` `g`", "*f*ind by *g*rep", "搜尋內容（ripgrep，邊打邊搜）", "new"],
+      ["`Space` `f` `d`", "*f*ind in *d*irectory", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
+      ["`Space` `f` `o`", "*f*ile *o*pen", "用 macOS 預設應用程式開啟目前檔案（`open`）", "new", "開啟磁碟上的版本；先用 `Space` `w` 儲存修改，適用於 Markdown、HTML 等檔案"],
+      ["`Space` `e`", "*e*xplorer", "開關左側檔案樹，並定位到目前檔案", "new"],
+      ["`Space` `y` `p`", "*y*ank *p*ath", "複製目前檔案的相對路徑到系統剪貼簿", "new", "相對於 Neovim 工作目錄，可用 `:pwd` 查看"],
+      ["`Space` `y` `P`", "*y*ank *P*ath（大寫 = 完整路徑）", "複製目前檔案的絕對路徑到系統剪貼簿", "new", "大寫 `P`，按 `Shift-p`"],
+      ["`Space` `y` `n`", "*y*ank *n*ame", "複製目前檔案名稱到系統剪貼簿", "new", "含副檔名，不含資料夾路徑，例如 `init.lua`"],
     ]},
     { id: "k-lsp", title: "LSP", rows: [
-      ["`gd`", "跳到 definition（只在有 LSP 的 buffer）", "override", "原本是跳到區域變數宣告"],
-      ["`Ctrl-]`", "跳到 definition", "default"],
-      ["`grr`", "reference 選單，含預覽", "override", "原本開在下方 [[quickfix]]，改成 [[fzf-lua]] 選單"],
-      ["`gri`", "跳到 implementation", "default"],
-      ["`grt`", "跳到 type definition", "default"],
-      ["`grn`", "rename，會改到其他檔案", "default"],
-      ["`gra`", "code action", "tweak", "改用 [[fzf-lua]] 選單，關掉預覽"],
-      ["`grx`", "執行 code lens", "default"],
-      ["`Space` `c` `u`", "移除整個檔案所有沒用到的 import", "new"],
-      ["`Space` `c` `D`", "Fix all：一次套用整個檔案可自動修正的問題（例如缺少的 interface 成員）", "new"],
-      ["`gO`", "目前檔案的 symbol 選單", "override", "原本開 location list，改成 [[fzf-lua]] 選單"],
-      ["`Space` `f` `s`", "搜尋整個專案的 symbol，邊打邊問 LSP", "new", "類似 VS Code 的 `#` symbol 搜尋"],
-      ["游標停在 symbol 上", "同一個 symbol 在檔案裡的其他位置一起標示，移動游標就清除", "new", "LSP document highlight"],
-      ["`K`", "hover 說明，連按兩次進入說明視窗", "default"],
-      ["`Ctrl-s`", "函式參數提示（insert mode）", "default"],
+      ["`gd`", "*g*o to *d*efinition", "跳到 definition（只在有 LSP 的 buffer）", "override", "原本是跳到區域變數宣告"],
+      ["`Ctrl-]`", "", "跳到 definition", "default"],
+      ["`grr`", "`gr` + *r*eferences", "reference 選單，含預覽", "override", "原本開在下方 [[quickfix]]，改成 [[fzf-lua]] 選單"],
+      ["`gri`", "`gr` + *i*mplementation", "跳到 implementation", "default"],
+      ["`grt`", "`gr` + *t*ype definition", "跳到 type definition", "default"],
+      ["`grn`", "`gr` + re*n*ame", "rename，會改到其他檔案", "default"],
+      ["`gra`", "`gr` + code *a*ction", "code action", "tweak", "改用 [[fzf-lua]] 選單，關掉預覽"],
+      ["`grx`", "`gr` + e*x*ecute code lens", "執行 code lens", "default"],
+      ["`Space` `c` `u`", "*c*ode: *u*nused imports", "移除整個檔案所有沒用到的 import", "new"],
+      ["`Space` `c` `D`", "*c*ode: fix all *D*iagnostics", "Fix all：一次套用整個檔案可自動修正的問題（例如缺少的 interface 成員）", "new"],
+      ["`gO`", "*O*utline", "目前檔案的 symbol 選單", "override", "原本開 location list，改成 [[fzf-lua]] 選單"],
+      ["`Space` `f` `s`", "*f*ind *s*ymbols", "搜尋整個專案的 symbol，邊打邊問 LSP", "new", "類似 VS Code 的 `#` symbol 搜尋"],
+      ["游標停在 symbol 上", "", "同一個 symbol 在檔案裡的其他位置一起標示，移動游標就清除", "new", "LSP document highlight"],
+      ["`K`", "*K*eyword lookup", "hover 說明，連按兩次進入說明視窗", "default"],
+      ["`Ctrl-s`", "*s*ignature", "函式參數提示（insert mode）", "default"],
     ]},
     { id: "k-diag", title: "Diagnostic（錯誤訊息）", toc: "Diagnostic", rows: [
-      ["`]d` / `[d`", "跳到下一個 / 上一個 diagnostic", "tweak", "跳過去時自動開浮窗顯示完整訊息"],
-      ["`]D` / `[D`", "跳到最後一個 / 第一個 diagnostic", "tweak", "同上"],
-      ["`Ctrl-w` `d`", "顯示游標所在位置的 diagnostic 浮窗", "default"],
+      ["`]d` / `[d`", "`]` 下一個、`[` 上一個 + *d*iagnostic", "跳到下一個 / 上一個 diagnostic", "tweak", "跳過去時自動開浮窗顯示完整訊息"],
+      ["`]D` / `[D`", "大寫 = 跳到最後 / 最前", "跳到最後一個 / 第一個 diagnostic", "tweak", "同上"],
+      ["`Ctrl-w` `d`", "*w*indow: *d*iagnostic", "顯示游標所在位置的 diagnostic 浮窗", "default"],
     ]},
     { id: "k-git", title: "Git", rows: [
-      ["自動顯示", "行號旁標出新增、修改、刪除的行", "new", "[[gitsigns]]"],
-      ["`]c` / `[c`", "跳到下一段 / 上一段 git 變更", "tweak", "原本只在 diff 畫面跳到下一個 / 上一個差異；diff 畫面裡維持原行為"],
-      ["`Space` `g` `p`", "浮窗預覽游標所在的這段變更", "new"],
-      ["`Space` `g` `b`", "浮窗顯示這一行最後修改的 author、時間和完整 commit 訊息", "new"],
-      ["`Space` `g` `d`", "開 [[diffview]]：左右並排看所有改動的檔案", "new"],
-      ["`Space` `g` `h`", "開 [[diffview]]：目前檔案的 commit 歷史", "new"],
-      ["`Space` `g` `q`", "關閉 [[diffview]]", "new"],
+      ["自動顯示", "", "行號旁標出新增、修改、刪除的行", "new", "[[gitsigns]]"],
+      ["`]c` / `[c`", "`]` / `[` + *c*hange", "跳到下一段 / 上一段 git 變更", "tweak", "原本只在 diff 畫面跳到下一個 / 上一個差異；diff 畫面裡維持原行為"],
+      ["`Space` `g` `p`", "*g*it *p*review", "浮窗預覽游標所在的這段變更", "new"],
+      ["`Space` `g` `r`", "*g*it *r*eset", "丟掉游標所在這段變更，還原成 git 裡的版本", "new", "visual mode 只還原選取的行；按 `u` 可復原"],
+      ["`Space` `g` `R`", "*g*it *R*eset（大寫 = 整個檔案）", "丟掉目前檔案的所有修改", "new", "大寫 `R`，按 `Shift-r`；按 `u` 可復原"],
+      ["`Space` `g` `b`", "*g*it *b*lame", "浮窗顯示這一行最後修改的 author、時間和完整 commit 訊息", "new"],
+      ["`Space` `g` `d`", "*g*it *d*iff", "開 [[diffview]]：左右並排看所有改動的檔案", "new"],
+      ["`Space` `g` `h`", "*g*it *h*istory", "開 [[diffview]]：目前檔案的 commit 歷史", "new"],
+      ["`Space` `g` `q`", "*g*it *q*uit", "關閉 [[diffview]]", "new"],
     ]},
     { id: "k-jump", title: "跳轉與捲動", rows: [
-      ["`%`", "在成對的括號 `(){}[]` 之間跳；也支援 HTML / JSX tag（matchit）", "default"],
-      ["`[{` / `]}`", "跳到目前所在 `{}` 區塊的開頭 / 結尾", "default"],
-      ["`Ctrl-o`", "往回跳（go back）", "default"],
-      ["`Ctrl-i` / `Tab`", "往前跳（go forward）", "default"],
-      ["`Ctrl-d` / `Ctrl-u`", "往下 / 往上捲半頁", "default"],
-      ["`Ctrl-f` / `Ctrl-b`", "往下 / 往上捲一頁", "default", "`Ctrl-b` 在 [[herdr]] 裡會被當成 prefix 吃掉"],
-      ["`zz` / `zt` / `zb`", "把游標所在行捲到畫面中間 / 頂端 / 底部", "default"],
-      ["`gg` / `G`", "跳到檔案開頭 / 結尾", "default", "數字加 `G` 跳到該行，例如 `42G`"],
-      ["`{` / `}`", "跳到上一個 / 下一個空行（段落邊界）", "default"],
-      ["`f` `{字元}` / `t` `{字元}`", "跳到這一行中下一個該字元上 / 前一格；`;` / `,` 往後 / 往前重複", "default", "大寫 `F` / `T` 往回找"],
-      ["`g;` / `g,`", "跳到上一個 / 下一個修改過的位置", "default", "類似 VS Code 的 Go to Last Edit Location"],
-      ["`gi`", "回到上次離開 insert mode 的位置並繼續輸入", "default"],
-      ["`m` `a` / `'` `a`", "在目前位置設書籤 `a` / 跳回書籤 `a` 那一行", "default", "小寫字母只在目前檔案有效，大寫（例如 `mA`）可跨檔案"],
-      ["`Ctrl-^`", "切回上一個開過的檔案", "default", "macOS 鍵盤按 `Ctrl-6`；沒反應時用 `:e #`"],
-      ["`]b` / `[b`", "切到下一個 / 上一個 buffer（已開啟的檔案）", "default"],
-      ["`gf`", "開啟游標下的檔案路徑", "default", "import 路徑沒寫副檔名時找不到，改用 `gd`"],
-      ["`gx`", "用 macOS 預設應用程式開啟游標下的網址或路徑", "default", "類似 VS Code 按住 `Cmd` 點連結"],
+      ["`%`", "", "在成對的括號 `(){}[]` 之間跳；也支援 HTML / JSX tag（matchit）", "default"],
+      ["`[{` / `]}`", "`[` 往前、`]` 往後 + `{`", "跳到目前所在 `{}` 區塊的開頭 / 結尾", "default"],
+      ["`Ctrl-o`", "*o*lder：較早的位置", "往回跳（go back）", "default"],
+      ["`Ctrl-i` / `Tab`", "*i*n：和 `Ctrl-o` 相反", "往前跳（go forward）", "default"],
+      ["`Ctrl-d` / `Ctrl-u`", "*d*own / *u*p", "往下 / 往上捲半頁", "default"],
+      ["`Ctrl-f` / `Ctrl-b`", "*f*orward / *b*ackward", "往下 / 往上捲一頁", "default", "`Ctrl-b` 在 [[herdr]] 裡會被當成 prefix 吃掉"],
+      ["`zz` / `zt` / `zb`", "`z` + *t*op / *b*ottom，`zz` 置中", "把游標所在行捲到畫面中間 / 頂端 / 底部", "default"],
+      ["`gg` / `G`", "*G*o to line", "跳到檔案開頭 / 結尾", "default", "數字加 `G` 跳到該行，例如 `42G`"],
+      ["`{` / `}`", "", "跳到上一個 / 下一個空行（段落邊界）", "default"],
+      ["`f` `{字元}` / `t` `{字元}`", "*f*ind / *t*ill（到前一格）", "跳到這一行中下一個該字元上 / 前一格；`;` / `,` 往後 / 往前重複", "default", "大寫 `F` / `T` 往回找"],
+      ["`g;` / `g,`", "", "跳到上一個 / 下一個修改過的位置", "default", "類似 VS Code 的 Go to Last Edit Location"],
+      ["`gi`", "*g*o *i*nsert", "回到上次離開 insert mode 的位置並繼續輸入", "default"],
+      ["`m` `a` / `'` `a`", "*m*ark", "在目前位置設書籤 `a` / 跳回書籤 `a` 那一行", "default", "小寫字母只在目前檔案有效，大寫（例如 `mA`）可跨檔案"],
+      ["`Ctrl-^`", "", "切回上一個開過的檔案", "default", "macOS 鍵盤按 `Ctrl-6`；沒反應時用 `:e #`"],
+      ["`]b` / `[b`", "`]` / `[` + *b*uffer", "切到下一個 / 上一個 buffer（已開啟的檔案）", "default"],
+      ["`gf`", "*g*o to *f*ile", "開啟游標下的檔案路徑", "default", "import 路徑沒寫副檔名時找不到，改用 `gd`"],
+      ["`gx`", "*g*o e*x*ternal：交給外部程式開", "用 macOS 預設應用程式開啟游標下的網址或路徑", "default", "類似 VS Code 按住 `Cmd` 點連結"],
     ]},
     { id: "k-edit", title: "編輯", rows: [
-      ["`u` / `Ctrl-r`", "undo / redo", "default"],
-      ["`:earlier 5m` / `:later 5m`", "把檔案退回 / 前進到 5 分鐘前後的狀態", "default", "單位可用 `s`、`m`、`h`；`f` 代表存檔次數，例如 `:earlier 1f` 回到上次存檔時"],
-      ["`gcc`", "註解 / 取消註解目前這一行", "default", "類似 VS Code `Cmd-/`"],
-      ["`gc` + 範圍", "註解一段範圍，例如 `gcip` 整段、`gc3j` 往下 3 行", "default", "visual mode 選取後按 `gc` 也可以"],
-      ["`yyp`", "把目前這一行複製到下一行", "default", "類似 VS Code `Shift-Option-↓`"],
-      ["`:m +1` / `:m -2`", "目前這一行往下 / 往上移一行", "default", "類似 VS Code `Option-↓` / `Option-↑`；`ddp` 也能下移，但會蓋掉系統剪貼簿"],
-      ["`>>` / `<<`", "目前這一行增加 / 減少縮排", "default", "類似 VS Code `Cmd-]` / `Cmd-[`；visual mode 用 `>` / `<`"],
-      ["`=` + 範圍", "重新縮排，例如 `=ip` 整段、`gg=G` 整個檔案", "default"],
-      ["`J`", "把下一行接到這一行後面", "default"],
-      ["`[` `Space` / `]` `Space`", "在上方 / 下方插入空行，游標不動", "default"],
-      ["`Ctrl-a` / `Ctrl-x`", "游標所在或之後的數字 +1 / -1", "default", "前面加數字一次加多，例如 `10` `Ctrl-a`"],
-      ["`~`", "切換游標所在字元的大小寫", "default", "`gUiw` / `guiw` 把整個字轉大寫 / 小寫"],
+      ["`u` / `Ctrl-r`", "*u*ndo / *r*edo", "undo / redo", "default"],
+      ["`:earlier 5m` / `:later 5m`", "", "把檔案退回 / 前進到 5 分鐘前後的狀態", "default", "單位可用 `s`、`m`、`h`；`f` 代表存檔次數，例如 `:earlier 1f` 回到上次存檔時"],
+      ["`gcc`", "*c*omment，重複最後一個字母 = 整行", "註解 / 取消註解目前這一行", "default", "類似 VS Code `Cmd-/`"],
+      ["`gc` + 範圍", "*c*omment", "註解一段範圍，例如 `gcip` 整段、`gc3j` 往下 3 行", "default", "visual mode 選取後按 `gc` 也可以"],
+      ["`yyp`", "*y*ank 整行 + *p*ut", "把目前這一行複製到下一行", "default", "類似 VS Code `Shift-Option-↓`"],
+      ["`:m +1` / `:m -2`", "*m*ove", "目前這一行往下 / 往上移一行", "default", "類似 VS Code `Option-↓` / `Option-↑`；`ddp` 也能下移，但會蓋掉系統剪貼簿"],
+      ["`>>` / `<<`", "", "目前這一行增加 / 減少縮排", "default", "類似 VS Code `Cmd-]` / `Cmd-[`；visual mode 用 `>` / `<`"],
+      ["`=` + 範圍", "`=` 對齊縮排", "重新縮排，例如 `=ip` 整段、`gg=G` 整個檔案", "default"],
+      ["`J`", "*J*oin", "把下一行接到這一行後面", "default"],
+      ["`[` `Space` / `]` `Space`", "", "在上方 / 下方插入空行，游標不動", "default"],
+      ["`Ctrl-a` / `Ctrl-x`", "*a*dd / `x` 減", "游標所在或之後的數字 +1 / -1", "default", "前面加數字一次加多，例如 `10` `Ctrl-a`"],
+      ["`~`", "", "切換游標所在字元的大小寫", "default", "`gUiw` / `guiw` 把整個字轉大寫 / 小寫"],
     ]},
     { id: "k-textobj", title: "Text object（`c` 改、`d` 刪、`y` 複製、`v` 選取 + 範圍）", toc: "Text object", rows: [
-      ["`ciw`", "刪掉游標所在的字並進入 insert mode", "default", "把 `c` 換成 `d` / `y` / `v` 就是刪除 / 複製 / 選取同一個範圍"],
-      ["`ci\"` / `ci'`", "改引號裡的內容", "default", "游標不在引號內時，會往這一行後面找"],
-      ["`ci(` / `ci{` / `ci[`", "改括號裡的內容", "default", "`i` 換成 `a`（例如 `ca(`）連括號一起"],
-      ["`cit`", "改 HTML / JSX tag 裡的內容", "default", "`dat` 刪掉整個 tag"],
-      ["`dap`", "刪掉整段，連同後面的空行", "default"],
+      ["`ciw`", "*c*hange *i*nner *w*ord", "刪掉游標所在的字並進入 insert mode", "default", "把 `c` 換成 `d` / `y` / `v` 就是刪除 / 複製 / 選取同一個範圍"],
+      ["`ci\"` / `ci'`", "*c*hange *i*nner + 引號", "改引號裡的內容", "default", "游標不在引號內時，會往這一行後面找"],
+      ["`ci(` / `ci{` / `ci[`", "*c*hange *i*nner + 括號", "改括號裡的內容", "default", "`i` 換成 `a`（例如 `ca(`）連括號一起"],
+      ["`cit`", "*c*hange *i*nner *t*ag", "改 HTML / JSX tag 裡的內容", "default", "`dat` 刪掉整個 tag"],
+      ["`dap`", "*d*elete *a* *p*aragraph", "刪掉整段，連同後面的空行", "default"],
     ]},
     { id: "k-visual", title: "選取（visual mode）", toc: "選取", rows: [
-      ["`v` / `V` / `Ctrl-v`", "以字元 / 整行 / 矩形範圍選取", "default"],
-      ["`Ctrl-v` 選好後 `I` / `A`", "在每一行的開頭 / 結尾同時輸入，按 `Esc` 套用到所有行", "default", "類似 VS Code 多游標 `Cmd-Option-↓`；行長不同時先按 `$` 再按 `A`"],
-      ["`gv`", "重新選取上一次的範圍", "default"],
-      ["`o`", "游標跳到選取範圍的另一端，用來調整起點", "default"],
-      ["`P`", "用剪貼簿內容取代選取範圍，剪貼簿不變", "default", "`p` 會把被取代的文字放進剪貼簿；同一段內容要貼到多處時用 `P`"],
-      ["`g` `Ctrl-a`", "選取的各行數字依序遞增（1、2、3…）", "default", "先讓每行都是同一個數字，例如 `0`"],
-      ["`:sort`", "選取多行後排序", "default", "按 `:` 會自動帶入選取範圍 `'<,'>`"],
+      ["`v` / `V` / `Ctrl-v`", "*v*isual", "以字元 / 整行 / 矩形範圍選取", "default"],
+      ["`Ctrl-v` 選好後 `I` / `A`", "*I*nsert / *A*ppend", "在每一行的開頭 / 結尾同時輸入，按 `Esc` 套用到所有行", "default", "類似 VS Code 多游標 `Cmd-Option-↓`；行長不同時先按 `$` 再按 `A`"],
+      ["`gv`", "*g*o *v*isual again", "重新選取上一次的範圍", "default"],
+      ["`o`", "*o*ther end", "游標跳到選取範圍的另一端，用來調整起點", "default"],
+      ["`P`", "*P*ut", "用剪貼簿內容取代選取範圍，剪貼簿不變", "default", "`p` 會把被取代的文字放進剪貼簿；同一段內容要貼到多處時用 `P`"],
+      ["`g` `Ctrl-a`", "`g` + *a*dd，逐行遞增", "選取的各行數字依序遞增（1、2、3…）", "default", "先讓每行都是同一個數字，例如 `0`"],
+      ["`:sort`", "", "選取多行後排序", "default", "按 `:` 會自動帶入選取範圍 `'<,'>`"],
     ]},
     { id: "k-search", title: "搜尋與取代", rows: [
-      ["`/` / `?`", "往下 / 往上搜尋，`Enter` 確定", "default", "不分大小寫，打了大寫才區分"],
-      ["`n` / `N`", "跳到下一個 / 上一個符合處", "default"],
-      ["`*` / `#`", "往下 / 往上搜尋游標所在的字", "default"],
-      ["`:noh`", "清除搜尋高亮", "default", "預設的 `Ctrl-l` 也能清，但已改成切視窗"],
-      ["`*` 再 `cgn`，之後按 `.`", "改掉下一個符合處，每按一次 `.` 改下一個", "default", "類似 VS Code `Cmd-D` 逐一選取再改；不想改的用 `n` 跳過"],
-      ["`:%s/舊/新/g`", "整個檔案取代，打字時即時預覽結果", "default", "結尾改成 `/gc` 逐一確認：`y` 換、`n` 跳過、`a` 全換、`q` 停止"],
-      ["`Ctrl-r` `Ctrl-w`", "在 `:` 指令列插入游標所在的字", "default", "例如打 `:%s/` 後按，不用手打要取代的字"],
-      ["`:g/文字/d`", "刪掉所有含該文字的行", "default", "`:v/文字/d` 反過來，只留下含該文字的行"],
+      ["`/` / `?`", "", "往下 / 往上搜尋，`Enter` 確定", "default", "不分大小寫，打了大寫才區分"],
+      ["`n` / `N`", "*n*ext，大寫反方向", "跳到下一個 / 上一個符合處", "default"],
+      ["`*` / `#`", "", "往下 / 往上搜尋游標所在的字", "default"],
+      ["`:noh`", "*no* *h*lsearch", "清除搜尋高亮", "default", "預設的 `Ctrl-l` 也能清，但已改成切視窗"],
+      ["`*` 再 `cgn`，之後按 `.`", "*c*hange + *g*o to *n*ext match", "改掉下一個符合處，每按一次 `.` 改下一個", "default", "類似 VS Code `Cmd-D` 逐一選取再改；不想改的用 `n` 跳過"],
+      ["`:%s/舊/新/g`", "*s*ubstitute，`%` = 整個檔案，`g` = *g*lobal", "整個檔案取代，打字時即時預覽結果", "default", "結尾改成 `/gc` 逐一確認：`y` 換、`n` 跳過、`a` 全換、`q` 停止"],
+      ["`Ctrl-r` `Ctrl-w`", "*r*egister: *w*ord", "在 `:` 指令列插入游標所在的字", "default", "例如打 `:%s/` 後按，不用手打要取代的字"],
+      ["`:g/文字/d`", "*g*lobal + *d*elete，`:v` = in*v*ert", "刪掉所有含該文字的行", "default", "`:v/文字/d` 反過來，只留下含該文字的行"],
     ]},
     { id: "k-repeat", title: "重複與巨集", rows: [
-      ["`.`", "重複上一次的修改", "default", "例如 `ciw` 改完一個字，移到別的字按 `.` 改成一樣的內容"],
-      ["`q` `a` … `q`", "開始錄製巨集到 `a`，再按 `q` 停止", "default"],
-      ["`@` `a` / `@@`", "執行巨集 `a` / 再執行一次上一個巨集", "default", "前面加數字重複多次，例如 `10@a`"],
-      ["`@:`", "重複上一個 `:` 指令", "default"],
+      ["`.`", "", "重複上一次的修改", "default", "例如 `ciw` 改完一個字，移到別的字按 `.` 改成一樣的內容"],
+      ["`q` `a` … `q`", "`q` 錄製到暫存器 `a`", "開始錄製巨集到 `a`，再按 `q` 停止", "default"],
+      ["`@` `a` / `@@`", "`@` 執行暫存器 `a`", "執行巨集 `a` / 再執行一次上一個巨集", "default", "前面加數字重複多次，例如 `10@a`"],
+      ["`@:`", "`@` 執行 `:` 暫存器（上一個指令）", "重複上一個 `:` 指令", "default"],
     ]},
     { id: "k-insert", title: "Insert mode 編輯", rows: [
-      ["`Ctrl-w`", "刪掉游標前一個字", "default", "類似 VS Code `Option-Backspace`"],
-      ["`Ctrl-u`", "刪掉游標前到行首的內容", "default", "類似 VS Code `Cmd-Backspace`"],
-      ["`Ctrl-t` / `Ctrl-d`", "目前這一行增加 / 減少縮排", "default"],
-      ["`Ctrl-o`", "執行一個 normal mode 指令後回到 insert mode", "default", "例如 `Ctrl-o` `zz` 把畫面置中"],
-      ["`Ctrl-r` `=`", "計算算式並插入結果，例如輸入 `60*24` 按 `Enter`", "default"],
-      ["`Ctrl-r` `%`", "插入目前檔案的相對路徑", "default", "`Ctrl-r` 接其他暫存器也行，例如 `Ctrl-r` `*` 貼上系統剪貼簿"],
+      ["`Ctrl-w`", "delete *w*ord", "刪掉游標前一個字", "default", "類似 VS Code `Option-Backspace`"],
+      ["`Ctrl-u`", "", "刪掉游標前到行首的內容", "default", "類似 VS Code `Cmd-Backspace`"],
+      ["`Ctrl-t` / `Ctrl-d`", "*t*ab / *d*edent", "目前這一行增加 / 減少縮排", "default"],
+      ["`Ctrl-o`", "*o*ne command", "執行一個 normal mode 指令後回到 insert mode", "default", "例如 `Ctrl-o` `zz` 把畫面置中"],
+      ["`Ctrl-r` `=`", "*r*egister `=`：運算式", "計算算式並插入結果，例如輸入 `60*24` 按 `Enter`", "default"],
+      ["`Ctrl-r` `%`", "*r*egister `%`：目前檔名", "插入目前檔案的相對路徑", "default", "`Ctrl-r` 接其他暫存器也行，例如 `Ctrl-r` `*` 貼上系統剪貼簿"],
     ]},
     { id: "k-cmp", title: "自動補全（insert mode）", toc: "自動補全", rows: [
-      ["打字時自動出現", "LSP 補全選單，旁邊自動顯示說明文件", "new", "[[blink.cmp]]，說明文件改成自動顯示"],
-      ["`↑` / `↓`、`Ctrl-n` / `Ctrl-p`", "選擇項目", "default", "[[blink.cmp]]"],
-      ["`Tab`", "接受選取的項目；在 snippet 裡跳到下一個位置", "default", "[[blink.cmp]] `super-tab` preset"],
-      ["`Enter`", "接受選取的項目", "new"],
-      ["`Ctrl-Space`", "手動開啟選單", "default", "[[blink.cmp]]"],
-      ["`Esc`", "關閉選單並離開 insert mode", "default"],
-      ["`Ctrl-e`", "只關閉選單，留在 insert mode", "default", "[[blink.cmp]]"],
-      ["`Ctrl-f` / `Ctrl-b`", "捲動說明文件", "default", "[[blink.cmp]]；`Ctrl-b` 在 [[herdr]] 裡會被吃掉"],
+      ["打字時自動出現", "", "LSP 補全選單，旁邊自動顯示說明文件", "new", "[[blink.cmp]]，說明文件改成自動顯示"],
+      ["`↑` / `↓`、`Ctrl-n` / `Ctrl-p`", "*n*ext / *p*revious", "選擇項目", "default", "[[blink.cmp]]"],
+      ["`Tab`", "", "接受選取的項目；在 snippet 裡跳到下一個位置", "default", "[[blink.cmp]] `super-tab` preset"],
+      ["`Enter`", "", "接受選取的項目", "new"],
+      ["`Ctrl-Space`", "", "手動開啟選單", "default", "[[blink.cmp]]"],
+      ["`Esc`", "", "關閉選單並離開 insert mode", "default"],
+      ["`Ctrl-e`", "*e*nd completion", "只關閉選單，留在 insert mode", "default", "[[blink.cmp]]"],
+      ["`Ctrl-f` / `Ctrl-b`", "*f*orward / *b*ackward", "捲動說明文件", "default", "[[blink.cmp]]；`Ctrl-b` 在 [[herdr]] 裡會被吃掉"],
     ]},
     { id: "k-win", title: "視窗切換與大小", rows: [
-      ["`Ctrl-h` / `Ctrl-j` / `Ctrl-k` / `Ctrl-l`", "切到左 / 下 / 上 / 右的視窗", "override", "原本 `Ctrl-h` 等於 `h`、`Ctrl-l` 清除搜尋高亮"],
-      ["`Ctrl-w` + `h/j/k/l` 或方向鍵", "同上", "default"],
-      ["`Ctrl-w` `w` / `Ctrl-w` `p`", "輪流切換 / 回到上一個視窗", "default"],
-      ["`Ctrl-w` `v` / `Ctrl-w` `s`", "左右 / 上下分割目前視窗", "default", "類似 VS Code `Cmd-\\`"],
-      ["`Ctrl-w` `q` / `Ctrl-w` `o`", "關閉目前視窗 / 只留下目前視窗", "default"],
-      ["`Option-→` / `Option-←`", "目前視窗寬度 +5 / -5", "new", "Ghostty 把這兩個鍵送成 `Alt-f` / `Alt-b`，兩種都有綁"],
-      ["`Option-↑` / `Option-↓`", "目前視窗高度 +2 / -2", "new"],
-      ["`Ctrl-w` `=`", "所有視窗平均分配大小", "default"],
+      ["`Ctrl-h` / `Ctrl-j` / `Ctrl-k` / `Ctrl-l`", "方向同 `h` `j` `k` `l`", "切到左 / 下 / 上 / 右的視窗", "override", "原本 `Ctrl-h` 等於 `h`、`Ctrl-l` 清除搜尋高亮"],
+      ["`Ctrl-w` + `h/j/k/l` 或方向鍵", "*w*indow + 方向", "同上", "default"],
+      ["`Ctrl-w` `w` / `Ctrl-w` `p`", "*w*indow: *w*indow / *p*revious", "輪流切換 / 回到上一個視窗", "default"],
+      ["`Ctrl-w` `v` / `Ctrl-w` `s`", "*w*indow: *v*ertical / *s*plit", "左右 / 上下分割目前視窗", "default", "類似 VS Code `Cmd-\\`"],
+      ["`Ctrl-w` `q` / `Ctrl-w` `o`", "*w*indow: *q*uit / *o*nly", "關閉目前視窗 / 只留下目前視窗", "default"],
+      ["`Option-→` / `Option-←`", "", "目前視窗寬度 +5 / -5", "new", "Ghostty 把這兩個鍵送成 `Alt-f` / `Alt-b`，兩種都有綁"],
+      ["`Option-↑` / `Option-↓`", "", "目前視窗高度 +2 / -2", "new"],
+      ["`Ctrl-w` `=`", "*w*indow: `=` 等寬等高", "所有視窗平均分配大小", "default"],
     ]},
     { id: "k-qf", title: "Quickfix（`Alt-q` 從 fzf 選單送出的清單）", toc: "Quickfix", rows: [
-      ["`Enter`", "跳到該位置（在清單裡）", "default"],
-      ["`]q` / `[q`", "不進清單，直接跳下一筆 / 上一筆", "default"],
-      ["`:cclose`", "關閉清單", "default"],
+      ["`Enter`", "", "跳到該位置（在清單裡）", "default"],
+      ["`]q` / `[q`", "`]` / `[` + *q*uickfix", "不進清單，直接跳下一筆 / 上一筆", "default"],
+      ["`:cclose`", "*c*（quickfix）+ *close*", "關閉清單", "default"],
     ]},
     { id: "k-save", title: "存檔與離開", rows: [
-      ["`Space` `w`", "存目前檔案", "new", "Normal mode 使用，等同 `:w`，會觸發已設定的存檔修正與格式化"],
-      ["`:w` / `:wq`", "存目前檔案 / 存檔並離開", "default"],
-      ["`:wa`", "存所有修改過的檔案（`grn` 改了多個檔案後用）", "default"],
-      ["`:wqa`", "全部存檔並離開", "default"],
-      ["`:e!`", "放棄目前檔案未存的修改，重新載入", "default", "類似 VS Code 的 Revert File"],
-      ["`:qa!`", "全部不存直接離開", "default"],
+      ["`Space` `w`", "*w*rite", "存目前檔案", "new", "Normal mode 使用，等同 `:w`，會觸發已設定的存檔修正與格式化"],
+      ["`:w` / `:wq`", "*w*rite / *w*rite + *q*uit", "存目前檔案 / 存檔並離開", "default"],
+      ["`:wa`", "*w*rite *a*ll", "存所有修改過的檔案（`grn` 改了多個檔案後用）", "default"],
+      ["`:wqa`", "*w*rite + *q*uit *a*ll", "全部存檔並離開", "default"],
+      ["`:e!`", "*e*dit 重新開，`!` = 放棄修改", "放棄目前檔案未存的修改，重新載入", "default", "類似 VS Code 的 Revert File"],
+      ["`:qa!`", "*q*uit *a*ll，`!` = 不存", "全部不存直接離開", "default"],
     ]},
     { id: "k-fzf", title: "fzf-lua 選單裡", rows: [
-      ["`Enter`", "開啟", "default"],
-      ["`Esc`", "關閉", "default"],
-      ["`↑` / `↓`、`Ctrl-j` / `Ctrl-k`", "移動選擇", "default"],
-      ["`Shift-↑` / `Shift-↓`", "預覽區上下翻頁", "default"],
-      ["`Ctrl-v` / `Ctrl-s` / `Ctrl-t`", "以垂直分割 / 水平分割 / 新 tab 開啟", "default"],
-      ["`Alt-q`", "把選中的結果送到 [[quickfix]]", "default"],
-      ["`F4`", "開關預覽", "default"],
+      ["`Enter`", "", "開啟", "default"],
+      ["`Esc`", "", "關閉", "default"],
+      ["`↑` / `↓`、`Ctrl-j` / `Ctrl-k`", "", "移動選擇", "default"],
+      ["`Shift-↑` / `Shift-↓`", "", "預覽區上下翻頁", "default"],
+      ["`Ctrl-v` / `Ctrl-s` / `Ctrl-t`", "*v*ertical / *s*plit / *t*ab", "以垂直分割 / 水平分割 / 新 tab 開啟", "default"],
+      ["`Alt-q`", "*q*uickfix", "把選中的結果送到 [[quickfix]]", "default"],
+      ["`F4`", "", "開關預覽", "default"],
     ]},
     { id: "k-diffview", title: "diffview 畫面裡", rows: [
-      ["`Tab` / `Shift-Tab`", "切到下一個 / 上一個檔案的 diff", "default"],
-      ["`Enter`", "開啟檔案清單中選取的檔案（在左側清單裡）", "default"],
-      ["`-`", "stage / unstage 選取的檔案（在左側清單裡）", "default"],
-      ["`S` / `U`", "全部 stage / 全部 unstage（在左側清單裡）", "default"],
-      ["`gf`", "在原本的分頁開啟這個檔案來編輯", "default"],
-      ["`Space` `e` / `Space` `b`", "聚焦 / 開關左側檔案清單", "default", "diffview 裡的 `Space` `e` 不是開檔案樹"],
-      ["`[x` / `]x`", "跳到上一個 / 下一個 merge conflict", "default"],
-      ["`g?`", "顯示全部快捷鍵", "default"],
+      ["`Tab` / `Shift-Tab`", "", "切到下一個 / 上一個檔案的 diff", "default"],
+      ["`Enter`", "", "開啟檔案清單中選取的檔案（在左側清單裡）", "default"],
+      ["`-`", "", "stage / unstage 選取的檔案（在左側清單裡）", "default"],
+      ["`S` / `U`", "*S*tage / *U*nstage", "全部 stage / 全部 unstage（在左側清單裡）", "default"],
+      ["`gf`", "*g*o to *f*ile", "在原本的分頁開啟這個檔案來編輯", "default"],
+      ["`Space` `e` / `Space` `b`", "", "聚焦 / 開關左側檔案清單", "default", "diffview 裡的 `Space` `e` 不是開檔案樹"],
+      ["`[x` / `]x`", "", "跳到上一個 / 下一個 merge conflict", "default"],
+      ["`g?`", "`?` = 說明", "顯示全部快捷鍵", "default"],
     ]},
     { id: "k-tree", title: "nvim-tree 檔案樹裡", rows: [
-      ["`Enter`", "開檔 / 展開資料夾", "default"],
-      ["`g?`", "顯示全部快捷鍵", "default"],
-      ["`a`", "新增檔案（結尾加 `/` 是資料夾）", "default"],
-      ["`r` / `d`", "重新命名 / 刪除", "default"],
-      ["`H` / `I`", "顯示或隱藏 dotfiles / gitignore 的檔案", "default"],
-      ["`Ctrl-v` / `Ctrl-x`", "以垂直 / 水平分割開檔", "default"],
+      ["`Enter`", "", "開檔 / 展開資料夾", "default"],
+      ["`g?`", "`?` = 說明", "顯示全部快捷鍵", "default"],
+      ["`a`", "*a*dd", "新增檔案（結尾加 `/` 是資料夾）", "default"],
+      ["`r` / `d`", "*r*ename / *d*elete", "重新命名 / 刪除", "default"],
+      ["`H` / `I`", "*H*idden / *I*gnored", "顯示或隱藏 dotfiles / gitignore 的檔案", "default"],
+      ["`Ctrl-v` / `Ctrl-x`", "*v*ertical / `x` 水平", "以垂直 / 水平分割開檔", "default"],
     ]},
   ];
 
@@ -716,19 +721,23 @@
       return term ? `<a class="term" href="${term.href}" title="${escapeHtml(term.def)}">${name}</a>` : name;
     });
   const plain = (s) => s.replace(/`|\[\[|\]\]/g, "");
+  // Mnemonics mark the letters behind a key with *x*.
+  const fmtMn = (s) => fmt(s, "code").replace(/\*([^*]+)\*/g, "<b>$1</b>");
+  const plainMn = (s) => plain(s).replace(/\*/g, "");
   const badge = (kind) => `<span class="badge b-${kind}" title="${escapeHtml(KINDS[kind].def)}">${KINDS[kind].label}</span>`;
 
   // ---- Render key tables ----
   const container = document.getElementById("key-sections");
   const allRows = [];
-  const COLUMNS = [["keys", "按鍵"], ["desc", "功能"], ["kind", "來源"]];
+  const COLUMNS = [["keys", "按鍵"], ["mn", "記法"], ["desc", "功能"], ["kind", "來源"]];
 
   for (const sec of SECTIONS) {
     const section = document.createElement("section");
-    const rows = sec.rows.map(([keys, desc, kind, note], i) => {
-      const search = `${plain(keys)} ${plain(desc)} ${plain(note ?? "")} ${KINDS[kind].label}`.toLowerCase();
-      return `<tr data-kind="${kind}" data-order="${i}" data-keys="${escapeHtml(plain(keys))}" data-desc="${escapeHtml(plain(desc))}" data-search="${escapeHtml(search)}">
+    const rows = sec.rows.map(([keys, mn, desc, kind, note], i) => {
+      const search = `${plain(keys)} ${plainMn(mn)} ${plain(desc)} ${plain(note ?? "")} ${KINDS[kind].label}`.toLowerCase();
+      return `<tr data-kind="${kind}" data-order="${i}" data-keys="${escapeHtml(plain(keys))}" data-mn="${escapeHtml(plainMn(mn))}" data-desc="${escapeHtml(plain(desc))}" data-search="${escapeHtml(search)}">
         <td class="keys">${fmt(keys, "kbd")}</td>
+        <td class="mn">${fmtMn(mn)}</td>
         <td>${fmt(desc, "code")}</td>
         <td class="src">${badge(kind)}${note ? `<span class="note">${fmt(note, "code")}</span>` : ""}</td>
       </tr>`;
@@ -798,6 +807,8 @@
   let sort = { col: null, dir: 1 };
   const compare = {
     keys: (a, b) => collator.compare(a.dataset.keys, b.dataset.keys),
+    // Rows without a mnemonic stay at the end in both directions.
+    mn: (a, b) => (!a.dataset.mn - !b.dataset.mn) * sort.dir || collator.compare(a.dataset.mn, b.dataset.mn),
     desc: (a, b) => collator.compare(a.dataset.desc, b.dataset.desc),
     kind: (a, b) => KIND_ORDER.indexOf(a.dataset.kind) - KIND_ORDER.indexOf(b.dataset.kind),
   };
