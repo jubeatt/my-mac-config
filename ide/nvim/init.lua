@@ -33,6 +33,8 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Focus upper window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 
 vim.keymap.set("n", "<leader>w", "<cmd>write<cr>", { desc = "Save current file" })
+-- Rename (grn) edits other buffers without saving them.
+vim.keymap.set("n", "<leader>W", "<cmd>wall<cr>", { desc = "Save all files" })
 
 -- Copy the current file path or name to the system clipboard.
 vim.keymap.set("n", "<leader>yp", function()

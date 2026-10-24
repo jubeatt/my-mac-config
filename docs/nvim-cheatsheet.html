@@ -660,8 +660,9 @@
     ]},
     { id: "k-save", title: "存檔與離開", rows: [
       ["`Space` `w`", "*w*rite", "存目前檔案", "new", "Normal mode 使用，等同 `:w`，會觸發已設定的存檔修正與格式化"],
+      ["`Space` `W`", "*W*rite（大寫 = 全部檔案）", "存所有修改過的檔案", "new", "等同 `:wa`；`grn` 改到其他檔案後用"],
       ["`:w` / `:wq`", "*w*rite / *w*rite + *q*uit", "存目前檔案 / 存檔並離開", "default"],
-      ["`:wa`", "*w*rite *a*ll", "存所有修改過的檔案（`grn` 改了多個檔案後用）", "default"],
+      ["`:wa`", "*w*rite *a*ll", "存所有修改過的檔案", "default", "快捷鍵是 `Space` `W`"],
       ["`:wqa`", "*w*rite + *q*uit *a*ll", "全部存檔並離開", "default"],
       ["`:e!`", "*e*dit 重新開，`!` = 放棄修改", "放棄目前檔案未存的修改，重新載入", "default", "類似 VS Code 的 Revert File"],
       ["`:qa!`", "*q*uit *a*ll，`!` = 不存", "全部不存直接離開", "default"],
