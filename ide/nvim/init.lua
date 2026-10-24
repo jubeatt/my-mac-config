@@ -122,6 +122,7 @@ require("fzf-lua").setup({
 -- Also render vim.ui.select (e.g. code actions) with fzf-lua.
 require("fzf-lua").register_ui_select()
 vim.keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files" })
+vim.keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find open buffers" })
 vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Search content" })
 -- Like VS Code's breadcrumb dropdown: pick a sibling of the current file.
 vim.keymap.set("n", "<leader>fd", function()
