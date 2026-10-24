@@ -13,6 +13,7 @@
     --text: #1f2335;
     --muted: #5f6680;
     --accent: #2e7de9;
+    --accent-tint: #e3edfc;
     --kbd-bg: #ffffff;
     --kbd-border: #c9cede;
     --code-bg: #eef0f6;
@@ -21,6 +22,8 @@
     --override-fg: #a3441d; --override-bg: #fbe5d8;
     --tweak-fg: #2858b0;    --tweak-bg: #dde8fb;
     --warn-bg: #fff6e0;     --warn-border: #f0d48a;
+    --info-bg: #eaf1fd;     --info-border: #b9cff3;
+    --sticky-h: 64px;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
@@ -32,6 +35,7 @@
       --text: #c0caf5;
       --muted: #8089b3;
       --accent: #7aa2f7;
+      --accent-tint: #24304f;
       --kbd-bg: #24283b;
       --kbd-border: #3b4261;
       --code-bg: #24283b;
@@ -40,6 +44,7 @@
       --override-fg: #ff9e64; --override-bg: #3a2a20;
       --tweak-fg: #7dcfff;    --tweak-bg: #1d3140;
       --warn-bg: #2d2a1e;     --warn-border: #5c4f28;
+      --info-bg: #1d2538;     --info-border: #34446b;
       color-scheme: dark;
     }
   }
@@ -51,6 +56,7 @@
     --text: #c0caf5;
     --muted: #8089b3;
     --accent: #7aa2f7;
+    --accent-tint: #24304f;
     --kbd-bg: #24283b;
     --kbd-border: #3b4261;
     --code-bg: #24283b;
@@ -59,6 +65,7 @@
     --override-fg: #ff9e64; --override-bg: #3a2a20;
     --tweak-fg: #7dcfff;    --tweak-bg: #1d3140;
     --warn-bg: #2d2a1e;     --warn-border: #5c4f28;
+    --info-bg: #1d2538;     --info-border: #34446b;
     color-scheme: dark;
   }
 
@@ -69,7 +76,7 @@
     color: var(--text);
     font: 15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Segoe UI", sans-serif;
   }
-  code, kbd { font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+  code, kbd, .path { font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
   code {
     background: var(--code-bg);
     padding: 1px 5px;
@@ -87,22 +94,33 @@
     line-height: 1.6;
     white-space: nowrap;
   }
+  a { color: var(--accent); }
+  button { font: inherit; color: inherit; }
+
+  /* Every in-page anchor target clears the sticky search toolbar. */
+  main [id] { scroll-margin-top: calc(var(--sticky-h) + 16px); }
 
   .layout {
-    max-width: 1180px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 24px 16px 64px;
     display: grid;
-    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-columns: 210px minmax(0, 1fr);
     gap: 32px;
   }
+
+  /* TOC */
   nav.toc {
     position: sticky;
     top: 24px;
     align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
     font-size: 14px;
   }
-  nav.toc .group { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; margin: 16px 0 6px; }
+  nav.toc summary { display: none; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; }
+  nav.toc ol ol { margin: 2px 0 10px; padding-left: 10px; border-left: 1px solid var(--border); }
   nav.toc a {
     display: block;
     color: var(--text);
@@ -110,30 +128,70 @@
     padding: 3px 8px;
     border-radius: 6px;
   }
+  nav.toc > details > ol > li > a { font-weight: 600; margin-top: 10px; }
   nav.toc a:hover { background: var(--surface-2); }
+  nav.toc a[aria-current="true"] { background: var(--accent-tint); color: var(--accent); }
+  nav.toc li.has-active > a { color: var(--accent); }
+  nav.toc a.dim { color: var(--muted); opacity: 0.55; }
 
-  header h1 { margin: 0 0 6px; font-size: 26px; }
-  header p { margin: 0; color: var(--muted); }
+  /* Header */
+  .page-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; justify-content: space-between; }
+  .page-head h1 { margin: 0 0 6px; font-size: 26px; }
+  .page-head p { margin: 0; color: var(--muted); max-width: 78ch; }
 
-  h2 { font-size: 20px; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  /* Headings with hover permalink */
+  h2 { font-size: 21px; margin: 44px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
   h3 { font-size: 16px; margin: 28px 0 10px; }
-  section { scroll-margin-top: 16px; }
+  .anchor {
+    margin-left: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 400;
+    opacity: 0;
+  }
+  h2:hover .anchor, h3:hover .anchor, .anchor:focus-visible { opacity: 1; }
+  .anchor:hover { color: var(--accent); }
 
+  p, .callout, .legend, .acc-body > p { max-width: 78ch; }
+
+  /* Tables */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    overflow: hidden;
+    overflow-x: auto;
   }
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 9px 14px; vertical-align: top; }
   th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
   tr + tr td { border-top: 1px solid var(--border); }
+  tr:target td { background: var(--accent-tint); }
   td.keys { width: 30%; }
   td.keys kbd { margin: 1px 0; }
   td.src { width: 26%; }
   .note { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .term { color: inherit; text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+  .term:hover { color: var(--accent); }
 
+  th button.sort {
+    border: 0;
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  th button.sort::after { content: "↕"; opacity: 0.4; }
+  th[aria-sort="ascending"] button.sort,
+  th[aria-sort="descending"] button.sort { color: var(--accent); }
+  th[aria-sort="ascending"] button.sort::after { content: "↑"; opacity: 1; }
+  th[aria-sort="descending"] button.sort::after { content: "↓"; opacity: 1; }
+
+  /* Badges and legend */
   .badge {
     display: inline-block;
     font-size: 12px;
@@ -146,7 +204,18 @@
   .b-new      { color: var(--new-fg);      background: var(--new-bg); }
   .b-override { color: var(--override-fg); background: var(--override-bg); }
   .b-tweak    { color: var(--tweak-fg);    background: var(--tweak-bg); }
+  .legend {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 12px;
+    align-items: baseline;
+    margin: 8px 0 4px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legend dt, .legend dd { margin: 0; }
 
+  /* Search toolbar */
   .toolbar {
     position: sticky;
     top: 0;
@@ -157,6 +226,7 @@
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
+    border-bottom: 1px solid var(--border);
   }
   .toolbar input {
     flex: 1 1 220px;
@@ -168,38 +238,127 @@
     color: var(--text);
     font: inherit;
   }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip {
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
     border-radius: 999px;
     padding: 5px 12px;
-    font: inherit;
     font-size: 13px;
     cursor: pointer;
   }
+  .chip .n { color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
   .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
-  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 8px 0 4px; }
-  .legend div { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--muted); }
-  .legend .badge { margin-right: 6px; }
-  .empty { color: var(--muted); padding: 12px 0; display: none; }
+  .count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; white-space: nowrap; }
+  .empty { color: var(--muted); padding: 12px 0; }
 
+  /* Callouts */
   .callout {
-    background: var(--warn-bg);
-    border: 1px solid var(--warn-border);
+    border: 1px solid;
     border-radius: 10px;
     padding: 12px 16px;
   }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-border); }
+  .callout.info { background: var(--info-bg); border-color: var(--info-border); }
+  .callout .label { font-weight: 600; margin-right: 6px; }
   .callout ul { margin: 6px 0 0; padding-left: 20px; }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 
-  .theme-toggle { margin-top: 20px; }
+  /* Copyable paths */
+  .path {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    max-width: 100%;
+    padding: 1px 6px;
+    border: 1px dashed var(--kbd-border);
+    border-radius: 5px;
+    background: var(--code-bg);
+    font-size: 0.86em;
+    text-align: left;
+    word-break: break-all;
+    cursor: copy;
+  }
+  .path:hover { border-color: var(--accent); color: var(--accent); }
+  .path svg { flex: none; width: 12px; height: 12px; opacity: 0.7; }
+  .path[data-copied]::after {
+    content: "已複製";
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%);
+    padding: 1px 8px;
+    border-radius: 5px;
+    background: var(--text);
+    color: var(--bg);
+    font: 12px/1.6 -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* Accordions */
+  .acc-tools { margin: -4px 0 8px; }
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  details.acc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 12px 0;
+  }
+  details.acc > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    list-style: none;
+  }
+  details.acc > summary::-webkit-details-marker { display: none; }
+  details.acc > summary::before {
+    content: "▸";
+    color: var(--muted);
+    transition: transform 150ms ease;
+  }
+  details.acc[open] > summary::before { transform: rotate(90deg); }
+  details.acc > summary h3 { margin: 0; }
+  details.acc > summary .hint { color: var(--muted); font-size: 13px; }
+  .acc-body { padding: 0 14px 12px; }
+  .acc-body .card { border-radius: 8px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    details.acc > summary::before { transition: none; }
+  }
 
   @media (max-width: 760px) {
-    .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
-    nav.toc { display: none; }
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    nav.toc { position: static; max-height: none; overflow: visible; }
+    nav.toc summary {
+      display: block;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    nav.toc details[open] > ol { padding: 4px 4px 8px; }
+    .toolbar .count { margin-left: 0; }
     table, tbody, tr, td { display: block; width: 100% !important; }
     thead { display: none; }
+    table.keytable thead { display: block; }
+    table.keytable thead tr { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 6px 14px; background: var(--surface-2); }
+    table.keytable th { padding: 0; }
     tr { padding: 10px 14px; }
     tr + tr { border-top: 1px solid var(--border); }
     tr + tr td { border-top: 0; }
@@ -210,145 +369,149 @@
 <body>
 <div class="layout">
   <nav class="toc" aria-label="目錄">
-    <div class="group">架構</div>
-    <a href="#files">設定檔</a>
-    <a href="#plugins">Plugin</a>
-    <a href="#servers">Language server</a>
-    <a href="#data">資料存放位置</a>
-    <a href="#options">選項</a>
-    <div class="group">快捷鍵</div>
-    <div id="toc-keys"></div>
-    <div class="group">其他</div>
-    <a href="#swap">Swap 檔提示</a>
-    <a href="#herdr">和 herdr 的關係</a>
-    <button class="chip theme-toggle" id="theme-toggle" type="button">切換深淺色</button>
+    <details id="toc-details" open>
+      <summary>目錄</summary>
+      <ol id="toc-list"></ol>
+    </details>
   </nav>
 
   <main>
-    <header>
-      <h1>Neovim 設定速查</h1>
-      <p>對應 <code>ide/nvim/init.lua</code> 目前的內容。Leader 鍵是空白鍵，下表寫成 <kbd>Space</kbd>。</p>
+    <header class="page-head">
+      <div>
+        <h1>Neovim 設定速查</h1>
+        <p>對應 <button type="button" class="path" data-copy="ide/nvim/init.lua">ide/nvim/init.lua</button> 目前的內容。Leader 鍵是空白鍵，下表寫成 <kbd>Space</kbd>。</p>
+      </div>
+      <button class="btn" id="theme-toggle" type="button">切換深淺色</button>
     </header>
 
-    <h2>架構</h2>
-
-    <section id="files">
-      <h3>設定檔</h3>
-      <div class="card"><table>
-        <thead><tr><th>位置</th><th>說明</th></tr></thead>
-        <tbody>
-          <tr><td><code>ide/nvim/init.lua</code></td><td>唯一的設定檔，透過 <code>link-configs.js</code> symlink 到 <code>~/.config/nvim</code></td></tr>
-          <tr><td><code>ide/nvim/nvim-pack-lock.json</code></td><td><code>vim.pack</code> 的 lockfile，記錄每個 plugin 的 commit，要 commit 進 repo</td></tr>
-          <tr><td><code>Brewfile</code></td><td><code>neovim</code>、<code>tree-sitter-cli</code>（編譯 parser）、<code>ripgrep</code>（搜尋內容）、<code>typescript</code>（TS7 全域備援）、<code>fd</code>、<code>fzf</code></td></tr>
-        </tbody>
-      </table></div>
-    </section>
-
-    <section id="plugins">
-      <h3>Plugin（用內建 <code>vim.pack</code> 管理）</h3>
-      <div class="card"><table>
-        <thead><tr><th>Plugin</th><th>用途</th></tr></thead>
-        <tbody>
-          <tr><td><code>nvim-treesitter</code>（<code>main</code> branch）</td><td>安裝 parser，Treesitter 語法高亮</td></tr>
-          <tr><td><code>tokyonight.nvim</code></td><td>主題，用 <code>tokyonight-night</code></td></tr>
-          <tr><td><code>lualine.nvim</code></td><td>底部狀態列，配色用 lualine 內建的 <code>nightfly</code>；顯示模式、git branch、檔名、錯誤數、檔案類型、行列位置</td></tr>
-          <tr><td><code>fzf-lua</code></td><td>搜尋檔案、搜尋內容、reference / symbol 選單；預設上方清單、下方預覽，預覽占視窗高度 45%；也接手 <code>vim.ui.select</code>（code action 選單，不含預覽）</td></tr>
-          <tr><td><code>nvim-tree.lua</code> + <code>nvim-web-devicons</code></td><td>左側檔案樹與 icon；取代 netrw</td></tr>
-          <tr><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
-          <tr><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
-          <tr><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
-          <tr><td><code>blink.cmp</code>（v1）</td><td>自動補全，只用 LSP 來源</td></tr>
-          <tr><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls），裝好的自動啟用</td></tr>
-        </tbody>
-      </table></div>
-    </section>
-
-    <section id="servers">
-      <h3>Language server</h3>
-      <div class="card"><table>
-        <thead><tr><th>Server</th><th>負責</th></tr></thead>
-        <tbody>
-          <tr><td><code>tsc</code>（TypeScript 7）</td><td>TypeScript / JavaScript。專案有 TS7 以上用專案的，否則用 Homebrew 的全域版本；不經 mason 安裝。沒有重構類 code action（extract、move to file）</td></tr>
-          <tr><td><code>tailwindcss</code></td><td>Tailwind class 提示與 hover</td></tr>
-          <tr><td><code>lua_ls</code></td><td>編輯 <code>init.lua</code>，已設定認得 <code>vim.*</code> API</td></tr>
-          <tr><td><code>jsonls</code></td><td>JSON 補全、hover、語法與 schema 檢查，schema 讀檔案裡的 <code>$schema</code></td></tr>
-        </tbody>
-      </table></div>
-      <p>Treesitter parser（新增語言時加進 <code>init.lua</code> 的 <code>parsers</code> 清單）：</p>
-      <div class="tags">
-        <code>javascript</code><code>typescript</code><code>tsx</code><code>vue</code><code>html</code><code>css</code><code>scss</code><code>json</code><code>yaml</code><code>markdown</code><code>lua</code><code>bash</code>
+    <section aria-labelledby="keys">
+      <h2 id="keys">快捷鍵</h2>
+      <dl class="legend" id="legend"></dl>
+      <div class="toolbar" id="toolbar">
+        <input id="filter" type="search" placeholder="按 / 搜尋按鍵或功能，例如 rename、Ctrl-o" aria-label="搜尋快捷鍵" aria-keyshortcuts="/">
+        <div class="chips" id="chips" role="group" aria-label="依來源過濾"></div>
+        <span class="count" id="count" aria-live="polite"></span>
       </div>
+      <div id="key-sections"></div>
+      <p class="empty" id="empty" hidden>沒有符合的快捷鍵。</p>
     </section>
 
-    <section id="data">
-      <h3>資料存放位置（不在 repo 裡）</h3>
-      <div class="card"><table>
-        <thead><tr><th>位置</th><th>內容</th></tr></thead>
-        <tbody>
-          <tr><td><code>~/.local/share/nvim/site/pack/core/opt/</code></td><td>plugin 本體</td></tr>
-          <tr><td><code>~/.local/share/nvim/site/parser/</code></td><td>Treesitter parser</td></tr>
-          <tr><td><code>~/.local/share/nvim/mason/</code></td><td>language server</td></tr>
-          <tr><td><code>~/.local/state/nvim/swap/</code></td><td>swap 檔（未存檔的修改備份）</td></tr>
-        </tbody>
-      </table></div>
+    <section aria-labelledby="notes">
+      <h2 id="notes">注意事項</h2>
+
+      <section>
+        <h3 id="swap" data-toc="Swap 檔提示">Swap 檔提示（E325）</h3>
+        <div class="callout warn">
+          <span class="label">注意</span>nvim 沒有正常離開（例如直接關掉 pane）時，未存的修改會留在 swap 檔，下次開到同一個檔案會跳出提示：
+          <ul>
+            <li>按 <kbd>D</kbd> 刪掉 swap 檔，<kbd>R</kbd> 復原當時的修改。</li>
+            <li><kbd>grn</kbd> 改到有殘留 swap 檔的檔案時無法回應提示，會直接報錯。先清掉殘留的 swap 檔再 rename。</li>
+            <li>離開前用 <code>:wqa</code> 或 <code>:qa!</code>，不要直接關 pane，就不會留下 swap 檔。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h3 id="herdr">和 herdr 的關係</h3>
+        <p>herdr 不按 prefix 時只攔 <kbd>Ctrl-b</kbd>（它的 prefix），其餘 herdr 快捷鍵都要先按 prefix，所以這份設定的按鍵不會被 herdr 攔走。</p>
+      </section>
     </section>
 
-    <section id="options">
-      <h3>選項</h3>
-      <div class="card"><table>
-        <thead><tr><th>選項</th><th>說明</th></tr></thead>
-        <tbody>
-          <tr><td><code>clipboard=unnamed</code></td><td><kbd>y</kbd> / <kbd>p</kbd> 直接用系統剪貼簿</td></tr>
-          <tr><td><code>nowrap</code>、<code>number</code>、<code>cursorline</code>、<code>scrolloff=5</code></td><td>從 <code>.vimrc</code> 搬過來</td></tr>
-          <tr><td><code>ignorecase</code> + <code>smartcase</code></td><td>搜尋不分大小寫，打了大寫才區分</td></tr>
-          <tr><td><code>tabstop=2</code>、<code>shiftwidth=2</code>、<code>expandtab</code></td><td>2 空格縮排</td></tr>
-          <tr><td><code>updatetime=250</code></td><td>游標停住 250ms 就觸發 <code>CursorHold</code>（預設 4 秒），讓 symbol 標示即時出現</td></tr>
-          <tr><td><code>confirm</code></td><td>有未存檔的 buffer 時，<code>:q</code> 會詢問要不要存，而不是噴 E37</td></tr>
-        </tbody>
-      </table></div>
-    </section>
+    <section aria-labelledby="setup">
+      <h2 id="setup">設定架構</h2>
+      <div class="acc-tools"><button class="btn" id="toggle-all" type="button">全部展開</button></div>
 
-    <h2 id="keys">快捷鍵</h2>
-    <div class="legend">
-      <div><span class="badge b-default">預設</span>Neovim 或 plugin 原本就有，沒有動</div>
-      <div><span class="badge b-new">新增</span>原本沒有，這份設定加的</div>
-      <div><span class="badge b-override">覆寫</span>原本有別的功能，被這份設定改掉</div>
-      <div><span class="badge b-tweak">預設＋調整</span>按鍵沒改，但行為或介面有調整</div>
-    </div>
-    <div class="toolbar">
-      <input id="filter" type="search" placeholder="按 / 搜尋按鍵或功能，例如 rename、Ctrl-o" aria-label="搜尋快捷鍵" aria-keyshortcuts="/">
-      <button class="chip" type="button" data-kind="all" aria-pressed="true">全部</button>
-      <button class="chip" type="button" data-kind="new" aria-pressed="false">新增</button>
-      <button class="chip" type="button" data-kind="override" aria-pressed="false">覆寫</button>
-      <button class="chip" type="button" data-kind="tweak" aria-pressed="false">預設＋調整</button>
-      <button class="chip" type="button" data-kind="default" aria-pressed="false">預設</button>
-    </div>
-    <div id="key-sections"></div>
-    <p class="empty" id="empty">沒有符合的快捷鍵。</p>
+      <section>
+        <h3 id="files">設定檔</h3>
+        <div class="card"><table>
+          <thead><tr><th>位置</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td><button type="button" class="path" data-copy="ide/nvim/init.lua">ide/nvim/init.lua</button></td><td>唯一的設定檔，透過 <button type="button" class="path" data-copy="scripts/link-configs.js">scripts/link-configs.js</button> symlink 到 <button type="button" class="path" data-copy="~/.config/nvim">~/.config/nvim</button></td></tr>
+            <tr><td><button type="button" class="path" data-copy="ide/nvim/nvim-pack-lock.json">ide/nvim/nvim-pack-lock.json</button></td><td><code>vim.pack</code> 的 lockfile，記錄每個 plugin 的 commit，要 commit 進 repo</td></tr>
+            <tr><td><button type="button" class="path" data-copy="Brewfile">Brewfile</button></td><td><code>neovim</code>、<code>tree-sitter-cli</code>（編譯 parser）、<code>ripgrep</code>（搜尋內容）、<code>typescript</code>（TS7 全域備援）、<code>fd</code>、<code>fzf</code></td></tr>
+          </tbody>
+        </table></div>
+      </section>
 
-    <h2>其他</h2>
+      <section>
+        <h3 id="plugins" data-toc="Plugin">Plugin（用內建 <code>vim.pack</code> 管理）</h3>
+        <div class="card"><table>
+          <thead><tr><th>Plugin</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr id="p-treesitter"><td><code>nvim-treesitter</code>（<code>main</code> branch）</td><td>安裝 parser，Treesitter 語法高亮</td></tr>
+            <tr id="p-tokyonight"><td><code>tokyonight.nvim</code></td><td>主題，用 <code>tokyonight-night</code></td></tr>
+            <tr id="p-lualine"><td><code>lualine.nvim</code></td><td>底部狀態列，配色用 lualine 內建的 <code>nightfly</code>；顯示模式、git branch、檔名、錯誤數、檔案類型、行列位置</td></tr>
+            <tr id="p-fzf-lua"><td><code>fzf-lua</code></td><td>搜尋檔案、搜尋內容、reference / symbol 選單；預設上方清單、下方預覽，預覽占視窗高度 45%；也接手 <code>vim.ui.select</code>（code action 選單，不含預覽）</td></tr>
+            <tr id="p-nvim-tree"><td><code>nvim-tree.lua</code> + <code>nvim-web-devicons</code></td><td>左側檔案樹與 icon；取代 netrw</td></tr>
+            <tr id="p-gitsigns"><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
+            <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
+            <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
+            <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）</td><td>自動補全，只用 LSP 來源</td></tr>
+            <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls），裝好的自動啟用</td></tr>
+          </tbody>
+        </table></div>
+      </section>
 
-    <section id="swap">
-      <h3>Swap 檔提示（E325）</h3>
-      <div class="callout">
-        nvim 沒有正常離開（例如直接關掉 pane）時，未存的修改會留在 swap 檔，下次開到同一個檔案會跳出提示：
-        <ul>
-          <li>按 <kbd>D</kbd> 刪掉 swap 檔，<kbd>R</kbd> 復原當時的修改。</li>
-          <li><kbd>grn</kbd> 改到有殘留 swap 檔的檔案時無法回應提示，會直接報錯。先清掉殘留的 swap 檔再 rename。</li>
-          <li>離開前用 <code>:wqa</code> 或 <code>:qa!</code>，不要直接關 pane，就不會留下 swap 檔。</li>
-        </ul>
-      </div>
-    </section>
+      <section>
+        <h3 id="servers">Language server</h3>
+        <div class="card"><table>
+          <thead><tr><th>Server</th><th>負責</th></tr></thead>
+          <tbody>
+            <tr><td><code>tsc</code>（TypeScript 7）</td><td>TypeScript / JavaScript。專案有 TS7 以上用專案的，否則用 Homebrew 的全域版本；不經 mason 安裝。沒有重構類 code action（extract、move to file）</td></tr>
+            <tr><td><code>tailwindcss</code></td><td>Tailwind class 提示與 hover</td></tr>
+            <tr><td><code>lua_ls</code></td><td>編輯 <code>init.lua</code>，已設定認得 <code>vim.*</code> API</td></tr>
+            <tr><td><code>jsonls</code></td><td>JSON 補全、hover、語法與 schema 檢查，schema 讀檔案裡的 <code>$schema</code></td></tr>
+          </tbody>
+        </table></div>
+        <details class="acc">
+          <summary>Treesitter parser 清單 <span class="hint">12 個</span></summary>
+          <div class="acc-body">
+            <p>新增語言時加進 <button type="button" class="path" data-copy="ide/nvim/init.lua">ide/nvim/init.lua</button> 的 <code>parsers</code> 清單。</p>
+            <div class="tags">
+              <code>javascript</code><code>typescript</code><code>tsx</code><code>vue</code><code>html</code><code>css</code><code>scss</code><code>json</code><code>yaml</code><code>markdown</code><code>lua</code><code>bash</code>
+            </div>
+          </div>
+        </details>
+      </section>
 
-    <section id="herdr">
-      <h3>和 herdr 的關係</h3>
-      <p>herdr 不按 prefix 時只攔 <kbd>Ctrl-b</kbd>（它的 prefix），其餘 herdr 快捷鍵都要先按 prefix，所以這份設定的按鍵不會被 herdr 攔走。</p>
+      <section>
+        <details class="acc">
+          <summary><h3 id="data" data-toc="資料存放位置">資料存放位置（不在 repo 裡）</h3></summary>
+          <div class="acc-body">
+            <div class="card"><table>
+              <thead><tr><th>位置</th><th>內容</th></tr></thead>
+              <tbody>
+                <tr><td><button type="button" class="path" data-copy="~/.local/share/nvim/site/pack/core/opt/">~/.local/share/nvim/site/pack/core/opt/</button></td><td>plugin 本體</td></tr>
+                <tr><td><button type="button" class="path" data-copy="~/.local/share/nvim/site/parser/">~/.local/share/nvim/site/parser/</button></td><td>Treesitter parser</td></tr>
+                <tr><td><button type="button" class="path" data-copy="~/.local/share/nvim/mason/">~/.local/share/nvim/mason/</button></td><td>language server</td></tr>
+                <tr><td><button type="button" class="path" data-copy="~/.local/state/nvim/swap/">~/.local/state/nvim/swap/</button></td><td>swap 檔（未存檔的修改備份，見 <a href="#swap">Swap 檔提示</a>）</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </details>
+      </section>
+
+      <section>
+        <h3 id="options">選項</h3>
+        <div class="card"><table>
+          <thead><tr><th>選項</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td><code>clipboard=unnamed</code></td><td><kbd>y</kbd> / <kbd>p</kbd> 直接用系統剪貼簿</td></tr>
+            <tr><td><code>nowrap</code>、<code>number</code>、<code>cursorline</code>、<code>scrolloff=5</code></td><td>從 <code>.vimrc</code> 搬過來</td></tr>
+            <tr><td><code>ignorecase</code> + <code>smartcase</code></td><td>搜尋不分大小寫，打了大寫才區分</td></tr>
+            <tr><td><code>tabstop=2</code>、<code>shiftwidth=2</code>、<code>expandtab</code></td><td>2 空格縮排</td></tr>
+            <tr><td><code>updatetime=250</code></td><td>游標停住 250ms 就觸發 <code>CursorHold</code>（預設 4 秒），讓 symbol 標示即時出現</td></tr>
+            <tr><td><code>confirm</code></td><td>有未存檔的 buffer 時，<code>:q</code> 會詢問要不要存，而不是噴 E37</td></tr>
+          </tbody>
+        </table></div>
+      </section>
     </section>
   </main>
 </div>
 
 <script>
-  // kind: default | new | override | tweak. Text uses `x` for <kbd> in keys and <code> in descriptions.
+  // Row format: [keys, description, kind, note?]. `x` renders as <kbd> in keys and <code> elsewhere;
+  // [[term]] links to the term's definition in TERMS.
   const SECTIONS = [
     { id: "k-files", title: "檔案與搜尋", rows: [
       ["`Space` `f` `f`", "搜尋檔案（fd，含隱藏檔，排除 `.git`）", "new"],
@@ -364,33 +527,33 @@
     { id: "k-lsp", title: "LSP", rows: [
       ["`gd`", "跳到 definition（只在有 LSP 的 buffer）", "override", "原本是跳到區域變數宣告"],
       ["`Ctrl-]`", "跳到 definition", "default"],
-      ["`grr`", "reference 選單，含預覽", "override", "原本開在下方 quickfix，改成 fzf-lua 選單"],
+      ["`grr`", "reference 選單，含預覽", "override", "原本開在下方 [[quickfix]]，改成 [[fzf-lua]] 選單"],
       ["`gri`", "跳到 implementation", "default"],
       ["`grt`", "跳到 type definition", "default"],
       ["`grn`", "rename，會改到其他檔案", "default"],
-      ["`gra`", "code action", "tweak", "改用 fzf-lua 選單，關掉預覽"],
+      ["`gra`", "code action", "tweak", "改用 [[fzf-lua]] 選單，關掉預覽"],
       ["`grx`", "執行 code lens", "default"],
       ["`Space` `c` `u`", "移除整個檔案所有沒用到的 import", "new"],
       ["`Space` `c` `D`", "Fix all：一次套用整個檔案可自動修正的問題（例如缺少的 interface 成員）", "new"],
-      ["`gO`", "目前檔案的 symbol 選單", "override", "原本開 location list，改成 fzf-lua 選單"],
+      ["`gO`", "目前檔案的 symbol 選單", "override", "原本開 location list，改成 [[fzf-lua]] 選單"],
       ["`Space` `f` `s`", "搜尋整個專案的 symbol，邊打邊問 LSP", "new", "類似 VS Code 的 `#` symbol 搜尋"],
       ["游標停在 symbol 上", "同一個 symbol 在檔案裡的其他位置一起標示，移動游標就清除", "new", "LSP document highlight"],
       ["`K`", "hover 說明，連按兩次進入說明視窗", "default"],
       ["`Ctrl-s`", "函式參數提示（insert mode）", "default"],
     ]},
-    { id: "k-diag", title: "Diagnostic（錯誤訊息）", rows: [
+    { id: "k-diag", title: "Diagnostic（錯誤訊息）", toc: "Diagnostic", rows: [
       ["`]d` / `[d`", "跳到下一個 / 上一個 diagnostic", "tweak", "跳過去時自動開浮窗顯示完整訊息"],
       ["`]D` / `[D`", "跳到最後一個 / 第一個 diagnostic", "tweak", "同上"],
       ["`Ctrl-w` `d`", "顯示游標所在位置的 diagnostic 浮窗", "default"],
     ]},
     { id: "k-git", title: "Git", rows: [
-      ["自動顯示", "行號旁標出新增、修改、刪除的行", "new", "gitsigns"],
+      ["自動顯示", "行號旁標出新增、修改、刪除的行", "new", "[[gitsigns]]"],
       ["`]c` / `[c`", "跳到下一段 / 上一段 git 變更", "tweak", "原本只在 diff 畫面跳到下一個 / 上一個差異；diff 畫面裡維持原行為"],
       ["`Space` `g` `p`", "浮窗預覽游標所在的這段變更", "new"],
       ["`Space` `g` `b`", "浮窗顯示這一行最後修改的 author、時間和完整 commit 訊息", "new"],
-      ["`Space` `g` `d`", "開 diffview：左右並排看所有改動的檔案", "new"],
-      ["`Space` `g` `h`", "開 diffview：目前檔案的 commit 歷史", "new"],
-      ["`Space` `g` `q`", "關閉 diffview", "new"],
+      ["`Space` `g` `d`", "開 [[diffview]]：左右並排看所有改動的檔案", "new"],
+      ["`Space` `g` `h`", "開 [[diffview]]：目前檔案的 commit 歷史", "new"],
+      ["`Space` `g` `q`", "關閉 [[diffview]]", "new"],
     ]},
     { id: "k-jump", title: "跳轉與捲動", rows: [
       ["`%`", "在成對的括號 `(){}[]` 之間跳；也支援 HTML / JSX tag（matchit）", "default"],
@@ -398,17 +561,17 @@
       ["`Ctrl-o`", "往回跳（go back）", "default"],
       ["`Ctrl-i` / `Tab`", "往前跳（go forward）", "default"],
       ["`Ctrl-d` / `Ctrl-u`", "往下 / 往上捲半頁", "default"],
-      ["`Ctrl-f` / `Ctrl-b`", "往下 / 往上捲一頁", "default", "`Ctrl-b` 在 herdr 裡會被當成 prefix 吃掉"],
+      ["`Ctrl-f` / `Ctrl-b`", "往下 / 往上捲一頁", "default", "`Ctrl-b` 在 [[herdr]] 裡會被當成 prefix 吃掉"],
     ]},
-    { id: "k-cmp", title: "自動補全（insert mode）", rows: [
-      ["打字時自動出現", "LSP 補全選單，旁邊自動顯示說明文件", "new", "blink.cmp，說明文件改成自動顯示"],
-      ["`↑` / `↓`、`Ctrl-n` / `Ctrl-p`", "選擇項目", "default", "blink.cmp"],
-      ["`Tab`", "接受選取的項目；在 snippet 裡跳到下一個位置", "default", "blink.cmp `super-tab` preset"],
+    { id: "k-cmp", title: "自動補全（insert mode）", toc: "自動補全", rows: [
+      ["打字時自動出現", "LSP 補全選單，旁邊自動顯示說明文件", "new", "[[blink.cmp]]，說明文件改成自動顯示"],
+      ["`↑` / `↓`、`Ctrl-n` / `Ctrl-p`", "選擇項目", "default", "[[blink.cmp]]"],
+      ["`Tab`", "接受選取的項目；在 snippet 裡跳到下一個位置", "default", "[[blink.cmp]] `super-tab` preset"],
       ["`Enter`", "接受選取的項目", "new"],
-      ["`Ctrl-Space`", "手動開啟選單", "default", "blink.cmp"],
+      ["`Ctrl-Space`", "手動開啟選單", "default", "[[blink.cmp]]"],
       ["`Esc`", "關閉選單並離開 insert mode", "default"],
-      ["`Ctrl-e`", "只關閉選單，留在 insert mode", "default", "blink.cmp"],
-      ["`Ctrl-f` / `Ctrl-b`", "捲動說明文件", "default", "blink.cmp；`Ctrl-b` 在 herdr 裡會被吃掉"],
+      ["`Ctrl-e`", "只關閉選單，留在 insert mode", "default", "[[blink.cmp]]"],
+      ["`Ctrl-f` / `Ctrl-b`", "捲動說明文件", "default", "[[blink.cmp]]；`Ctrl-b` 在 [[herdr]] 裡會被吃掉"],
     ]},
     { id: "k-win", title: "視窗切換與大小", rows: [
       ["`Ctrl-h` / `Ctrl-j` / `Ctrl-k` / `Ctrl-l`", "切到左 / 下 / 上 / 右的視窗", "override", "原本 `Ctrl-h` 等於 `h`、`Ctrl-l` 清除搜尋高亮"],
@@ -418,7 +581,7 @@
       ["`Option-↑` / `Option-↓`", "目前視窗高度 +2 / -2", "new"],
       ["`Ctrl-w` `=`", "所有視窗平均分配大小", "default"],
     ]},
-    { id: "k-qf", title: "Quickfix（`Alt-q` 從 fzf 選單送出的清單）", rows: [
+    { id: "k-qf", title: "Quickfix（`Alt-q` 從 fzf 選單送出的清單）", toc: "Quickfix", rows: [
       ["`Enter`", "跳到該位置（在清單裡）", "default"],
       ["`]q` / `[q`", "不進清單，直接跳下一筆 / 上一筆", "default"],
       ["`:cclose`", "關閉清單", "default"],
@@ -436,7 +599,7 @@
       ["`↑` / `↓`、`Ctrl-j` / `Ctrl-k`", "移動選擇", "default"],
       ["`Shift-↑` / `Shift-↓`", "預覽區上下翻頁", "default"],
       ["`Ctrl-v` / `Ctrl-s` / `Ctrl-t`", "以垂直分割 / 水平分割 / 新 tab 開啟", "default"],
-      ["`Alt-q`", "把選中的結果送到 quickfix", "default"],
+      ["`Alt-q`", "把選中的結果送到 [[quickfix]]", "default"],
       ["`F4`", "開關預覽", "default"],
     ]},
     { id: "k-diffview", title: "diffview 畫面裡", rows: [
@@ -459,40 +622,71 @@
     ]},
   ];
 
-  const KIND_LABEL = { default: "預設", new: "新增", override: "覆寫", tweak: "預設＋調整" };
+  // Order here is the order of filter chips and the "來源" sort.
+  const KINDS = {
+    new:      { label: "新增",       def: "原本沒有，這份設定加的" },
+    override: { label: "覆寫",       def: "原本有別的功能，被這份設定改掉" },
+    tweak:    { label: "預設＋調整", def: "按鍵沒改，但行為或介面有調整" },
+    default:  { label: "預設",       def: "Neovim 或 plugin 原本就有，沒有動" },
+  };
+  const KIND_ORDER = Object.keys(KINDS);
+
+  const TERMS = {
+    "fzf-lua":   { href: "#p-fzf-lua",   def: "搜尋檔案、內容與 reference / symbol 的選單" },
+    "blink.cmp": { href: "#p-blink-cmp", def: "自動補全，只用 LSP 來源" },
+    "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
+    "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
+    "herdr":     { href: "#herdr",       def: "不按 prefix 時只攔 Ctrl-b（它的 prefix）" },
+    "quickfix":  { href: "#k-qf",        def: "fzf 選單按 Alt-q 送出的結果清單" },
+  };
 
   const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const fmt = (s, tag) => escapeHtml(s).replace(/`([^`]+)`/g, `<${tag}>$1</${tag}>`);
+  const fmt = (s, tag) => escapeHtml(s)
+    .replace(/`([^`]+)`/g, `<${tag}>$1</${tag}>`)
+    .replace(/\[\[([^\]]+)\]\]/g, (_, name) => {
+      const term = TERMS[name];
+      return term ? `<a class="term" href="${term.href}" title="${escapeHtml(term.def)}">${name}</a>` : name;
+    });
+  const plain = (s) => s.replace(/`|\[\[|\]\]/g, "");
+  const badge = (kind) => `<span class="badge b-${kind}" title="${escapeHtml(KINDS[kind].def)}">${KINDS[kind].label}</span>`;
 
+  // ---- Render key tables ----
   const container = document.getElementById("key-sections");
-  const tocKeys = document.getElementById("toc-keys");
+  const allRows = [];
+  const COLUMNS = [["keys", "按鍵"], ["desc", "功能"], ["kind", "來源"]];
 
   for (const sec of SECTIONS) {
     const section = document.createElement("section");
-    section.id = sec.id;
-    const rows = sec.rows.map(([keys, desc, kind, note]) => {
-      const search = `${keys} ${desc} ${note ?? ""} ${KIND_LABEL[kind]}`.replace(/`/g, "").toLowerCase();
-      return `<tr data-kind="${kind}" data-search="${escapeHtml(search)}">
+    const rows = sec.rows.map(([keys, desc, kind, note], i) => {
+      const search = `${plain(keys)} ${plain(desc)} ${plain(note ?? "")} ${KINDS[kind].label}`.toLowerCase();
+      return `<tr data-kind="${kind}" data-order="${i}" data-keys="${escapeHtml(plain(keys))}" data-desc="${escapeHtml(plain(desc))}" data-search="${escapeHtml(search)}">
         <td class="keys">${fmt(keys, "kbd")}</td>
         <td>${fmt(desc, "code")}</td>
-        <td class="src"><span class="badge b-${kind}">${KIND_LABEL[kind]}</span>${note ? `<span class="note">${fmt(note, "code")}</span>` : ""}</td>
+        <td class="src">${badge(kind)}${note ? `<span class="note">${fmt(note, "code")}</span>` : ""}</td>
       </tr>`;
     }).join("");
-    section.innerHTML = `<h3>${fmt(sec.title, "code")}</h3>
-      <div class="card"><table>
-        <thead><tr><th>按鍵</th><th>功能</th><th>來源</th></tr></thead>
+    const head = COLUMNS.map(([key, label]) => `<th aria-sort="none" data-col="${key}"><button type="button" class="sort">${label}</button></th>`).join("");
+    section.innerHTML = `<h3 id="${sec.id}" data-toc="${escapeHtml(sec.toc ?? plain(sec.title))}">${fmt(sec.title, "code")}</h3>
+      <div class="card"><table class="keytable">
+        <thead><tr>${head}</tr></thead>
         <tbody>${rows}</tbody>
       </table></div>`;
     container.appendChild(section);
-
-    const link = document.createElement("a");
-    link.href = `#${sec.id}`;
-    link.textContent = sec.title.replace(/`/g, "").replace(/（.*$/, "");
-    tocKeys.appendChild(link);
+    allRows.push(...section.querySelectorAll("tbody tr"));
   }
 
+  document.getElementById("legend").innerHTML = KIND_ORDER
+    .map((kind) => `<dt>${badge(kind)}</dt><dd>${KINDS[kind].def}</dd>`).join("");
+
+  // ---- Search, filter and count ----
   const filterInput = document.getElementById("filter");
-  const chips = document.querySelectorAll(".chip[data-kind]");
+  const chipBox = document.getElementById("chips");
+  const countEl = document.getElementById("count");
+  const presentKinds = KIND_ORDER.filter((kind) => allRows.some((tr) => tr.dataset.kind === kind));
+  chipBox.innerHTML = [["all", "全部", allRows.length], ...presentKinds.map((kind) => [kind, KINDS[kind].label, allRows.filter((tr) => tr.dataset.kind === kind).length])]
+    .map(([kind, label, n]) => `<button class="chip" type="button" data-kind="${kind}" aria-pressed="${kind === "all"}">${label}<span class="n">${n}</span></button>`)
+    .join("");
+  const chips = chipBox.querySelectorAll(".chip");
   let activeKind = "all";
 
   function applyFilter() {
@@ -506,12 +700,21 @@
         if (show) visible++;
       }
       section.hidden = visible === 0;
+      tocLinks.get(section.querySelector("h3").id)?.classList.toggle("dim", visible === 0);
       total += visible;
     }
-    document.getElementById("empty").style.display = total ? "none" : "block";
+    countEl.textContent = `${total} / ${allRows.length}`;
+    document.getElementById("empty").hidden = total > 0;
   }
 
   filterInput.addEventListener("input", applyFilter);
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      activeKind = chip.dataset.kind;
+      chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+      applyFilter();
+    });
+  }
   document.addEventListener("keydown", (event) => {
     if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey || event.isComposing || event.defaultPrevented) return;
     const target = event.target;
@@ -522,15 +725,157 @@
     filterInput.focus({ preventScroll: true });
   });
 
-  for (const chip of chips) {
-    chip.addEventListener("click", () => {
-      activeKind = chip.dataset.kind;
-      chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-      applyFilter();
+  // ---- Sorting: one sort state shared by every key table; third click restores config order ----
+  const collator = new Intl.Collator("zh-Hant", { numeric: true, sensitivity: "base" });
+  let sort = { col: null, dir: 1 };
+  const compare = {
+    keys: (a, b) => collator.compare(a.dataset.keys, b.dataset.keys),
+    desc: (a, b) => collator.compare(a.dataset.desc, b.dataset.desc),
+    kind: (a, b) => KIND_ORDER.indexOf(a.dataset.kind) - KIND_ORDER.indexOf(b.dataset.kind),
+  };
+
+  function applySort() {
+    for (const tbody of container.querySelectorAll("tbody")) {
+      const rows = [...tbody.rows].sort((a, b) =>
+        (sort.col ? compare[sort.col](a, b) * sort.dir : 0) || a.dataset.order - b.dataset.order);
+      tbody.append(...rows);
+    }
+    for (const th of container.querySelectorAll("th[data-col]")) {
+      const active = th.dataset.col === sort.col;
+      th.setAttribute("aria-sort", active ? (sort.dir === 1 ? "ascending" : "descending") : "none");
+    }
+  }
+
+  container.addEventListener("click", (event) => {
+    const th = event.target instanceof Element && event.target.closest("th[data-col]");
+    if (!th) return;
+    const col = th.dataset.col;
+    if (sort.col !== col) sort = { col, dir: 1 };
+    else if (sort.dir === 1) sort = { col, dir: -1 };
+    else sort = { col: null, dir: 1 };
+    applySort();
+  });
+
+  // ---- Heading permalinks and TOC ----
+  const main = document.querySelector("main");
+  const tocList = document.getElementById("toc-list");
+  const tocLinks = new Map();
+  let currentGroup = null;
+
+  for (const heading of main.querySelectorAll("h2[id], h3[id]")) {
+    const label = heading.dataset.toc ?? heading.textContent.trim();
+    const anchor = document.createElement("a");
+    anchor.className = "anchor";
+    anchor.href = `#${heading.id}`;
+    anchor.setAttribute("aria-label", `連結到「${label}」`);
+    anchor.textContent = "#";
+    heading.append(anchor);
+
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = `#${heading.id}`;
+    link.textContent = label;
+    li.append(link);
+    tocLinks.set(heading.id, link);
+    if (heading.tagName === "H2") {
+      currentGroup = document.createElement("ol");
+      li.append(currentGroup);
+      tocList.append(li);
+    } else {
+      currentGroup.append(li);
+    }
+  }
+
+  // Narrow screens collapse the TOC into a menu; wide screens keep it open as a sidebar.
+  const tocDetails = document.getElementById("toc-details");
+  const wide = matchMedia("(min-width: 761px)");
+  const syncToc = () => { tocDetails.open = wide.matches; };
+  syncToc();
+  wide.addEventListener("change", syncToc);
+  tocList.addEventListener("click", (event) => {
+    if (!wide.matches && event.target instanceof Element && event.target.closest("a")) tocDetails.open = false;
+  });
+
+  // ---- Keep anchor targets clear of the sticky toolbar ----
+  const toolbar = document.getElementById("toolbar");
+  const setStickyHeight = () => document.documentElement.style.setProperty("--sticky-h", `${toolbar.offsetHeight}px`);
+  setStickyHeight();
+  new ResizeObserver(setStickyHeight).observe(toolbar);
+
+  // ---- Scrollspy over leaf sections ----
+  const leafSections = [...main.querySelectorAll("section")].filter((s) => !s.querySelector("section"));
+  const visibleSections = new Set();
+  const spy = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) visibleSections.add(entry.target);
+      else visibleSections.delete(entry.target);
+    }
+    const current = leafSections.find((s) => visibleSections.has(s));
+    if (!current) return;
+    const id = current.querySelector("h3[id]")?.id;
+    for (const [linkId, link] of tocLinks) {
+      const active = linkId === id;
+      link.setAttribute("aria-current", String(active));
+      if (link.parentElement.querySelector("ol")) link.parentElement.classList.remove("has-active");
+    }
+    tocLinks.get(id)?.closest("ol")?.parentElement.classList.add("has-active");
+  }, { rootMargin: `-${toolbar.offsetHeight + 20}px 0px -55% 0px` });
+  leafSections.forEach((s) => spy.observe(s));
+
+  // ---- Accordions ----
+  const accordions = [...document.querySelectorAll("details.acc")];
+  const toggleAll = document.getElementById("toggle-all");
+  const syncToggleAll = () => {
+    toggleAll.textContent = accordions.every((d) => d.open) ? "全部收合" : "全部展開";
+  };
+  toggleAll.addEventListener("click", () => {
+    const open = !accordions.every((d) => d.open);
+    accordions.forEach((d) => { d.open = open; });
+  });
+  accordions.forEach((d) => d.addEventListener("toggle", syncToggleAll));
+
+  // Open the accordion holding a jump target so the reader lands on its content.
+  const openTarget = () => {
+    const target = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    const details = target?.closest("details.acc");
+    if (details && !details.open) {
+      details.open = true;
+      target.scrollIntoView();
+    }
+  };
+  addEventListener("hashchange", openTarget);
+  openTarget();
+
+  // ---- Copyable paths ----
+  const COPY_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M3 11V3a1 1 0 0 1 1-1h7"/></svg>';
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.cssText = "position:fixed;opacity:0";
+      document.body.append(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+    }
+  }
+  for (const button of document.querySelectorAll(".path")) {
+    button.title = `複製 ${button.dataset.copy}`;
+    button.insertAdjacentHTML("beforeend", COPY_ICON);
+    button.addEventListener("click", async () => {
+      await copyText(button.dataset.copy);
+      button.dataset.copied = "";
+      clearTimeout(button.copyTimer);
+      button.copyTimer = setTimeout(() => delete button.dataset.copied, 1000);
     });
   }
 
-  // Remember the chosen theme per viewer; fall back silently when storage is unavailable.
+  applyFilter();
+
+  // ---- Theme: remember the choice per viewer; fall back silently when storage is unavailable ----
   const root = document.documentElement;
   try {
     const saved = localStorage.getItem("nvim-cheatsheet-theme");
