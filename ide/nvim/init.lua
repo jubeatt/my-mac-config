@@ -116,6 +116,11 @@ require("fzf-lua").setup({
   winopts = {
     preview = { layout = "vertical", vertical = "down:45%" },
   },
+  files = {
+    -- Parse file:line queries and jump to the requested line.
+    -- Ref: https://github.com/ibhagwan/fzf-lua/blob/main/OPTIONS.md#filesline_query
+    line_query = true,
+  },
   -- Previewing resolves each action, which vtsls rejects for disabled refactors.
   lsp = { code_actions = { previewer = false } },
 })
