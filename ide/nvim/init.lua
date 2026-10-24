@@ -132,6 +132,18 @@ vim.keymap.set("n", "<leader>fd", function()
   })
 end, { desc = "Find files in current directory" })
 
+vim.keymap.set("n", "<leader>fo", function()
+  local path = vim.api.nvim_buf_get_name(0)
+  if vim.bo.buftype ~= "" or path == "" or vim.fn.filereadable(path) ~= 1 then
+    vim.notify("Save the file before opening it in the default app", vim.log.levels.WARN)
+    return
+  end
+  local _, err = vim.ui.open(path)
+  if err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = "Open file in default app" })
+
 -- File explorer
 require("nvim-tree").setup()
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
