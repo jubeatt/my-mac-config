@@ -448,6 +448,7 @@
             <tr id="p-nvim-tree"><td><code>nvim-tree.lua</code> + <code>nvim-web-devicons</code></td><td>左側檔案樹與 icon；取代 netrw</td></tr>
             <tr id="p-gitsigns"><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
+            <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
             <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）</td><td>自動補全，只用 LSP 來源</td></tr>
             <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls），裝好的自動啟用</td></tr>
@@ -615,6 +616,7 @@
       ["`*` / `#`", "", "往下 / 往上搜尋游標所在的字", "default"],
       ["`:noh`", "*no* *h*lsearch", "清除搜尋高亮", "default", "預設的 `Ctrl-l` 也能清，但已改成切視窗"],
       ["`*` 再 `cgn`，之後按 `.`", "*c*hange + *g*o to *n*ext match", "改掉下一個符合處，每按一次 `.` 改下一個", "default", "類似 VS Code `Cmd-D` 逐一選取再改；不想改的用 `n` 跳過"],
+      ["`Space` `s` `r`", "*s*earch & *r*eplace", "開 [[grug-far]] 全專案搜尋取代，游標所在的字自動帶入搜尋欄", "new", "類似 VS Code `Cmd-Shift-H`；visual mode 帶入選取的文字"],
       ["`:%s/舊/新/g`", "*s*ubstitute，`%` = 整個檔案，`g` = *g*lobal", "整個檔案取代，打字時即時預覽結果", "default", "結尾改成 `/gc` 逐一確認：`y` 換、`n` 跳過、`a` 全換、`q` 停止"],
       ["`Ctrl-r` `Ctrl-w`", "*r*egister: *w*ord", "在 `:` 指令列插入游標所在的字", "default", "例如打 `:%s/` 後按，不用手打要取代的字"],
       ["`:g/文字/d`", "*g*lobal + *d*elete，`:v` = in*v*ert", "刪掉所有含該文字的行", "default", "`:v/文字/d` 反過來，只留下含該文字的行"],
@@ -677,6 +679,15 @@
       ["`Alt-q`", "*q*uickfix", "把選中的結果送到 [[quickfix]]", "default", "沒有先選取時只送出游標所在那一筆；要全部送出先按 `Alt-a`"],
       ["`F4`", "", "開關預覽", "default"],
     ]},
+    { id: "k-grug", title: "grug-far 面板裡", rows: [
+      ["`Tab` / `Shift-Tab`", "", "切到下一個 / 上一個輸入欄", "default", "輸入欄依序是 Search、Replace、Files Filter（例如 `*.ts`）、Flags、Paths"],
+      ["`\\` `r`", "*r*eplace", "全部取代並寫回檔案", "default", "`\\` 是 localleader；從結果刪掉某一行不會排除它，要挑著改用 `\\` `j`"],
+      ["`\\` `j`", "`j` = 往下", "只套用游標所在這一筆，再跳到下一筆", "default", "不想改的直接往下移過去"],
+      ["`Enter`", "", "跳到該位置", "default"],
+      ["`↑` / `↓`", "", "只移動游標", "override", "原本會移到上一筆 / 下一筆並在左邊打開該檔案"],
+      ["`\\` `c`", "*c*lose", "關閉面板", "default"],
+      ["`g?`", "`?` = 說明", "顯示全部快捷鍵", "default"],
+    ]},
     { id: "k-diffview", title: "diffview 畫面裡", rows: [
       ["`Tab` / `Shift-Tab`", "", "切到下一個 / 上一個檔案的 diff", "default"],
       ["`Enter`", "", "開啟檔案清單中選取的檔案（在左側清單裡）", "default"],
@@ -711,6 +722,7 @@
     "blink.cmp": { href: "#p-blink-cmp", def: "自動補全，只用 LSP 來源" },
     "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
+    "grug-far":  { href: "#p-grug-far",  def: "全專案搜尋取代面板" },
     "herdr":     { href: "#herdr",       def: "不按 prefix 時只攔 Ctrl-b（它的 prefix）" },
     "quickfix":  { href: "#k-qf",        def: "fzf 選單按 Alt-q 送出的結果清單" },
   };

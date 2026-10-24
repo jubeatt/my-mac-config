@@ -87,6 +87,7 @@ vim.pack.add({
   "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/sindrets/diffview.nvim",
+  "https://github.com/MagicDuck/grug-far.nvim",
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mason-org/mason.nvim",
   "https://github.com/mason-org/mason-lspconfig.nvim",
@@ -192,6 +193,18 @@ require("gitsigns").setup({
 vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open git diff view" })
 vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "Current file git history" })
 vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close git diff view" })
+
+-- Project-wide search and replace with a live preview of every change.
+require("grug-far").setup({
+  -- Keep arrow keys as plain movement instead of opening each result on the left.
+  keymaps = { openNextLocation = false, openPrevLocation = false },
+})
+vim.keymap.set("n", "<leader>sr", function()
+  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
+end, { desc = "Search and replace in project" })
+vim.keymap.set("v", "<leader>sr", function()
+  require("grug-far").with_visual_selection()
+end, { desc = "Search and replace selection in project" })
 
 -- LSP
 -- Built-in keymaps: K hover, grr references, grn rename, gra code action,
