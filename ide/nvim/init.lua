@@ -170,6 +170,11 @@ require("gitsigns").setup({
     end, { buffer = bufnr, desc = "Previous git hunk" })
 
     vim.keymap.set("n", "<leader>gp", gitsigns.preview_hunk, { buffer = bufnr, desc = "Preview git hunk" })
+    vim.keymap.set("n", "<leader>gr", gitsigns.reset_hunk, { buffer = bufnr, desc = "Reset git hunk" })
+    vim.keymap.set("v", "<leader>gr", function()
+      gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+    end, { buffer = bufnr, desc = "Reset selected lines" })
+    vim.keymap.set("n", "<leader>gR", gitsigns.reset_buffer, { buffer = bufnr, desc = "Reset git buffer" })
     vim.keymap.set("n", "<leader>gb", function()
       gitsigns.blame_line({ full = true })
     end, { buffer = bufnr, desc = "Blame line" })
