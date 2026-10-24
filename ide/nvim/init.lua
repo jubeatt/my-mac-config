@@ -32,6 +32,21 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Focus lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Focus upper window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 
+vim.keymap.set("n", "<leader>w", "<cmd>write<cr>", { desc = "Save current file" })
+
+-- Copy the current file path or name to the system clipboard.
+vim.keymap.set("n", "<leader>yp", function()
+  vim.fn.setreg("+", vim.fn.expand("%:."))
+end, { desc = "Copy relative path" })
+
+vim.keymap.set("n", "<leader>yP", function()
+  vim.fn.setreg("+", vim.fn.expand("%:p"))
+end, { desc = "Copy absolute path" })
+
+vim.keymap.set("n", "<leader>yn", function()
+  vim.fn.setreg("+", vim.fn.expand("%:t"))
+end, { desc = "Copy file name" })
+
 -- Treesitter
 local parsers = {
   "javascript",

@@ -316,7 +316,7 @@
       <div><span class="badge b-tweak">預設＋調整</span>按鍵沒改，但行為或介面有調整</div>
     </div>
     <div class="toolbar">
-      <input id="filter" type="search" placeholder="搜尋按鍵或功能，例如 rename、Ctrl-o" aria-label="搜尋快捷鍵">
+      <input id="filter" type="search" placeholder="按 / 搜尋按鍵或功能，例如 rename、Ctrl-o" aria-label="搜尋快捷鍵" aria-keyshortcuts="/">
       <button class="chip" type="button" data-kind="all" aria-pressed="true">全部</button>
       <button class="chip" type="button" data-kind="new" aria-pressed="false">新增</button>
       <button class="chip" type="button" data-kind="override" aria-pressed="false">覆寫</button>
@@ -355,6 +355,9 @@
       ["`Space` `f` `g`", "搜尋內容（ripgrep，邊打邊搜）", "new"],
       ["`Space` `f` `d`", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
       ["`Space` `e`", "開關左側檔案樹，並定位到目前檔案", "new"],
+      ["`Space` `y` `p`", "複製目前檔案的相對路徑到系統剪貼簿", "new", "相對於 Neovim 工作目錄，可用 `:pwd` 查看"],
+      ["`Space` `y` `P`", "複製目前檔案的絕對路徑到系統剪貼簿", "new", "大寫 `P`，按 `Shift-p`"],
+      ["`Space` `y` `n`", "複製目前檔案名稱到系統剪貼簿", "new", "含副檔名，不含資料夾路徑，例如 `init.lua`"],
     ]},
     { id: "k-lsp", title: "LSP", rows: [
       ["`gd`", "跳到 definition（只在有 LSP 的 buffer）", "override", "原本是跳到區域變數宣告"],
@@ -419,6 +422,7 @@
       ["`:cclose`", "關閉清單", "default"],
     ]},
     { id: "k-save", title: "存檔與離開", rows: [
+      ["`Space` `w`", "存目前檔案", "new", "Normal mode 使用，等同 `:w`，會觸發已設定的存檔修正與格式化"],
       ["`:w` / `:wq`", "存目前檔案 / 存檔並離開", "default"],
       ["`:wa`", "存所有修改過的檔案（`grn` 改了多個檔案後用）", "default"],
       ["`:wqa`", "全部存檔並離開", "default"],
@@ -506,6 +510,16 @@
   }
 
   filterInput.addEventListener("input", applyFilter);
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey || event.isComposing || event.defaultPrevented) return;
+    const target = event.target;
+    if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select"))) return;
+
+    event.preventDefault();
+    filterInput.scrollIntoView({ block: "center" });
+    filterInput.focus({ preventScroll: true });
+  });
+
   for (const chip of chips) {
     chip.addEventListener("click", () => {
       activeKind = chip.dataset.kind;
