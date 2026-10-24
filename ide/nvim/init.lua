@@ -113,6 +113,9 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- Fuzzy finder (files via fd, content via ripgrep)
 require("fzf-lua").setup({
+  winopts = {
+    preview = { layout = "vertical", vertical = "down:45%" },
+  },
   -- Previewing resolves each action, which vtsls rejects for disabled refactors.
   lsp = { code_actions = { previewer = false } },
 })
