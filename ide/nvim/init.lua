@@ -201,6 +201,8 @@ end, { desc = "Open file in default app" })
 require("nvim-tree").setup({
   -- Show gitignored files by default; `I` still toggles them.
   filters = { git_ignored = false },
+  -- `D` moves to the macOS Trash; the default `gio trash` isn't installed.
+  trash = { cmd = "trash" },
   renderer = {
     icons = {
       -- Same glyphs mini.icons uses for directories.
