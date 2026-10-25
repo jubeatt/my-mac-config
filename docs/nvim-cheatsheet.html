@@ -175,6 +175,26 @@
   .term { color: inherit; text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
   .term:hover { color: var(--accent); }
 
+  /* Pin buttons: unpinned ones stay out of the way until the row is hovered */
+  .pin {
+    border: 0;
+    background: none;
+    padding: 2px;
+    margin: 0 4px 0 -6px;
+    border-radius: 4px;
+    line-height: 0;
+    vertical-align: middle;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .pin svg { width: 14px; height: 14px; }
+  .pin:hover, .pin[aria-pressed="true"] { color: var(--accent); }
+  .pin[aria-pressed="true"] svg path:last-child { fill: currentColor; }
+  @media (hover: hover) {
+    tr:not(:hover) .pin[aria-pressed="false"]:not(:focus-visible) { opacity: 0; }
+  }
+  .tip { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+
   th button.sort {
     border: 0;
     background: none;
@@ -390,6 +410,7 @@
     <section aria-labelledby="keys">
       <h2 id="keys">快捷鍵</h2>
       <dl class="legend" id="legend"></dl>
+      <p class="tip">按每列左側的圖釘，可以把常忘的快捷鍵釘到最上面的「置頂」；只記在這個瀏覽器。</p>
       <div class="toolbar" id="toolbar">
         <input id="filter" type="search" placeholder="按 / 搜尋按鍵或功能，例如 rename、Ctrl-o" aria-label="搜尋快捷鍵" aria-keyshortcuts="/">
         <div class="chips" id="chips" role="group" aria-label="依來源過濾"></div>
@@ -744,27 +765,64 @@
   const container = document.getElementById("key-sections");
   const allRows = [];
   const COLUMNS = [["keys", "按鍵"], ["mn", "記法"], ["desc", "功能"], ["kind", "來源"]];
+  const PIN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
 
+  // A row's pin id is its section plus its keys, so pins survive reordering rows in the config.
+  const rowById = new Map();
   for (const sec of SECTIONS) {
-    const section = document.createElement("section");
-    const rows = sec.rows.map(([keys, mn, desc, kind, note], i) => {
-      const search = `${plain(keys)} ${plainMn(mn)} ${plain(desc)} ${plain(note ?? "")} ${KINDS[kind].label}`.toLowerCase();
-      return `<tr data-kind="${kind}" data-order="${i}" data-keys="${escapeHtml(plain(keys))}" data-mn="${escapeHtml(plainMn(mn))}" data-desc="${escapeHtml(plain(desc))}" data-search="${escapeHtml(search)}">
-        <td class="keys">${fmt(keys, "kbd")}</td>
+    for (const [keys, mn, desc, kind, note] of sec.rows) {
+      const id = `${sec.id}:${plain(keys)}`;
+      rowById.set(id, { id, keys, mn, desc, kind, note });
+    }
+  }
+
+  // ---- Pins: remembered per viewer; ids of rows no longer in the config are dropped ----
+  const PIN_KEY = "nvim-cheatsheet-pins";
+  let pins = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(PIN_KEY) ?? "[]");
+    if (Array.isArray(saved)) pins = saved.filter((id) => rowById.has(id));
+  } catch {}
+
+  const rowHtml = ({ id, keys, mn, desc, kind, note }, order) => {
+    const search = `${plain(keys)} ${plainMn(mn)} ${plain(desc)} ${plain(note ?? "")} ${KINDS[kind].label}`.toLowerCase();
+    return `<tr data-kind="${kind}" data-order="${order}" data-keys="${escapeHtml(plain(keys))}" data-mn="${escapeHtml(plainMn(mn))}" data-desc="${escapeHtml(plain(desc))}" data-search="${escapeHtml(search)}">
+        <td class="keys"><button type="button" class="pin" data-pin="${escapeHtml(id)}" aria-pressed="false" aria-label="置頂">${PIN_ICON}</button>${fmt(keys, "kbd")}</td>
         <td class="mn">${fmtMn(mn)}</td>
         <td>${fmt(desc, "code")}</td>
         <td class="src">${badge(kind)}${note ? `<span class="note">${fmt(note, "code")}</span>` : ""}</td>
       </tr>`;
-    }).join("");
-    const head = COLUMNS.map(([key, label]) => `<th aria-sort="none" data-col="${key}"><button type="button" class="sort">${label}</button></th>`).join("");
-    section.innerHTML = `<h3 id="${sec.id}" data-toc="${escapeHtml(sec.toc ?? plain(sec.title))}">${fmt(sec.title, "code")}</h3>
+  };
+
+  const head = COLUMNS.map(([key, label]) => `<th aria-sort="none" data-col="${key}"><button type="button" class="sort">${label}</button></th>`).join("");
+  const renderSection = (id, title, toc, rows) => {
+    const section = document.createElement("section");
+    section.innerHTML = `<h3 id="${id}" data-toc="${escapeHtml(toc)}">${fmt(title, "code")}</h3>
       <div class="card"><table class="keytable">
         <thead><tr>${head}</tr></thead>
         <tbody>${rows}</tbody>
       </table></div>`;
     container.appendChild(section);
+    return section;
+  };
+
+  const pinnedSection = renderSection("k-pinned", "置頂", "置頂", "");
+  const pinnedBody = pinnedSection.querySelector("tbody");
+  for (const sec of SECTIONS) {
+    const rows = sec.rows.map(([keys], i) => rowHtml(rowById.get(`${sec.id}:${plain(keys)}`), i)).join("");
+    const section = renderSection(sec.id, sec.title, sec.toc ?? plain(sec.title), rows);
     allRows.push(...section.querySelectorAll("tbody tr"));
   }
+
+  function renderPins() {
+    pinnedBody.innerHTML = pins.map((id, i) => rowHtml(rowById.get(id), i)).join("");
+    for (const button of container.querySelectorAll(".pin")) {
+      const pinned = pins.includes(button.dataset.pin);
+      button.setAttribute("aria-pressed", String(pinned));
+      button.setAttribute("aria-label", pinned ? "取消置頂" : "置頂");
+    }
+  }
+  renderPins();
 
   document.getElementById("legend").innerHTML = KIND_ORDER
     .map((kind) => `<dt>${badge(kind)}</dt><dd>${KINDS[kind].def}</dd>`).join("");
@@ -792,8 +850,10 @@
       }
       section.hidden = visible === 0;
       tocLinks.get(section.querySelector("h3").id)?.classList.toggle("dim", visible === 0);
-      total += visible;
+      // Pinned rows are copies, so they stay out of the count.
+      if (section !== pinnedSection) total += visible;
     }
+    tocLinks.get(pinnedSection.querySelector("h3").id).parentElement.hidden = pins.length === 0;
     countEl.textContent = `${total} / ${allRows.length}`;
     document.getElementById("empty").hidden = total > 0;
   }
@@ -847,6 +907,17 @@
     else if (sort.dir === 1) sort = { col, dir: -1 };
     else sort = { col: null, dir: 1 };
     applySort();
+  });
+
+  container.addEventListener("click", (event) => {
+    const button = event.target instanceof Element && event.target.closest(".pin");
+    if (!button) return;
+    const id = button.dataset.pin;
+    pins = pins.includes(id) ? pins.filter((p) => p !== id) : [...pins, id];
+    try { localStorage.setItem(PIN_KEY, JSON.stringify(pins)); } catch {}
+    renderPins();
+    applySort();
+    applyFilter();
   });
 
   // ---- Heading permalinks and TOC ----
