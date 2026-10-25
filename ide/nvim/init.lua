@@ -12,6 +12,14 @@ vim.o.wrap = false
 vim.o.number = true
 vim.o.cursorline = true
 vim.o.scrolloff = 5
+-- Reserve the sign column so gitsigns / diagnostics don't shift the text.
+vim.o.signcolumn = "yes"
+
+-- Keep undo history across sessions.
+vim.o.undofile = true
+
+-- Open files fully unfolded; treesitter folds only close on demand.
+vim.o.foldlevel = 99
 
 vim.o.ignorecase = true
 vim.o.smartcase = true
@@ -144,6 +152,9 @@ vim.api.nvim_create_autocmd("FileType", {
     -- language.add() fails while a parser is still installing on first launch.
     if lang and vim.tbl_contains(parsers, lang) and vim.treesitter.language.add(lang) then
       vim.treesitter.start(ev.buf, lang)
+      vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      vim.wo[0][0].foldmethod = "expr"
+      vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
     end
   end,
 })
@@ -300,6 +311,8 @@ require("blink.cmp").setup({
     ["<CR>"] = { "accept", "fallback" },
   },
   completion = { documentation = { auto_show = true } },
+  -- Parameter hints while typing a call, like VS Code; <C-k> toggles them.
+  signature = { enabled = true },
   sources = { default = { "lsp", "snippets" } },
 })
 
@@ -349,6 +362,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "<leader>cD", source_action("source.fixAll"), { buffer = ev.buf, desc = "Fix all" })
 
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+    -- Inlay hints stay off by default; toggle them on demand.
+    vim.keymap.set("n", "<leader>ci", function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
+    end, { buffer = ev.buf, desc = "Toggle inlay hints" })
 
     -- On save, apply Biome's safe fixes then format with Biome only, so tsc /
     -- jsonls never touch the file. Same as VS Code's source.fixAll.biome + format on save.

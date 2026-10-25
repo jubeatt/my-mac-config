@@ -510,6 +510,7 @@
                 <tr><td><button type="button" class="path" data-copy="~/.local/share/nvim/site/parser/">~/.local/share/nvim/site/parser/</button></td><td>Treesitter parser</td></tr>
                 <tr><td><button type="button" class="path" data-copy="~/.local/share/nvim/mason/">~/.local/share/nvim/mason/</button></td><td>language server</td></tr>
                 <tr><td><button type="button" class="path" data-copy="~/.local/state/nvim/swap/">~/.local/state/nvim/swap/</button></td><td>swap 檔（未存檔的修改備份，見 <a href="#swap">Swap 檔提示</a>）</td></tr>
+                <tr><td><button type="button" class="path" data-copy="~/.local/state/nvim/undo/">~/.local/state/nvim/undo/</button></td><td>undo 歷史（<code>undofile</code>）</td></tr>
               </tbody>
             </table></div>
           </div>
@@ -527,6 +528,10 @@
             <tr><td><code>tabstop=2</code>、<code>shiftwidth=2</code>、<code>expandtab</code></td><td>2 空格縮排</td></tr>
             <tr><td><code>updatetime=250</code></td><td>游標停住 250ms 就觸發 <code>CursorHold</code>（預設 4 秒），讓 symbol 標示即時出現</td></tr>
             <tr><td><code>confirm</code></td><td>有未存檔的 buffer 時，<code>:q</code> 會詢問要不要存，而不是噴 E37</td></tr>
+            <tr><td><code>signcolumn=yes</code></td><td>行號左邊的標記欄永遠保留寬度，git 標記或 diagnostic 出現時畫面不會往右跳</td></tr>
+            <tr><td><code>undofile</code></td><td>undo 歷史存到磁碟，關掉檔案或重開 nvim 後還能 <kbd>u</kbd></td></tr>
+            <tr><td><code>foldlevel=99</code></td><td>開檔時不摺疊；摺疊依 Treesitter 語法結構（<code>foldexpr</code>）</td></tr>
+            <tr><td>Treesitter <code>indentexpr</code></td><td>換行與 <kbd>=</kbd> 重新縮排改依語法樹計算，JSX、Vue template 也縮得對</td></tr>
           </tbody>
         </table></div>
       </section>
@@ -560,6 +565,7 @@
       ["`grx`", "`gr` + e*x*ecute code lens", "執行 code lens", "default"],
       ["`Space` `c` `u`", "*c*ode: *u*nused imports", "移除整個檔案所有沒用到的 import", "new"],
       ["`Space` `c` `D`", "*c*ode: fix all *D*iagnostics", "Fix all：一次套用整個檔案可自動修正的問題（例如缺少的 interface 成員）", "new"],
+      ["`Space` `c` `i`", "*c*ode: *i*nlay hints", "開關行內的型別與參數名提示", "new", "預設關閉"],
       ["`gO`", "*O*utline", "目前檔案的 symbol 選單", "override", "原本開 location list，改成 [[fzf-lua]] 選單"],
       ["`Space` `f` `s`", "*f*ind *s*ymbols", "搜尋整個專案的 symbol，邊打邊問 LSP", "new", "類似 VS Code 的 `#` symbol 搜尋"],
       ["游標停在 symbol 上", "", "同一個 symbol 在檔案裡的其他位置一起標示，移動游標就清除", "new", "LSP document highlight"],
@@ -602,18 +608,23 @@
       ["`gx`", "*g*o e*x*ternal：交給外部程式開", "用 macOS 預設應用程式開啟游標下的網址或路徑", "default", "類似 VS Code 按住 `Cmd` 點連結"],
     ]},
     { id: "k-edit", title: "編輯", rows: [
-      ["`u` / `Ctrl-r`", "*u*ndo / *r*edo", "undo / redo", "default"],
+      ["`u` / `Ctrl-r`", "*u*ndo / *r*edo", "undo / redo", "tweak", "undo 歷史存到磁碟，關檔或重開 nvim 後還能 undo"],
       ["`:earlier 5m` / `:later 5m`", "", "把檔案退回 / 前進到 5 分鐘前後的狀態", "default", "單位可用 `s`、`m`、`h`；`f` 代表存檔次數，例如 `:earlier 1f` 回到上次存檔時"],
       ["`gcc`", "*c*omment，重複最後一個字母 = 整行", "註解 / 取消註解目前這一行", "default", "類似 VS Code `Cmd-/`"],
       ["`gc` + 範圍", "*c*omment", "註解一段範圍，例如 `gcip` 整段、`gc3j` 往下 3 行", "default", "visual mode 選取後按 `gc` 也可以"],
       ["`yyp`", "*y*ank 整行 + *p*ut", "把目前這一行複製到下一行", "default", "類似 VS Code `Shift-Option-↓`"],
       ["`:m +1` / `:m -2`", "*m*ove", "目前這一行往下 / 往上移一行", "default", "類似 VS Code `Option-↓` / `Option-↑`；`ddp` 也能下移，但會蓋掉系統剪貼簿"],
       ["`>>` / `<<`", "", "目前這一行增加 / 減少縮排", "default", "類似 VS Code `Cmd-]` / `Cmd-[`；visual mode 用 `>` / `<`"],
-      ["`=` + 範圍", "`=` 對齊縮排", "重新縮排，例如 `=ip` 整段、`gg=G` 整個檔案", "default"],
+      ["`=` + 範圍", "`=` 對齊縮排", "重新縮排，例如 `=ip` 整段、`gg=G` 整個檔案", "tweak", "縮排規則改用 Treesitter，換行時的自動縮排也一樣"],
       ["`J`", "*J*oin", "把下一行接到這一行後面", "default"],
       ["`[` `Space` / `]` `Space`", "", "在上方 / 下方插入空行，游標不動", "default"],
       ["`Ctrl-a` / `Ctrl-x`", "*a*dd / `x` 減", "游標所在或之後的數字 +1 / -1", "default", "前面加數字一次加多，例如 `10` `Ctrl-a`"],
       ["`~`", "", "切換游標所在字元的大小寫", "default", "`gUiw` / `guiw` 把整個字轉大寫 / 小寫"],
+    ]},
+    { id: "k-fold", title: "摺疊", rows: [
+      ["`za`", "", "切換游標所在的摺疊", "tweak", "摺疊範圍依 Treesitter 語法結構（函式、物件、JSX 區塊）"],
+      ["`zc` / `zo`", "*c*lose / *o*pen", "收合 / 展開游標所在的摺疊", "tweak", "同上"],
+      ["`zM` / `zR`", "", "全部收合 / 全部展開", "tweak", "開檔時預設全部展開"],
     ]},
     { id: "k-textobj", title: "Text object（`c` 改、`d` 刪、`y` 複製、`v` 選取 + 範圍）", toc: "Text object", rows: [
       ["`ciw`", "*c*hange *i*nner *w*ord", "刪掉游標所在的字並進入 insert mode", "default", "把 `c` 換成 `d` / `y` / `v` 就是刪除 / 複製 / 選取同一個範圍"],
@@ -663,6 +674,8 @@
       ["`Enter`", "", "接受選取的項目", "new"],
       ["`Ctrl-Space`", "", "手動開啟選單", "default", "[[blink.cmp]]"],
       ["`Esc`", "", "關閉選單並離開 insert mode", "default"],
+      ["打 `(` 或 `,` 時自動出現", "", "函式參數提示，標出正在填的參數", "new", "[[blink.cmp]] signature"],
+      ["`Ctrl-k`", "", "開關函式參數提示", "default", "[[blink.cmp]]；只在 insert mode，不影響 normal mode 的切視窗"],
       ["`Ctrl-e`", "*e*nd completion", "只關閉選單，留在 insert mode", "default", "[[blink.cmp]]"],
       ["`Ctrl-f` / `Ctrl-b`", "*f*orward / *b*ackward", "捲動說明文件", "default", "[[blink.cmp]]；`Ctrl-b` 在 [[herdr]] 裡會被吃掉"],
     ]},
