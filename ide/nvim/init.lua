@@ -45,15 +45,15 @@ vim.keymap.set("n", "<leader>w", "<cmd>write<cr>", { desc = "Save current file" 
 vim.keymap.set("n", "<leader>W", "<cmd>wall<cr>", { desc = "Save all files" })
 
 -- Copy the current file path or name to the system clipboard.
-vim.keymap.set("n", "<leader>yp", function()
+vim.keymap.set("n", "<leader>fp", function()
   vim.fn.setreg("+", vim.fn.expand("%:."))
 end, { desc = "Copy relative path" })
 
-vim.keymap.set("n", "<leader>yP", function()
+vim.keymap.set("n", "<leader>fP", function()
   vim.fn.setreg("+", vim.fn.expand("%:p"))
 end, { desc = "Copy absolute path" })
 
-vim.keymap.set("n", "<leader>yn", function()
+vim.keymap.set("n", "<leader>fn", function()
   vim.fn.setreg("+", vim.fn.expand("%:t"))
 end, { desc = "Copy file name" })
 
