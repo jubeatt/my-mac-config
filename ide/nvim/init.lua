@@ -199,6 +199,8 @@ end, { desc = "Open file in default app" })
 
 -- File explorer
 require("nvim-tree").setup({
+  -- Show gitignored files by default; `I` still toggles them.
+  filters = { git_ignored = false },
   renderer = {
     icons = {
       -- Same glyphs mini.icons uses for directories.
