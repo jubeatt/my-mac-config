@@ -117,7 +117,22 @@ require("mini.icons").setup()
 MiniIcons.mock_nvim_web_devicons()
 
 -- Statusline
-require("lualine").setup({ options = { theme = "evergarden" } })
+require("lualine").setup({
+  options = { theme = "evergarden" },
+  sections = {
+    lualine_a = {
+      {
+        "mode",
+        -- First letter of each word: NORMAL -> N, V-LINE -> VL, V-BLOCK -> VB.
+        fmt = function(mode)
+          return (mode:gsub("(%a)%a*%-?", "%1"))
+        end,
+      },
+    },
+    lualine_c = {},
+    lualine_x = { { "filename", path = 1 } },
+  },
+})
 
 -- Async and a no-op for parsers that are already installed.
 require("nvim-treesitter").install(parsers)
