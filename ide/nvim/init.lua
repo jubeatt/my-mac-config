@@ -80,10 +80,10 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 vim.pack.add({
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
-  "https://github.com/folke/tokyonight.nvim",
+  { src = "https://github.com/evergardentheme/nvim", name = "evergarden" },
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/nvim-tree/nvim-tree.lua",
-  "https://github.com/nvim-tree/nvim-web-devicons",
+  "https://github.com/nvim-mini/mini.icons",
   "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/sindrets/diffview.nvim",
@@ -96,10 +96,28 @@ vim.pack.add({
 })
 
 -- Colorscheme
-vim.cmd.colorscheme("tokyonight-night")
+require("evergarden").setup({
+  theme = { variant = "winter" },
+  overrides = function(c)
+    return {
+      -- Plain files read as muted grey instead of the bright text color.
+      MiniIconsGrey = { fg = c.overlay2 },
+      -- The default maps purple to pink, which nvim-tree already uses for its root and opened file.
+      MiniIconsPurple = { fg = c.purple },
+      -- Match nvim-tree's folder glyphs to mini.icons' directory color.
+      NvimTreeFolderIcon = { fg = c.skye },
+    }
+  end,
+})
+-- Variant colorschemes (evergarden-winter etc.) ignore setup(), so pick the variant there instead.
+vim.cmd.colorscheme("evergarden")
+
+-- Icons: mocking nvim-web-devicons lets nvim-tree, lualine and fzf-lua pick up mini.icons.
+require("mini.icons").setup()
+MiniIcons.mock_nvim_web_devicons()
 
 -- Statusline
-require("lualine").setup({ options = { theme = "nightfly" } })
+require("lualine").setup({ options = { theme = "evergarden" } })
 
 -- Async and a no-op for parsers that are already installed.
 require("nvim-treesitter").install(parsers)
@@ -153,7 +171,21 @@ vim.keymap.set("n", "<leader>fo", function()
 end, { desc = "Open file in default app" })
 
 -- File explorer
-require("nvim-tree").setup()
+require("nvim-tree").setup({
+  renderer = {
+    icons = {
+      -- Same glyphs mini.icons uses for directories.
+      glyphs = {
+        folder = {
+          default = "󰉋",
+          open = "󰝰",
+          empty = "󰉖",
+          empty_open = "󰷏",
+        },
+      },
+    },
+  },
+})
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
 
 -- Git: change markers in the sign column, hunk navigation and line blame.
