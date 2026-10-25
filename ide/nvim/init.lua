@@ -91,6 +91,7 @@ vim.pack.add({
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mason-org/mason.nvim",
   "https://github.com/mason-org/mason-lspconfig.nvim",
+  "https://github.com/rafamadriz/friendly-snippets",
   -- Release tags ship a prebuilt fuzzy matcher binary.
   { src = "https://github.com/saghen/blink.cmp", version = vim.version.range("1.*") },
 })
@@ -291,7 +292,7 @@ vim.lsp.enable("tsc")
 -- biome.json is found above the file.
 vim.lsp.enable("biome")
 
--- Completion (LSP items only)
+-- Completion (LSP items plus friendly-snippets, e.g. ES7 React's rafce)
 require("blink.cmp").setup({
   -- Tab or Enter accepts, like VS Code.
   keymap = {
@@ -299,7 +300,7 @@ require("blink.cmp").setup({
     ["<CR>"] = { "accept", "fallback" },
   },
   completion = { documentation = { auto_show = true } },
-  sources = { default = { "lsp" } },
+  sources = { default = { "lsp", "snippets" } },
 })
 
 -- Apply a whole-file source action, e.g. remove every unused import at once.

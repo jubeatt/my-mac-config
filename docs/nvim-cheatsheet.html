@@ -471,7 +471,7 @@
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
-            <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）</td><td>自動補全，只用 LSP 來源</td></tr>
+            <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）+ <code>friendly-snippets</code></td><td>自動補全，來源是 LSP 與 snippet；friendly-snippets 提供各語言的 snippet，包含 ES7 React（<code>rafce</code>、<code>imr</code>、<code>useStateSnippet</code>…）</td></tr>
             <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls），裝好的自動啟用</td></tr>
           </tbody>
         </table></div>
@@ -657,7 +657,7 @@
       ["`Ctrl-r` `%`", "*r*egister `%`：目前檔名", "插入目前檔案的相對路徑", "default", "`Ctrl-r` 接其他暫存器也行，例如 `Ctrl-r` `*` 貼上系統剪貼簿"],
     ]},
     { id: "k-cmp", title: "自動補全（insert mode）", toc: "自動補全", rows: [
-      ["打字時自動出現", "", "LSP 補全選單，旁邊自動顯示說明文件", "new", "[[blink.cmp]]，說明文件改成自動顯示"],
+      ["打字時自動出現", "", "LSP 與 snippet 補全選單，旁邊自動顯示說明文件", "new", "[[blink.cmp]]，說明文件改成自動顯示；snippet 例如 `rafce`、`for`"],
       ["`↑` / `↓`、`Ctrl-n` / `Ctrl-p`", "*n*ext / *p*revious", "選擇項目", "default", "[[blink.cmp]]"],
       ["`Tab`", "", "接受選取的項目；在 snippet 裡跳到下一個位置", "default", "[[blink.cmp]] `super-tab` preset"],
       ["`Enter`", "", "接受選取的項目", "new"],
@@ -740,7 +740,7 @@
 
   const TERMS = {
     "fzf-lua":   { href: "#p-fzf-lua",   def: "搜尋檔案、內容與 reference / symbol 的選單" },
-    "blink.cmp": { href: "#p-blink-cmp", def: "自動補全，只用 LSP 來源" },
+    "blink.cmp": { href: "#p-blink-cmp", def: "自動補全，來源是 LSP 與 snippet" },
     "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
     "grug-far":  { href: "#p-grug-far",  def: "全專案搜尋取代面板" },
