@@ -436,6 +436,27 @@
       </section>
 
       <section>
+        <h3 id="which-key" data-toc="which-key 面板">which-key 面板裡的提示</h3>
+        <p>面板列的都是目前真的存在的按鍵，來源有三種：</p>
+        <ul>
+          <li><strong>這份設定加的</strong>：說明取自 <code>init.lua</code> 裡每個 keymap 的 <code>desc</code>，例如 <code>Next git hunk</code>。</li>
+          <li><strong>Neovim 內建的 keymap</strong>：有些沒寫說明，就直接顯示它執行的指令，例如 <code>]q</code> 顯示 <code>:cnext</code>、<code>]b</code> 顯示 <code>:bnext</code>。</li>
+          <li><strong>which-key 自帶的 preset</strong>：替 Vim 內建 motion（<code>]m</code>、<code>]s</code>、<code>]%</code>…）補上說明。preset 原本還列了 <code>](</code>、<code>]{</code>、<code>]&lt;</code>、<code>[&lt;</code> 這幾個 Vim 沒有的按鍵，已在 <code>init.lua</code> 隱藏，換成真正的 <code>])</code>、<code>]}</code>。</li>
+        </ul>
+        <div class="callout info">
+          <span class="label">補充</span>很多 <code>]</code> / <code>[</code> 按鍵要有對應的清單才會動，沒有時按了像是沒反應：
+          <ul>
+            <li><code>]q</code> / <code>]l</code>：quickfix / location list 裡要有東西，例如從 fzf 選單按 <kbd>Alt-q</kbd> 送出的結果。</li>
+            <li><code>]b</code>：要開了兩個以上的 buffer。</li>
+            <li><code>]a</code>：argument list，只有用 <code>nvim a.ts b.ts</code> 一次開多個檔案時才有。</li>
+            <li><code>]t</code> / <code>]&lt;C-T&gt;</code>：tag 跳轉，要有 tags 檔，這份設定用不到。</li>
+            <li><code>]s</code>：要先 <code>:set spell</code> 開拼字檢查。</li>
+            <li><code>]m</code> / <code>]M</code>：依大括號找 Java 風格 class 裡的 method，JS / TS 裡常跳不準。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
         <h3 id="herdr">和 herdr 的關係</h3>
         <p>herdr 不按 prefix 時只攔 <kbd>Ctrl-b</kbd>（它的 prefix），其餘 herdr 快捷鍵都要先按 prefix，所以這份設定的按鍵不會被 herdr 攔走。</p>
       </section>
@@ -472,7 +493,10 @@
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
             <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）+ <code>friendly-snippets</code></td><td>自動補全，來源是 LSP 與 snippet；friendly-snippets 提供各語言的 snippet，包含 ES7 React（<code>rafce</code>、<code>imr</code>、<code>useStateSnippet</code>…）</td></tr>
-            <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls），裝好的自動啟用</td></tr>
+            <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls、cssls、html），裝好的自動啟用</td></tr>
+            <tr id="p-autopairs"><td><code>nvim-autopairs</code></td><td>打 <code>(</code>、<code>[</code>、<code>{</code>、引號時自動補上結尾；在結尾前打結尾字元會直接跳過</td></tr>
+            <tr id="p-ts-autotag"><td><code>nvim-ts-autotag</code></td><td>HTML / JSX / Vue 打完開頭標籤自動補結尾標籤；改開頭標籤名稱時結尾同步跟著改</td></tr>
+            <tr id="p-which-key"><td><code>which-key.nvim</code></td><td>按 <kbd>Space</kbd> 等前綴鍵後停 0.5 秒，跳出面板列出接下來能按的鍵，說明文字取自各 keymap 的 <code>desc</code></td></tr>
           </tbody>
         </table></div>
       </section>
@@ -486,6 +510,8 @@
             <tr><td><code>tailwindcss</code></td><td>Tailwind class 提示與 hover</td></tr>
             <tr><td><code>lua_ls</code></td><td>編輯 <code>init.lua</code>，已設定認得 <code>vim.*</code> API</td></tr>
             <tr><td><code>jsonls</code></td><td>JSON 補全、hover、語法與 schema 檢查，schema 讀檔案裡的 <code>$schema</code></td></tr>
+            <tr><td><code>cssls</code></td><td>CSS / SCSS 屬性與值的補全、hover 文件，不存在的屬性會報錯</td></tr>
+            <tr><td><code>html</code></td><td>HTML 標籤與屬性補全、hover 文件</td></tr>
           </tbody>
         </table></div>
         <details class="acc">
@@ -543,6 +569,9 @@
   // Row format: [keys, mnemonic, description, kind, note?]; mnemonic is "" when the key has none. `x` renders as <kbd> in keys and <code> elsewhere;
   // [[term]] links to the term's definition in TERMS.
   const SECTIONS = [
+    { id: "k-help", title: "按鍵提示", rows: [
+      ["按 `Space` 後停 0.5 秒", "", "跳出 [[which-key]] 面板，列出接下來能按的鍵和功能", "new", "`g`、`z`、`[`、`]`、`Ctrl-w` 等前綴也會跳；`Backspace` 回上一層、`Esc` 關閉；面板內容的來源見下方注意事項"],
+    ]},
     { id: "k-files", title: "檔案與搜尋", rows: [
       ["`Space` `f` `f`", "*f*ind *f*iles", "搜尋檔案（fd，含隱藏檔，排除 `.git`）", "new"],
       ["`Space` `f` `b`", "*f*ind *b*uffers", "列出已開啟的檔案，依最近使用排序，選取後切換", "new", "可輸入檔名篩選，按 `Enter` 開啟"],
@@ -550,9 +579,9 @@
       ["`Space` `f` `d`", "*f*ind in *d*irectory", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
       ["`Space` `f` `o`", "*f*ile *o*pen", "用 macOS 預設應用程式開啟目前檔案（`open`）", "new", "開啟磁碟上的版本；先用 `Space` `w` 儲存修改，適用於 Markdown、HTML 等檔案"],
       ["`Space` `e`", "*e*xplorer", "開關左側檔案樹，並定位到目前檔案", "new"],
-      ["`Space` `y` `p`", "*y*ank *p*ath", "複製目前檔案的相對路徑到系統剪貼簿", "new", "相對於 Neovim 工作目錄，可用 `:pwd` 查看"],
-      ["`Space` `y` `P`", "*y*ank *P*ath（大寫 = 完整路徑）", "複製目前檔案的絕對路徑到系統剪貼簿", "new", "大寫 `P`，按 `Shift-p`"],
-      ["`Space` `y` `n`", "*y*ank *n*ame", "複製目前檔案名稱到系統剪貼簿", "new", "含副檔名，不含資料夾路徑，例如 `init.lua`"],
+      ["`Space` `f` `p`", "*f*ile *p*ath", "複製目前檔案的相對路徑到系統剪貼簿", "new", "相對於 Neovim 工作目錄，可用 `:pwd` 查看"],
+      ["`Space` `f` `P`", "*f*ile *P*ath（大寫 = 完整路徑）", "複製目前檔案的絕對路徑到系統剪貼簿", "new", "大寫 `P`，按 `Shift-p`"],
+      ["`Space` `f` `n`", "*f*ile *n*ame", "複製目前檔案名稱到系統剪貼簿", "new", "含副檔名，不含資料夾路徑，例如 `init.lua`"],
     ]},
     { id: "k-lsp", title: "LSP", rows: [
       ["`gd`", "*g*o to *d*efinition", "跳到 definition（只在有 LSP 的 buffer）", "override", "原本是跳到區域變數宣告"],
@@ -591,6 +620,7 @@
     { id: "k-jump", title: "跳轉與捲動", rows: [
       ["`%`", "", "在成對的括號 `(){}[]` 之間跳；也支援 HTML / JSX tag（matchit）", "default"],
       ["`[{` / `]}`", "`[` 往前、`]` 往後 + `{`", "跳到目前所在 `{}` 區塊的開頭 / 結尾", "default"],
+      ["`[(` / `])`", "`[` 往前、`]` 往後 + `(`", "跳到目前所在 `()` 的開頭 / 結尾", "default"],
       ["`Ctrl-o`", "*o*lder：較早的位置", "往回跳（go back）", "default"],
       ["`Ctrl-i` / `Tab`", "*i*n：和 `Ctrl-o` 相反", "往前跳（go forward）", "default"],
       ["`Ctrl-d` / `Ctrl-u`", "*d*own / *u*p", "往下 / 往上捲半頁", "default"],
@@ -660,6 +690,9 @@
       ["`@:`", "`@` 執行 `:` 暫存器（上一個指令）", "重複上一個 `:` 指令", "default"],
     ]},
     { id: "k-insert", title: "Insert mode 編輯", rows: [
+      ["打 `(` `[` `{` 或引號", "", "自動補上結尾；在結尾前打結尾字元會直接跳過", "new", "[[nvim-autopairs]]；在空的一對中間按 `Backspace` 兩邊一起刪，在 `{}` 中間按 `Enter` 會拆成三行並縮排"],
+      ["打完開頭標籤，例如 `<div>`", "", "自動補上結尾標籤 `</div>`", "new", "[[nvim-ts-autotag]]；HTML、JSX、Vue 都適用"],
+      ["改開頭標籤名稱", "", "結尾標籤同步改名", "new", "例如在 `div` 上按 `ciw` 改成 `section`，結尾的 `</div>` 跟著變成 `</section>`"],
       ["`Ctrl-w`", "delete *w*ord", "刪掉游標前一個字", "default", "類似 VS Code `Option-Backspace`"],
       ["`Ctrl-u`", "", "刪掉游標前到行首的內容", "default", "類似 VS Code `Cmd-Backspace`"],
       ["`Ctrl-t` / `Ctrl-d`", "*t*ab / *d*edent", "目前這一行增加 / 減少縮排", "default"],
@@ -685,8 +718,6 @@
       ["`Ctrl-w` `w` / `Ctrl-w` `p`", "*w*indow: *w*indow / *p*revious", "輪流切換 / 回到上一個視窗", "default"],
       ["`Ctrl-w` `v` / `Ctrl-w` `s`", "*w*indow: *v*ertical / *s*plit", "左右 / 上下分割目前視窗", "default", "類似 VS Code `Cmd-\\`"],
       ["`Ctrl-w` `q` / `Ctrl-w` `o`", "*w*indow: *q*uit / *o*nly", "關閉目前視窗 / 只留下目前視窗", "default"],
-      ["`Option-→` / `Option-←`", "", "目前視窗寬度 +5 / -5", "new", "Ghostty 把這兩個鍵送成 `Alt-f` / `Alt-b`，兩種都有綁"],
-      ["`Option-↑` / `Option-↓`", "", "目前視窗高度 +2 / -2", "new"],
       ["`Ctrl-w` `=`", "*w*indow: `=` 等寬等高", "所有視窗平均分配大小", "default"],
     ]},
     { id: "k-qf", title: "Quickfix（`Alt-q` 從 fzf 選單送出的清單）", toc: "Quickfix", rows: [
@@ -779,6 +810,9 @@
     "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
     "grug-far":  { href: "#p-grug-far",  def: "全專案搜尋取代面板" },
+    "nvim-autopairs":  { href: "#p-autopairs",  def: "自動補上括號與引號的結尾" },
+    "nvim-ts-autotag": { href: "#p-ts-autotag", def: "HTML / JSX / Vue 標籤自動關閉與同步改名" },
+    "which-key": { href: "#p-which-key", def: "按前綴鍵後列出接下來能按的鍵" },
     "herdr":     { href: "#herdr",       def: "不按 prefix 時只攔 Ctrl-b（它的 prefix）" },
     "quickfix":  { href: "#k-qf",        def: "fzf 選單按 Alt-q 送出的結果清單" },
   };

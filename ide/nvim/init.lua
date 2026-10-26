@@ -102,6 +102,9 @@ vim.pack.add({
   "https://github.com/rafamadriz/friendly-snippets",
   -- Release tags ship a prebuilt fuzzy matcher binary.
   { src = "https://github.com/saghen/blink.cmp", version = vim.version.range("1.*") },
+  "https://github.com/windwp/nvim-autopairs",
+  "https://github.com/windwp/nvim-ts-autotag",
+  "https://github.com/folke/which-key.nvim",
 })
 
 -- Colorscheme
@@ -157,6 +160,38 @@ vim.api.nvim_create_autocmd("FileType", {
       vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
     end
   end,
+})
+
+-- Auto-close brackets and quotes as they are typed, like VS Code.
+require("nvim-autopairs").setup()
+
+-- Auto-close and rename paired HTML / JSX / Vue tags via treesitter.
+require("nvim-ts-autotag").setup()
+
+-- Popup listing the next available keys after a pause, e.g. after <leader>.
+-- Keymap descriptions come from each mapping's desc.
+require("which-key").setup({
+  -- Wait longer than the 200ms default before showing the popup; the marks /
+  -- registers plugins still open immediately.
+  delay = function(ctx)
+    return ctx.plugin and 0 or 500
+  end,
+  spec = {
+    { "<leader>f", group = "Find / file" },
+    { "<leader>g", group = "Git" },
+    { "<leader>c", group = "Code" },
+    { "<leader>s", group = "Search" },
+    -- The nav preset lists ]( ]{ ]< [< which aren't Vim motions; the real
+    -- unmatched-bracket motions are [( [{ ]) ]}.
+    { "](", hidden = true },
+    { "]{", hidden = true },
+    { "]<", hidden = true },
+    { "[<", hidden = true },
+    { "[(", desc = "Previous unmatched (" },
+    { "[{", desc = "Previous unmatched {" },
+    { "])", desc = "Next unmatched )" },
+    { "]}", desc = "Next unmatched }" },
+  },
 })
 
 -- Fuzzy finder (files via fd, content via ripgrep)
@@ -296,7 +331,7 @@ vim.lsp.config("lua_ls", {
 require("mason").setup()
 -- Installed servers are enabled automatically.
 require("mason-lspconfig").setup({
-  ensure_installed = { "tailwindcss", "lua_ls", "jsonls" },
+  ensure_installed = { "tailwindcss", "lua_ls", "jsonls", "cssls", "html" },
 })
 
 -- TypeScript 7 native LSP: uses the project's tsc when it is 7+, otherwise the
