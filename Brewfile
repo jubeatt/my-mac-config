@@ -47,6 +47,8 @@ brew "uv"
 # Feature-rich command-line audio/video downloader
 brew "yt-dlp"
 brew "aviator-co/tap/av", trusted: true
+# Android SDK component
+cask "android-platform-tools"
 # Terminal-based AI coding assistant
 cask "claude-code"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
