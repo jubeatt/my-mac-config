@@ -126,7 +126,7 @@ kcc() {
 alias lg="lazygit"
 alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
 alias vs="code"
-alias nv="nvim"
+alias n="nvim"
 alias pn="pnpm"
 alias co="codex"
 alias cc="claude"
@@ -257,4 +257,3 @@ export PATH="/opt/homebrew/sbin:$PATH"
 
 # Kiro CLI post block. Keep at the bottom of this file.
 [[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
-
