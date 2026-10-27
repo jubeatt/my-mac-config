@@ -670,6 +670,8 @@
     ]},
     { id: "k-visual", title: "選取（visual mode）", toc: "選取", rows: [
       ["`v` / `V` / `Ctrl-v`", "*v*isual", "以字元 / 整行 / 矩形範圍選取", "default"],
+      ["`an`", "*a*round *n*ode", "擴大選取到上一層語法節點", "default", "先按 `v`，再重複按 `an` 逐層擴選，類似 VS Code 的智慧擴選；Neovim 0.12 內建，沒有 Treesitter parser 時需 LSP 支援 selection range"],
+      ["`in`", "*i*nner *n*ode", "縮小選取到上一個或第一個子節點", "default", "Visual mode 使用；沒有 Treesitter parser 時，透過支援 selection range 的 LSP 縮選"],
       ["`Ctrl-v` 選好後 `I` / `A`", "*I*nsert / *A*ppend", "在每一行的開頭 / 結尾同時輸入，按 `Esc` 套用到所有行", "default", "類似 VS Code 多游標 `Cmd-Option-↓`；行長不同時先按 `$` 再按 `A`"],
       ["`gv`", "*g*o *v*isual again", "重新選取上一次的範圍", "default"],
       ["`o`", "*o*ther end", "游標跳到選取範圍的另一端，用來調整起點", "default"],
