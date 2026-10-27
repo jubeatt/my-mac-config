@@ -89,6 +89,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 vim.pack.add({
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+  "https://github.com/Wansmer/treesj",
   { src = "https://github.com/evergardentheme/nvim", name = "evergarden" },
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/nvim-tree/nvim-tree.lua",
@@ -162,6 +163,14 @@ vim.api.nvim_create_autocmd("FileType", {
     end
   end,
 })
+
+-- Split / join syntax nodes, including arrow-function bodies.
+require("treesj").setup({
+  use_default_keymaps = false,
+  max_join_length = 1000,
+})
+vim.keymap.set("n", "<leader>cs", require("treesj").split, { desc = "Split code block" })
+vim.keymap.set("n", "<leader>cj", require("treesj").join, { desc = "Join code block" })
 
 -- Auto-close brackets and quotes as they are typed, like VS Code.
 require("nvim-autopairs").setup()

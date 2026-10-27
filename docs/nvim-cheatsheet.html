@@ -484,6 +484,7 @@
           <thead><tr><th>Plugin</th><th>用途</th></tr></thead>
           <tbody>
             <tr id="p-treesitter"><td><code>nvim-treesitter</code>（<code>main</code> branch）</td><td>安裝 parser，Treesitter 語法高亮</td></tr>
+            <tr id="p-treesj"><td><code>TreeSJ</code></td><td>依 Treesitter 節點展開／收合程式碼；支援箭頭函式 expression body 與 block body 轉換，不依賴 LSP</td></tr>
             <tr id="p-evergarden"><td><code>evergarden</code></td><td>主題，用 winter 變體；在 <code>setup()</code> 指定變體與 icon 配色微調</td></tr>
             <tr id="p-lualine"><td><code>lualine.nvim</code></td><td>底部狀態列，配色用 evergarden 附的 <code>evergarden</code>；左側顯示縮寫模式（N / I / V / VL / VB…）、git branch、diff、錯誤數；右側顯示相對路徑檔名、捲動位置、行列位置</td></tr>
             <tr id="p-fzf-lua"><td><code>fzf-lua</code></td><td>搜尋檔案、搜尋內容、reference / symbol 選單；預設上方清單、下方預覽，預覽占視窗高度 45%；也接手 <code>vim.ui.select</code>（code action 選單，不含預覽）</td></tr>
@@ -600,6 +601,10 @@
       ["游標停在 symbol 上", "", "同一個 symbol 在檔案裡的其他位置一起標示，移動游標就清除", "new", "LSP document highlight"],
       ["`K`", "*K*eyword lookup", "hover 說明，連按兩次進入說明視窗", "default"],
       ["`Ctrl-s`", "*s*ignature", "函式參數提示（insert mode）", "default"],
+    ]},
+    { id: "k-code", title: "程式碼展開與收合", rows: [
+      ["`Space` `c` `s`", "*c*ode: *s*plit", "展開程式碼；單行箭頭函式加上 block 與 return", "new", "[[TreeSJ]]；游標放在目標 `=>` 上。多行 expression body 先按 `Space c j` 收成單行，再按 `Space c s`"],
+      ["`Space` `c` `j`", "*c*ode: *j*oin", "收合程式碼；單一 return 的箭頭函式轉成 expression body", "new", "[[TreeSJ]]；join 上限為 1000 字元，長 JSX 轉完儲存後由 Biome 排版；有其他敘述時保留 block"],
     ]},
     { id: "k-diag", title: "Diagnostic（錯誤訊息）", toc: "Diagnostic", rows: [
       ["`]d` / `[d`", "`]` 下一個、`[` 上一個 + *d*iagnostic", "跳到下一個 / 上一個 diagnostic", "tweak", "跳過去時自動開浮窗顯示完整訊息"],
@@ -810,6 +815,7 @@
     "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
     "grug-far":  { href: "#p-grug-far",  def: "全專案搜尋取代面板" },
+    "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
     "nvim-autopairs":  { href: "#p-autopairs",  def: "自動補上括號與引號的結尾" },
     "nvim-ts-autotag": { href: "#p-ts-autotag", def: "HTML / JSX / Vue 標籤自動關閉與同步改名" },
     "which-key": { href: "#p-which-key", def: "按前綴鍵後列出接下來能按的鍵" },
