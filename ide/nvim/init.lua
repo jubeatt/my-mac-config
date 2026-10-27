@@ -298,6 +298,24 @@ require("gitsigns").setup({
 })
 
 -- Side-by-side diff of the working tree, and per-file commit history.
+local diffview_actions = require("diffview.actions")
+require("diffview").setup({
+  -- Match the file explorer toggle in both diff and history views.
+  keymaps = {
+    view = {
+      { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+      ["<leader>b"] = false,
+    },
+    file_panel = {
+      { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+      ["<leader>b"] = false,
+    },
+    file_history_panel = {
+      { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+      ["<leader>b"] = false,
+    },
+  },
+})
 vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open git diff view" })
 vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "Current file git history" })
 vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close git diff view" })
