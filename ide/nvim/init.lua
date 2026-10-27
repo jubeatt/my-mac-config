@@ -8,6 +8,8 @@ vim.g.loaded_netrwPlugin = 1
 -- Options (only those that differ from Neovim defaults)
 vim.o.clipboard = "unnamed"
 vim.o.wrap = false
+vim.o.splitright = true
+vim.o.splitbelow = true
 
 vim.o.number = true
 vim.o.cursorline = true
@@ -93,6 +95,7 @@ vim.pack.add({
   { src = "https://github.com/evergardentheme/nvim", name = "evergarden" },
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/nvim-tree/nvim-tree.lua",
+  "https://github.com/antosha417/nvim-lsp-file-operations",
   "https://github.com/nvim-mini/mini.icons",
   "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/lewis6991/gitsigns.nvim",
@@ -107,6 +110,7 @@ vim.pack.add({
   "https://github.com/windwp/nvim-autopairs",
   "https://github.com/windwp/nvim-ts-autotag",
   "https://github.com/folke/which-key.nvim",
+  "https://github.com/folke/flash.nvim",
 })
 
 -- Colorscheme
@@ -178,6 +182,17 @@ require("nvim-autopairs").setup()
 -- Auto-close and rename paired HTML / JSX / Vue tags via treesitter.
 require("nvim-ts-autotag").setup()
 
+-- Use explicit Flash jumps while keeping native f / t character motions.
+require("flash").setup({
+  modes = { char = { enabled = false } },
+})
+vim.keymap.set({ "n", "x", "o" }, "s", function()
+  require("flash").jump()
+end, { desc = "Flash jump" })
+vim.keymap.set({ "n", "x", "o" }, "S", function()
+  require("flash").treesitter()
+end, { desc = "Flash treesitter selection" })
+
 -- Popup listing the next available keys after a pause, e.g. after <leader>.
 -- Keymap descriptions come from each mapping's desc.
 require("which-key").setup({
@@ -191,6 +206,7 @@ require("which-key").setup({
     { "<leader>g", group = "Git" },
     { "<leader>c", group = "Code" },
     { "<leader>s", group = "Search" },
+    { "<leader>x", group = "Diagnostics" },
     -- The nav preset lists ]( ]{ ]< [< which aren't Vim motions; the real
     -- unmatched-bracket motions are [( [{ ]) ]}.
     { "](", hidden = true },
@@ -222,6 +238,10 @@ require("fzf-lua").register_ui_select()
 vim.keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files" })
 vim.keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find open buffers" })
 vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Search content" })
+vim.keymap.set("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Recent files" })
+vim.keymap.set("n", "<leader>fR", "<cmd>FzfLua resume<cr>", { desc = "Resume last picker" })
+vim.keymap.set("n", "<leader>xx", "<cmd>FzfLua diagnostics_workspace<cr>", { desc = "Workspace diagnostics" })
+vim.keymap.set("n", "<leader>xd", "<cmd>FzfLua diagnostics_document<cr>", { desc = "Document diagnostics" })
 -- Like VS Code's breadcrumb dropdown: pick a sibling of the current file.
 vim.keymap.set("n", "<leader>fd", function()
   require("fzf-lua").files({
@@ -263,6 +283,22 @@ require("nvim-tree").setup({
   },
 })
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
+
+-- Bridge nvim-tree renames and cut/paste moves to LSP import updates.
+-- Keep edits unsaved, like symbol renames; <leader>W saves all changed files.
+local file_operations = require("lsp-file-operations")
+file_operations.setup({
+  auto_save = false,
+  operations = {
+    willRenameFiles = true,
+    didRenameFiles = true,
+    willCreateFiles = false,
+    didCreateFiles = false,
+    willDeleteFiles = false,
+    didDeleteFiles = false,
+  },
+})
+vim.lsp.config("*", { capabilities = file_operations.default_capabilities() })
 
 -- Git: change markers in the sign column, hunk navigation and line blame.
 require("gitsigns").setup({
@@ -364,6 +400,17 @@ require("mason-lspconfig").setup({
 
 -- TypeScript 7 native LSP: uses the project's tsc when it is 7+, otherwise the
 -- global one from Homebrew.
+vim.lsp.config("tsc", {
+  on_init = function(client)
+    -- TS7 handles folder renames but advertises only file-extension filters.
+    local workspace = client.server_capabilities.workspace
+    local operations = workspace and workspace.fileOperations
+    local rename = operations and operations.willRename
+    if rename then
+      table.insert(rename.filters, { scheme = "file", pattern = { glob = "**/*", matches = "folder" } })
+    end
+  end,
+})
 vim.lsp.enable("tsc")
 
 -- Biome from Homebrew (or the project's node_modules); attaches only when a

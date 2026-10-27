@@ -457,6 +457,16 @@
       </section>
 
       <section>
+        <h3 id="file-move-imports" data-toc="搬檔與 imports">搬檔與 imports</h3>
+        <p>在 nvim-tree 用 <kbd>r</kbd> 改名或輸入新路徑、用 <kbd>x</kbd> / <kbd>p</kbd> 剪下貼上時，<code>nvim-lsp-file-operations</code> 會請 LSP 更新引用路徑。TypeScript 7 支援檔案與資料夾改名，也會調整搬走檔案內自己的相對 import。</p>
+        <ul>
+          <li>專案的 LSP 必須已啟動，並支援檔案改名請求；其他語言的行為依各自的 server 而定。</li>
+          <li>其他引用檔案即使原本沒開啟，也可能被載入並修改；用 <kbd>Space</kbd> <kbd>W</kbd> 儲存所有修改過的檔案。</li>
+          <li>這個串接處理 nvim-tree 的檔案操作；在 Finder 或終端機搬檔時不會透過這條流程更新 imports。</li>
+        </ul>
+      </section>
+
+      <section>
         <h3 id="herdr">和 herdr 的關係</h3>
         <p>herdr 不按 prefix 時只攔 <kbd>Ctrl-b</kbd>（它的 prefix），其餘 herdr 快捷鍵都要先按 prefix，所以這份設定的按鍵不會被 herdr 攔走。</p>
       </section>
@@ -485,10 +495,12 @@
           <tbody>
             <tr id="p-treesitter"><td><code>nvim-treesitter</code>（<code>main</code> branch）</td><td>安裝 parser，Treesitter 語法高亮</td></tr>
             <tr id="p-treesj"><td><code>TreeSJ</code></td><td>依 Treesitter 節點展開／收合程式碼；支援箭頭函式 expression body 與 block body 轉換，不依賴 LSP</td></tr>
+            <tr id="p-flash"><td><code>flash.nvim</code></td><td>用 <kbd>s</kbd> 輸入文字，再按標籤跳到畫面內的位置；<kbd>S</kbd> 用標籤選取 Treesitter 語法節點。Normal、Visual 與 operator-pending mode 都能使用；<kbd>f</kbd> / <kbd>t</kbd> 與一般搜尋維持原生行為</td></tr>
             <tr id="p-evergarden"><td><code>evergarden</code></td><td>主題，用 winter 變體；在 <code>setup()</code> 指定變體與 icon 配色微調</td></tr>
             <tr id="p-lualine"><td><code>lualine.nvim</code></td><td>底部狀態列，配色用 evergarden 附的 <code>evergarden</code>；左側顯示縮寫模式（N / I / V / VL / VB…）、git branch、diff、錯誤數；右側顯示相對路徑檔名、捲動位置、行列位置</td></tr>
             <tr id="p-fzf-lua"><td><code>fzf-lua</code></td><td>搜尋檔案、搜尋內容、reference / symbol 選單；預設上方清單、下方預覽，預覽占視窗高度 45%；也接手 <code>vim.ui.select</code>（code action 選單，不含預覽）</td></tr>
             <tr id="p-nvim-tree"><td><code>nvim-tree.lua</code> + <code>mini.icons</code></td><td>左側檔案樹與 icon；取代 netrw。mini.icons 模擬 nvim-web-devicons，lualine、fzf-lua 也共用同一套 icon</td></tr>
+            <tr id="p-file-operations"><td><code>nvim-lsp-file-operations</code></td><td>串接 nvim-tree 的改名與剪下貼上事件，向 LSP 請求更新 imports；引用檔案的修改以 <kbd>Space</kbd> <kbd>W</kbd> 一次儲存</td></tr>
             <tr id="p-gitsigns"><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
@@ -553,6 +565,7 @@
             <tr><td><code>nowrap</code>、<code>number</code>、<code>cursorline</code>、<code>scrolloff=5</code></td><td>從 <code>.vimrc</code> 搬過來</td></tr>
             <tr><td><code>ignorecase</code> + <code>smartcase</code></td><td>搜尋不分大小寫，打了大寫才區分</td></tr>
             <tr><td><code>tabstop=2</code>、<code>shiftwidth=2</code>、<code>expandtab</code></td><td>2 空格縮排</td></tr>
+            <tr><td><code>splitright</code> + <code>splitbelow</code></td><td>新分割視窗出現在右側或下方</td></tr>
             <tr><td><code>updatetime=250</code></td><td>游標停住 250ms 就觸發 <code>CursorHold</code>（預設 4 秒），讓 symbol 標示即時出現</td></tr>
             <tr><td><code>confirm</code></td><td>有未存檔的 buffer 時，<code>:q</code> 會詢問要不要存，而不是噴 E37</td></tr>
             <tr><td><code>signcolumn=yes</code></td><td>行號左邊的標記欄永遠保留寬度，git 標記或 diagnostic 出現時畫面不會往右跳</td></tr>
@@ -577,6 +590,8 @@
       ["`Space` `f` `f`", "*f*ind *f*iles", "搜尋檔案（fd，含隱藏檔，排除 `.git`）", "new"],
       ["`Space` `f` `b`", "*f*ind *b*uffers", "列出已開啟的檔案，依最近使用排序，選取後切換", "new", "可輸入檔名篩選，按 `Enter` 開啟"],
       ["`Space` `f` `g`", "*f*ind by *g*rep", "搜尋內容（ripgrep，邊打邊搜）", "new"],
+      ["`Space` `f` `r`", "*f*ind *r*ecent files", "搜尋最近開過的檔案", "new", "[[fzf-lua]] oldfiles，包含歷史紀錄裡仍存在的檔案"],
+      ["`Space` `f` `R`", "*f*ind: *R*esume", "回到上一次的搜尋選單", "new", "[[fzf-lua]] resume，保留上次查詢內容；大寫 `R`，按 `Shift-r`"],
       ["`Space` `f` `d`", "*f*ind in *d*irectory", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
       ["`Space` `f` `o`", "*f*ile *o*pen", "用 macOS 預設應用程式開啟目前檔案（`open`）", "new", "開啟磁碟上的版本；先用 `Space` `w` 儲存修改，適用於 Markdown、HTML 等檔案"],
       ["`Space` `e`", "*e*xplorer", "開關左側檔案樹，並定位到目前檔案", "new"],
@@ -607,6 +622,8 @@
       ["`Space` `c` `j`", "*c*ode: *j*oin", "收合程式碼；單一 return 的箭頭函式轉成 expression body", "new", "[[TreeSJ]]；join 上限為 1000 字元，長 JSX 轉完儲存後由 Biome 排版；有其他敘述時保留 block"],
     ]},
     { id: "k-diag", title: "Diagnostic（錯誤訊息）", toc: "Diagnostic", rows: [
+      ["`Space` `x` `x`", "`x`：diagnostics", "列出工作區目前已收到的所有 diagnostic", "new", "[[fzf-lua]] 選單；範圍依 LSP 回報，不等於對整個專案執行完整檢查"],
+      ["`Space` `x` `d`", "`x`：diagnostics + *d*ocument", "列出目前檔案的所有 diagnostic", "new", "[[fzf-lua]] 選單，選取後跳到問題位置"],
       ["`]d` / `[d`", "`]` 下一個、`[` 上一個 + *d*iagnostic", "跳到下一個 / 上一個 diagnostic", "tweak", "跳過去時自動開浮窗顯示完整訊息"],
       ["`]D` / `[D`", "大寫 = 跳到最後 / 最前", "跳到最後一個 / 第一個 diagnostic", "tweak", "同上"],
       ["`Ctrl-w` `d`", "*w*indow: *d*iagnostic", "顯示游標所在位置的 diagnostic 浮窗", "default"],
@@ -623,6 +640,8 @@
       ["`Space` `g` `q`", "*g*it *q*uit", "關閉 [[diffview]]", "new"],
     ]},
     { id: "k-jump", title: "跳轉與捲動", rows: [
+      ["`s` → 輸入文字 → 標籤", "", "用 [[Flash]] 跳到畫面內符合文字的位置，可跨分割視窗", "override", "Normal、Visual 與 operator-pending mode 使用；按 `Esc` 取消；單字元刪除後輸入可用 `cl`"],
+      ["`S` → 標籤", "", "用 [[Flash]] 選取游標周圍的 Treesitter 語法節點", "override", "Normal、Visual 與 operator-pending mode 使用；`;` / `,` 擴大 / 縮小範圍，按 `Esc` 取消；整行改寫可用 `cc`"],
       ["`%`", "", "在成對的括號 `(){}[]` 之間跳；也支援 HTML / JSX tag（matchit）", "default"],
       ["`[{` / `]}`", "`[` 往前、`]` 往後 + `{`", "跳到目前所在 `{}` 區塊的開頭 / 結尾", "default"],
       ["`[(` / `])`", "`[` 往前、`]` 往後 + `(`", "跳到目前所在 `()` 的開頭 / 結尾", "default"],
@@ -723,7 +742,7 @@
       ["`Ctrl-h` / `Ctrl-j` / `Ctrl-k` / `Ctrl-l`", "方向同 `h` `j` `k` `l`", "切到左 / 下 / 上 / 右的視窗", "override", "原本 `Ctrl-h` 等於 `h`、`Ctrl-l` 清除搜尋高亮"],
       ["`Ctrl-w` + `h/j/k/l` 或方向鍵", "*w*indow + 方向", "同上", "default"],
       ["`Ctrl-w` `w` / `Ctrl-w` `p`", "*w*indow: *w*indow / *p*revious", "輪流切換 / 回到上一個視窗", "default"],
-      ["`Ctrl-w` `v` / `Ctrl-w` `s`", "*w*indow: *v*ertical / *s*plit", "左右 / 上下分割目前視窗", "default", "類似 VS Code `Cmd-\\`"],
+      ["`Ctrl-w` `v` / `Ctrl-w` `s`", "*w*indow: *v*ertical / *s*plit", "往右 / 往下分割目前視窗", "tweak", "類似 VS Code `Cmd-\\`；新視窗方向由 `splitright` / `splitbelow` 設定"],
       ["`Ctrl-w` `q` / `Ctrl-w` `o`", "*w*indow: *q*uit / *o*nly", "關閉目前視窗 / 只留下目前視窗", "default"],
       ["`Ctrl-w` `=`", "*w*indow: `=` 等寬等高", "所有視窗平均分配大小", "default"],
     ]},
@@ -790,11 +809,11 @@
     ]},
     { id: "k-tree-fs", title: "nvim-tree：檔案操作", toc: "nvim-tree 檔案操作", rows: [
       ["`a`", "*a*dd", "新增檔案，結尾加 `/` 是資料夾", "default", "可以一次輸入多層，例如 `ui/Button.tsx`，中間的資料夾會自動建立"],
-      ["`r`", "*r*ename", "改名，預設帶入檔名", "default", "輸入的路徑相對於目前所在的資料夾，所以也能搬檔案，例如 `../ui/Button.tsx`；目標資料夾不存在會自動建立；搬檔不會自動更新 import 路徑"],
+      ["`r`", "*r*ename", "改名，預設帶入檔名", "tweak", "輸入的路徑相對於目前所在的資料夾，所以也能搬檔案，例如 `../ui/Button.tsx`；目標資料夾不存在會自動建立；[[LSP 檔案操作]] 會更新 imports，用 `Space W` 儲存所有引用檔案"],
       ["`e`", "", "只改檔名，副檔名保留", "default", "輸入框不帶副檔名，例如只顯示 `Button`"],
       ["`u`", "", "從絕對路徑開始改，適合搬到遠處的資料夾", "default"],
       ["`Ctrl-r`", "", "帶入資料夾路徑、清空檔名", "default", "適合搬到別處並同時改名"],
-      ["`x` / `c` → `p`", "`x` 剪下、*c*opy → *p*aste", "剪下 / 複製，移到目標資料夾按 `p` 貼上", "default", "移到資料夾裡的任一個檔案上按 `p` 也行；visual mode 可以一次選多個，或在多個檔案上各按一次 `x` / `c` 再一起貼"],
+      ["`x` / `c` → `p`", "`x` 剪下、*c*opy → *p*aste", "剪下 / 複製，移到目標資料夾按 `p` 貼上", "tweak", "移到資料夾裡的任一個檔案上按 `p` 也行；visual mode 可以一次選多個，或在多個檔案上各按一次 `x` / `c` 再一起貼；剪下搬移時由 [[LSP 檔案操作]] 更新 imports，用 `Space W` 儲存"],
       ["`m` → `bmv`", "*m*ark → *b*ulk *m*o*v*e", "標記多個檔案，再一次搬到輸入的資料夾", "default", "適合要搬的檔案散在不同資料夾；`bd` 刪除、`bt` 丟垃圾桶所有標記的檔案"],
       ["`D`", "", "丟到 macOS 垃圾桶", "tweak", "預設的 `gio trash` 沒裝，改用 macOS 內建的 `trash`；可以從垃圾桶救回"],
       ["`d`", "*d*elete", "直接刪除，不經過垃圾桶", "default", "無法復原，優先用 `D`"],
@@ -818,6 +837,8 @@
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
     "grug-far":  { href: "#p-grug-far",  def: "全專案搜尋取代面板" },
     "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
+    "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
+    "LSP 檔案操作": { href: "#file-move-imports", def: "透過 nvim-lsp-file-operations 更新改名或搬移後的 imports；需要 LSP 支援" },
     "nvim-autopairs":  { href: "#p-autopairs",  def: "自動補上括號與引號的結尾" },
     "nvim-ts-autotag": { href: "#p-ts-autotag", def: "HTML / JSX / Vue 標籤自動關閉與同步改名" },
     "which-key": { href: "#p-which-key", def: "按前綴鍵後列出接下來能按的鍵" },
