@@ -353,6 +353,40 @@ require("diffview").setup({
     },
   },
 })
+-- Run Lazygit inside Neovim so nvim-remote can open files in this instance.
+vim.keymap.set("n", "<leader>gg", function()
+  if vim.fn.executable("lazygit") ~= 1 then
+    vim.notify("Install lazygit from the Brewfile first", vim.log.levels.WARN)
+    return
+  end
+  local root = vim.fs.root(0, ".git") or vim.fs.root(vim.fn.getcwd(), ".git")
+  if not root then
+    vim.notify("Open a file or directory in a Git repository first", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd.tabnew()
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.bo[bufnr].bufhidden = "wipe"
+  vim.fn.jobstart({ "lazygit" }, {
+    term = true,
+    cwd = root,
+    on_exit = function(_, code)
+      vim.schedule(function()
+        if code ~= 0 then
+          vim.notify("Lazygit exited with code " .. code .. "; see the terminal output", vim.log.levels.WARN)
+          return
+        end
+        for _, winid in ipairs(vim.fn.win_findbuf(bufnr)) do
+          pcall(vim.api.nvim_win_close, winid, true)
+        end
+        if vim.api.nvim_buf_is_valid(bufnr) then
+          vim.api.nvim_buf_delete(bufnr, { force = true })
+        end
+      end)
+    end,
+  })
+  vim.cmd.startinsert()
+end, { desc = "Open Lazygit" })
 vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open git diff view" })
 vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "Current file git history" })
 vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close git diff view" })

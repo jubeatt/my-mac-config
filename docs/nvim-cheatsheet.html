@@ -479,6 +479,17 @@
       </section>
 
       <section>
+        <h3 id="lazygit" data-toc="Lazygit">Lazygit 與 Neovim</h3>
+        <p>在 Neovim 按 <kbd>Space</kbd> <kbd>g</kbd> <kbd>g</kbd>，會在新分頁開啟目前 Git repo 的 Lazygit，直接進入可操作的 terminal mode。Herdr 裡的 Neovim 也適用。</p>
+        <ul>
+          <li>在 Files 或 commit 的檔案清單選檔後按 <kbd>e</kbd>，透過 <code>nvim-remote</code> 在同一個 Neovim 的新分頁開啟檔案；在 diff 裡按 <kbd>e</kbd> 可跳到對應行。</li>
+          <li>按 Lazygit 的 <kbd>q</kbd> 離開，terminal 分頁會自動關閉，回到編輯畫面。</li>
+          <li>在一般終端機直接執行 <code>lazygit</code> 時，<kbd>e</kbd> 會啟動 Neovim；離開編輯器後回到 Lazygit。</li>
+          <li>編輯器選擇由 <button type="button" class="path" data-copy="terminal/lazygit/config.yml">terminal/lazygit/config.yml</button> 的 <code>os.editPreset</code> 設定，不需額外 Neovim 外掛。</li>
+        </ul>
+      </section>
+
+      <section>
         <h3 id="herdr">和 herdr 的關係</h3>
         <p>herdr 不按 prefix 時只攔 <kbd>Ctrl-b</kbd>（它的 prefix），其餘 herdr 快捷鍵都要先按 prefix，所以這份設定的按鍵不會被 herdr 攔走。</p>
       </section>
@@ -643,6 +654,7 @@
       ["`Ctrl-w` `d`", "*w*indow: *d*iagnostic", "顯示游標所在位置的 diagnostic 浮窗", "default"],
     ]},
     { id: "k-git", title: "Git", rows: [
+      ["`Space` `g` `g`", "*g*it GUI", "在新分頁開 [[Lazygit]]，選檔後按 `e` 開回同一個 Neovim", "new", "從目前檔案或工作目錄尋找 Git repo；按 Lazygit 的 `q` 離開並自動關閉 terminal 分頁"],
       ["自動顯示", "", "行號旁標出新增、修改、刪除的行", "new", "[[gitsigns]]"],
       ["`]c` / `[c`", "`]` / `[` + *c*hange", "跳到下一段 / 上一段 git 變更", "tweak", "原本只在 diff 畫面跳到下一個 / 上一個差異；diff 畫面裡維持原行為"],
       ["`Space` `g` `p`", "*g*it *p*review", "浮窗預覽游標所在的這段變更", "new"],
@@ -854,6 +866,7 @@
     "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
     "LSP 檔案操作": { href: "#file-move-imports", def: "透過 nvim-lsp-file-operations 更新改名或搬移後的 imports；需要 LSP 支援" },
     "CSpell":    { href: "#spell-check", def: "透過 nvim-lint 呼叫 CSpell CLI，將程式碼與文件裡的錯字發布成 diagnostics" },
+    "Lazygit":   { href: "#lazygit", def: "在 Neovim terminal 中操作 Git，以 nvim-remote 開回選取的檔案" },
     "nvim-autopairs":  { href: "#p-autopairs",  def: "自動補上括號與引號的結尾" },
     "nvim-ts-autotag": { href: "#p-ts-autotag", def: "HTML / JSX / Vue 標籤自動關閉與同步改名" },
     "which-key": { href: "#p-which-key", def: "按前綴鍵後列出接下來能按的鍵" },

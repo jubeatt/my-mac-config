@@ -5,11 +5,7 @@ gui:
     selectedLineBgColor:
       - "#444444"
 os:
-  edit: 'code --goto {{filename}}'
-  editAtLine: 'code --goto {{filename}}:{{line}}'
-  editAtLineAndWait: 'code --goto --wait {{filename}}:{{line}}'
-  editInTerminal: false
-  openDirInEditor: 'code {{dir}}'
+  editPreset: "nvim-remote"
 customCommands:
   - key: "A"
     command: git commit --amend {{.Form.V}} --no-edit
