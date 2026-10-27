@@ -1,0 +1,2 @@
+# Keep project Python runtimes independent of Homebrew formula lifecycles.
+python-preference = "only-managed"

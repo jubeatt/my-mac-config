@@ -34,6 +34,11 @@ const CONFIGS = {
     target: `${home}/.config`,
     files: ["nvim"],
   },
+  uv: {
+    source: resolve(__dirname, ".."),
+    target: `${home}/.config/uv`,
+    files: ["uv.toml"],
+  },
   git: {
     source: resolve(__dirname, ".."),
     target: home,

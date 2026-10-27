@@ -33,6 +33,7 @@
 ├── .gitignore_global     # Git global ignore 設定
 ├── .editorconfig         # EditorConfig
 ├── Brewfile              # Homebrew 套件清單
+├── uv.toml               # uv 的 Python 來源設定
 └── biome.json            # Biome formatter/linter 設定
 ```
 
@@ -87,6 +88,7 @@ node scripts/gen-vscode-extensions.js --dryrun
 | --------- | ------------------------------------------ | -------------------------------------------------- |
 | VS Code   | `ide/vscode/`                              | `~/Library/Application Support/Code/User/`         |
 | Neovim    | `ide/nvim/`                                | `~/.config/nvim`                                   |
+| uv        | `uv.toml`                                  | `~/.config/uv/uv.toml`                              |
 | Git       | `.gitconfig`                               | `~/.gitconfig`                                     |
 | Git ignore | `.gitignore_global`                        | `~/.gitignore_global`                              |
 | Zsh       | `.zshrc`                                   | `~/.zshrc`                                         |
@@ -95,6 +97,22 @@ node scripts/gen-vscode-extensions.js --dryrun
 | Ghostty   | `terminal/ghostty/config`                  | `~/.config/ghostty/config`                         |
 | herdr     | `terminal/herdr/config.toml`               | `~/.config/herdr/config.toml`                      |
 | Lazygit   | `terminal/lazygit/config.yml`              | `~/Library/Application Support/lazygit/config.yml` |
+
+## Python 環境
+
+專案的 Python 版本與虛擬環境由 uv 管理。`uv.toml` 設定 `python-preference = "only-managed"`，讓 uv 使用自己管理的 Python；Homebrew 管理 uv CLI，以及 `yt-dlp` 等工具所需的 Python 依賴。
+
+在 uv 專案根目錄執行：
+
+```bash
+uv python install
+uv sync --locked
+uv run python -c "import sys; print(sys.version); print(sys.executable); print(sys.base_prefix)"
+```
+
+專案的 `.python-version` 指定 Python 版本，`pyproject.toml` 與 `uv.lock` 記錄套件依賴；`.venv` 留在本機。上面的檢查指令會列出版本、專案解譯器與基底 Python 路徑。
+
+`bbd` 會重新產生 Homebrew 套件清單 `Brewfile`，本身不會移除套件。uv 管理的 Python 安裝與專案環境由 uv 維護。
 
 ## Git Hooks
 
