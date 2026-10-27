@@ -21,7 +21,6 @@
 │   ├── iterm2/          # iTerm2 設定（自動同步）
 │   ├── oh-my-zsh/       # 自訂 zsh theme
 │   ├── ghostty/         # Ghostty 終端設定
-│   ├── cmux/            # cmux 設定（layout commands, settings）
 │   ├── herdr/           # herdr 終端設定
 │   └── lazygit/         # Lazygit 設定
 ├── scripts/
@@ -94,7 +93,6 @@ node scripts/gen-vscode-extensions.js --dryrun
 | Zsh Theme | `terminal/oh-my-zsh/tonotdo.zsh-theme`     | `~/.oh-my-zsh/custom/themes/`                      |
 | iTerm2    | `terminal/iterm2/`                         | iTerm2 Preferences → Custom Folder                 |
 | Ghostty   | `terminal/ghostty/config`                  | `~/.config/ghostty/config`                         |
-| cmux      | `terminal/cmux/cmux.json`, `settings.json` | `~/.config/cmux/`                                  |
 | herdr     | `terminal/herdr/config.toml`               | `~/.config/herdr/config.toml`                      |
 | Lazygit   | `terminal/lazygit/config.yml`              | `~/Library/Application Support/lazygit/config.yml` |
 

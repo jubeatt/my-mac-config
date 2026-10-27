@@ -49,11 +49,6 @@ const CONFIGS = {
     target: `${home}/.config/ghostty`,
     files: ["config"],
   },
-  cmux: {
-    source: resolve(__dirname, "../terminal/cmux"),
-    target: `${home}/.config/cmux`,
-    files: ["cmux.json"],
-  },
   herdr: {
     source: resolve(__dirname, "../terminal/herdr"),
     target: `${home}/.config/herdr`,
