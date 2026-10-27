@@ -525,7 +525,7 @@
             <tr id="p-nvim-tree"><td><code>nvim-tree.lua</code> + <code>mini.icons</code></td><td>左側檔案樹與 icon；取代 netrw。mini.icons 模擬 nvim-web-devicons，lualine、fzf-lua 也共用同一套 icon</td></tr>
             <tr id="p-file-operations"><td><code>nvim-lsp-file-operations</code></td><td>串接 nvim-tree 的改名與剪下貼上事件，向 LSP 請求更新 imports；引用檔案的修改以 <kbd>Space</kbd> <kbd>W</kbd> 一次儲存</td></tr>
             <tr id="p-gitsigns"><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
-            <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
+            <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案或整個 repo 的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
             <tr id="p-nvim-lint"><td><code>nvim-lint</code></td><td>呼叫外部 CSpell CLI 檢查拼字，結果發布成 Neovim diagnostics；讀取專案的 CSpell 字庫與忽略規則</td></tr>
@@ -663,6 +663,7 @@
       ["`Space` `g` `b`", "*g*it *b*lame", "浮窗顯示這一行最後修改的 author、時間和完整 commit 訊息", "new"],
       ["`Space` `g` `d`", "*g*it *d*iff", "開 [[diffview]]：左右並排看所有改動的檔案", "new"],
       ["`Space` `g` `h`", "*g*it *h*istory", "開 [[diffview]]：目前檔案的 commit 歷史", "new"],
+      ["`Space` `g` `H`", "*g*it *H*istory（大寫 = 整個 repo）", "開 [[diffview]]：整個 repo 的 commit 歷史", "new", "大寫 `H`，按 `Shift-h`；執行不帶檔案路徑的 `:DiffviewFileHistory`"],
       ["`Space` `g` `q`", "*g*it *q*uit", "關閉 [[diffview]]", "new"],
     ]},
     { id: "k-jump", title: "跳轉與捲動", rows: [
