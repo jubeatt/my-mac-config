@@ -467,6 +467,18 @@
       </section>
 
       <section>
+        <h3 id="spell-check" data-toc="拼字檢查">拼字檢查（CSpell）</h3>
+        <p><code>nvim-lint</code> 在開檔、存檔與離開 Insert mode 時，呼叫 CSpell CLI 非同步檢查目前 buffer，包含尚未存檔的文字。適用於 JS / TS / JSX / TSX、HTML / CSS / SCSS / Vue、JSON / YAML、Markdown / MDX、純文字、Git commit 訊息、Lua、Python 與 Shell。</p>
+        <ul>
+          <li>錯字以 <code>cspell</code> 來源出現在 diagnostics；用 <kbd>]d</kbd> / <kbd>[d</kbd> 跳轉，<kbd>Space</kbd> <kbd>x</kbd> <kbd>d</kbd> 看目前檔案的清單。</li>
+          <li><kbd>Space</kbd> <kbd>x</kbd> <kbd>s</kbd> 立即重新檢查；專案字庫或忽略規則修改後也可用。</li>
+          <li>從目前檔案的資料夾向上尋找 CSpell 設定，例如 <code>cspell.json</code>、<code>.cspell.json</code> 或 <code>.vscode/cspell.json</code>；加入 <code>words</code> 可接受專案術語，<code>ignorePaths</code> 可排除檔案。</li>
+          <li>VS Code 的 <code>cSpell.userWords</code> 屬於編輯器設定；要讓兩邊共用自訂字詞，請放進專案的 <code>cspell.json</code>。</li>
+          <li>CSpell CLI 是必要的外部工具，由 Brewfile 的 <code>npm "cspell"</code> 安裝；使用目前啟用的 Node.js 全域環境。</li>
+        </ul>
+      </section>
+
+      <section>
         <h3 id="herdr">和 herdr 的關係</h3>
         <p>herdr 不按 prefix 時只攔 <kbd>Ctrl-b</kbd>（它的 prefix），其餘 herdr 快捷鍵都要先按 prefix，所以這份設定的按鍵不會被 herdr 攔走。</p>
       </section>
@@ -483,7 +495,7 @@
           <tbody>
             <tr><td><button type="button" class="path" data-copy="ide/nvim/init.lua">ide/nvim/init.lua</button></td><td>唯一的設定檔，透過 <button type="button" class="path" data-copy="scripts/link-configs.js">scripts/link-configs.js</button> symlink 到 <button type="button" class="path" data-copy="~/.config/nvim">~/.config/nvim</button></td></tr>
             <tr><td><button type="button" class="path" data-copy="ide/nvim/nvim-pack-lock.json">ide/nvim/nvim-pack-lock.json</button></td><td><code>vim.pack</code> 的 lockfile，記錄每個 plugin 的 commit，要 commit 進 repo</td></tr>
-            <tr><td><button type="button" class="path" data-copy="Brewfile">Brewfile</button></td><td><code>neovim</code>、<code>tree-sitter-cli</code>（編譯 parser）、<code>ripgrep</code>（搜尋內容）、<code>typescript</code>（TS7 全域備援）、<code>fd</code>、<code>fzf</code></td></tr>
+            <tr><td><button type="button" class="path" data-copy="Brewfile">Brewfile</button></td><td><code>neovim</code>、<code>tree-sitter-cli</code>（編譯 parser）、<code>ripgrep</code>（搜尋內容）、<code>typescript</code>（TS7 全域備援）、<code>fd</code>、<code>fzf</code>、<code>npm "cspell"</code>（拼字檢查 CLI）</td></tr>
           </tbody>
         </table></div>
       </section>
@@ -505,6 +517,7 @@
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
+            <tr id="p-nvim-lint"><td><code>nvim-lint</code></td><td>呼叫外部 CSpell CLI 檢查拼字，結果發布成 Neovim diagnostics；讀取專案的 CSpell 字庫與忽略規則</td></tr>
             <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）+ <code>friendly-snippets</code></td><td>自動補全，來源是 LSP 與 snippet；friendly-snippets 提供各語言的 snippet，包含 ES7 React（<code>rafce</code>、<code>imr</code>、<code>useStateSnippet</code>…）</td></tr>
             <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls、cssls、html），裝好的自動啟用</td></tr>
             <tr id="p-autopairs"><td><code>nvim-autopairs</code></td><td>打 <code>(</code>、<code>[</code>、<code>{</code>、引號時自動補上結尾；在結尾前打結尾字元會直接跳過</td></tr>
@@ -624,6 +637,7 @@
     { id: "k-diag", title: "Diagnostic（錯誤訊息）", toc: "Diagnostic", rows: [
       ["`Space` `x` `x`", "`x`：diagnostics", "列出工作區目前已收到的所有 diagnostic", "new", "[[fzf-lua]] 選單；範圍依 LSP 回報，不等於對整個專案執行完整檢查"],
       ["`Space` `x` `d`", "`x`：diagnostics + *d*ocument", "列出目前檔案的所有 diagnostic", "new", "[[fzf-lua]] 選單，選取後跳到問題位置"],
+      ["`Space` `x` `s`", "`x`：diagnostics + *s*pelling", "立即檢查目前檔案的拼字", "new", "[[CSpell]]；開檔、存檔與離開 Insert mode 也會自動檢查，包含尚未存檔的文字"],
       ["`]d` / `[d`", "`]` 下一個、`[` 上一個 + *d*iagnostic", "跳到下一個 / 上一個 diagnostic", "tweak", "跳過去時自動開浮窗顯示完整訊息"],
       ["`]D` / `[D`", "大寫 = 跳到最後 / 最前", "跳到最後一個 / 第一個 diagnostic", "tweak", "同上"],
       ["`Ctrl-w` `d`", "*w*indow: *d*iagnostic", "顯示游標所在位置的 diagnostic 浮窗", "default"],
@@ -839,6 +853,7 @@
     "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
     "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
     "LSP 檔案操作": { href: "#file-move-imports", def: "透過 nvim-lsp-file-operations 更新改名或搬移後的 imports；需要 LSP 支援" },
+    "CSpell":    { href: "#spell-check", def: "透過 nvim-lint 呼叫 CSpell CLI，將程式碼與文件裡的錯字發布成 diagnostics" },
     "nvim-autopairs":  { href: "#p-autopairs",  def: "自動補上括號與引號的結尾" },
     "nvim-ts-autotag": { href: "#p-ts-autotag", def: "HTML / JSX / Vue 標籤自動關閉與同步改名" },
     "which-key": { href: "#p-which-key", def: "按前綴鍵後列出接下來能按的鍵" },

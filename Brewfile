@@ -68,4 +68,6 @@ cask "ghostty"
 cask "hiddenbar"
 # Open-source code editor
 cask "visual-studio-code"
+# Source code spell checker used by Neovim's nvim-lint
+npm "cspell"
 npm "corepack"
