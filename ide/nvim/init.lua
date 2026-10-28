@@ -52,6 +52,9 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
+-- A suspended nvim keeps its swap files, so opening the same file again hits E325.
+vim.keymap.set({ "n", "x" }, "<C-z>", "<Nop>", { desc = "Disable suspend" })
+
 -- Exiting merges jumps back from the project's ShaDa file, so overwrite it right away.
 vim.keymap.set("n", "<leader>j", "<cmd>clearjumps | wshada!<cr>", { desc = "Clear jumplist" })
 

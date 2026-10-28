@@ -429,6 +429,7 @@
           <span class="label">注意</span>nvim 沒有正常離開（例如直接關掉 pane）時，未存的修改會留在 swap 檔，下次開到同一個檔案會跳出提示：
           <ul>
             <li>按 <kbd>D</kbd> 刪掉 swap 檔，<kbd>R</kbd> 復原當時的修改。</li>
+            <li>提示裡寫 <code>STILL RUNNING</code> 時，代表另一個 nvim 還開著這個檔案，swap 檔刪不掉，從 fzf-lua 開檔會報 <code>Unable to add buffer</code>。在 shell 用 <code>jobs</code> 找出被暫停的 nvim，<code>fg</code> 叫回來後用 <code>:wqa</code> 離開。nvim 裡的 <kbd>Ctrl-Z</kbd> 已停用，避免誤按把 nvim 暫停到背景。</li>
             <li><kbd>grn</kbd> 改到有殘留 swap 檔的檔案時無法回應提示，會直接報錯。先清掉殘留的 swap 檔再 rename。</li>
             <li>離開前用 <code>:wqa</code> 或 <code>:qa!</code>，不要直接關 pane，就不會留下 swap 檔。</li>
           </ul>
