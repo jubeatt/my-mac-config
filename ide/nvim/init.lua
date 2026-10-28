@@ -111,6 +111,7 @@ vim.pack.add({
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/sindrets/diffview.nvim",
   "https://github.com/MagicDuck/grug-far.nvim",
+  "https://github.com/vim-test/vim-test",
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mfussenegger/nvim-lint",
   "https://github.com/mason-org/mason.nvim",
@@ -231,6 +232,7 @@ require("which-key").setup({
     { "<leader>g", group = "Git" },
     { "<leader>c", group = "Code" },
     { "<leader>s", group = "Search" },
+    { "<leader>t", group = "Test" },
     { "<leader>x", group = "Diagnostics" },
     -- The nav preset lists ]( ]{ ]< [< which aren't Vim motions; the real
     -- unmatched-bracket motions are [( [{ ]) ]}.
@@ -437,6 +439,27 @@ end, { desc = "Search and replace selection in project" })
 vim.keymap.set("v", "<leader>sf", function()
   require("grug-far").with_visual_selection({ prefills = { paths = current_file_path() } })
 end, { desc = "Search and replace selection in current file" })
+
+-- Run tests via the project's runner (Vitest, Jest, Playwright…), picked from
+-- the file name and package.json. Output goes to a reused :terminal split.
+-- Closing the split kills the terminal, so the next run starts a fresh one.
+vim.g["test#custom_strategies"] = {
+  sticky_wipe = function(cmd)
+    vim.fn["test#strategy#neovim_sticky"](cmd)
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.b[buf]._test_vim_neovim_sticky then
+        vim.bo[buf].bufhidden = "wipe"
+      end
+    end
+  end,
+}
+vim.g["test#strategy"] = "sticky_wipe"
+-- Playwright claims every *.test / *.spec file once @playwright/test is in
+-- package.json, so limit it to e2e/ or playwright/ folders and leave the rest to Vitest / Jest.
+vim.g["test#javascript#playwright#file_pattern"] = [[\v(^|/)(e2e|playwright)/.*(spec|test)\.(js|jsx|ts|tsx)$]]
+vim.keymap.set("n", "<leader>tt", "<cmd>TestNearest<cr>", { desc = "Run nearest test" })
+vim.keymap.set("n", "<leader>tf", "<cmd>TestFile<cr>", { desc = "Run tests in file" })
+vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>", { desc = "Rerun last test" })
 
 -- LSP
 -- Built-in keymaps: K hover, grr references, grn rename, gra code action,

@@ -527,6 +527,7 @@
             <tr id="p-gitsigns"><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案或整個 repo 的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改；範圍可以是全專案或只限目前檔案</td></tr>
+            <tr id="p-vim-test"><td><code>vim-test</code></td><td>在 terminal 分割視窗跑游標所在的測試、整個檔案或上一次的測試；依檔名與 <code>package.json</code> 選 Vitest、Jest 或 Playwright。Playwright 只認 <code>e2e/</code>、<code>playwright/</code> 資料夾裡的測試檔，其餘交給 Vitest / Jest</td></tr>
             <tr id="p-bufremove"><td><code>mini.bufremove</code></td><td>關掉 buffer 但保留視窗，視窗改顯示其他 buffer，不會連同分割視窗一起關掉</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
             <tr id="p-nvim-lint"><td><code>nvim-lint</code></td><td>呼叫外部 CSpell CLI 檢查拼字，結果發布成 Neovim diagnostics；讀取專案的 CSpell 字庫與忽略規則</td></tr>
@@ -667,6 +668,11 @@
       ["`Space` `g` `h`", "*g*it *h*istory", "開 [[diffview]]：目前檔案的 commit 歷史", "new"],
       ["`Space` `g` `H`", "*g*it *H*istory（大寫 = 整個 repo）", "開 [[diffview]]：整個 repo 的 commit 歷史", "new", "大寫 `H`，按 `Shift-h`；執行不帶檔案路徑的 `:DiffviewFileHistory`"],
       ["`Space` `g` `q`", "*g*it *q*uit", "關閉 [[diffview]]", "new"],
+    ]},
+    { id: "k-test", title: "測試", rows: [
+      ["`Space` `t` `t`", "*t*est: *t*his", "用 [[vim-test]] 跑游標所在（或最接近）的測試", "new", "結果顯示在下方的 terminal 分割視窗，之後每次執行都重用同一個視窗；看完用 `Ctrl-j` 移過去按 `Ctrl-w` `q` 關掉，terminal 和還在跑的測試會一起結束，下次執行開新的"],
+      ["`Space` `t` `f`", "*t*est *f*ile", "跑目前檔案的所有測試", "new", "[[vim-test]]"],
+      ["`Space` `t` `l`", "*t*est *l*ast", "重跑上一次的測試", "new", "在其他檔案也能按，例如改完程式碼直接重跑剛才的測試"],
     ]},
     { id: "k-jump", title: "跳轉與捲動", rows: [
       ["`s` → 輸入文字 → 標籤", "", "用 [[Flash]] 跳到畫面內符合文字的位置，可跨分割視窗", "override", "Normal、Visual 與 operator-pending mode 使用；按 `Esc` 取消；單字元刪除後輸入可用 `cl`"],
@@ -868,6 +874,7 @@
     "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
     "grug-far":  { href: "#p-grug-far",  def: "搜尋取代面板，可限定全專案或目前檔案" },
+    "vim-test":  { href: "#p-vim-test",  def: "在 terminal 跑游標所在的測試，自動選 Vitest / Jest / Playwright" },
     "mini.bufremove": { href: "#p-bufremove", def: "關掉 buffer 但保留視窗" },
     "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
     "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
