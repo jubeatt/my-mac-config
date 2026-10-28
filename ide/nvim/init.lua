@@ -20,6 +20,14 @@ vim.o.signcolumn = "yes"
 -- Keep undo history across sessions.
 vim.o.undofile = true
 
+-- One ShaDa file per project, so jumps, recent files and marks stay within the
+-- Git repo (or working directory) Neovim starts in. -i still picks its own file.
+if vim.o.shadafile == "" then
+  local cwd = vim.fn.getcwd()
+  local root = vim.fs.root(cwd, ".git") or cwd
+  vim.o.shadafile = vim.fn.stdpath("state") .. "/shada/" .. (root:gsub("/", "%%")) .. ".shada"
+end
+
 -- Open files fully unfolded; treesitter folds only close on demand.
 vim.o.foldlevel = 99
 
@@ -42,9 +50,10 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Focus lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Focus upper window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 
-vim.keymap.set("n", "<leader>w", "<cmd>write<cr>", { desc = "Save current file" })
--- Rename (grn) edits other buffers without saving them.
-vim.keymap.set("n", "<leader>W", "<cmd>wall<cr>", { desc = "Save all files" })
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+
+-- Exiting merges jumps back from the project's ShaDa file, so overwrite it right away.
+vim.keymap.set("n", "<leader>j", "<cmd>clearjumps | wshada!<cr>", { desc = "Clear jumplist" })
 
 -- Copy the current file path or name to the system clipboard.
 vim.keymap.set("n", "<leader>fp", function()
@@ -301,7 +310,7 @@ require("nvim-tree").setup({
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
 
 -- Bridge nvim-tree renames and cut/paste moves to LSP import updates.
--- Keep edits unsaved, like symbol renames; <leader>W saves all changed files.
+-- Keep edits unsaved, like symbol renames; :wall saves all changed files.
 local file_operations = require("lsp-file-operations")
 file_operations.setup({
   auto_save = false,
