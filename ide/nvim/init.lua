@@ -131,6 +131,12 @@ vim.pack.add({
 -- Colorscheme
 require("evergarden").setup({
   theme = { variant = "winter" },
+  -- Darker than winter's backgrounds for more contrast; base matches evergarden's twilight preset.
+  color_overrides = {
+    base = "#151a1d",
+    mantle = "#12171a",
+    crust = "#0f1315",
+  },
   overrides = function(c)
     return {
       -- Plain files read as muted grey instead of the bright text color.
@@ -139,6 +145,11 @@ require("evergarden").setup({
       MiniIconsPurple = { fg = c.purple },
       -- Match nvim-tree's folder glyphs to mini.icons' directory color.
       NvimTreeFolderIcon = { fg = c.skye },
+      -- Lift the cursor line between surface0 and Visual's surface1 so it stands out without looking like a selection.
+      CursorLine = { bg = "#2d373b" },
+      CursorLineNr = { fg = c.green, style = { "bold" } },
+      -- Teal-tinted so symbol references stand out from both the cursor line and Visual; Read/Write link here.
+      LspReferenceText = { bg = "#334a4e", style = { "bold" } },
     }
   end,
 })
