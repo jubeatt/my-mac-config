@@ -365,19 +365,32 @@ require("gitsigns").setup({
 
 -- Side-by-side diff of the working tree, and per-file commit history.
 local diffview_actions = require("diffview.actions")
+-- Open the file under the cursor in the previous tab, then close the diff view it came from.
+local function diffview_goto_file_and_close()
+  local diffview_lib = require("diffview.lib")
+  local view = diffview_lib.get_current_view()
+  diffview_actions.goto_file_edit()
+  if view and not view:is_cur_tabpage() then
+    view:close()
+    diffview_lib.dispose_view(view)
+  end
+end
 require("diffview").setup({
   -- Match the file explorer toggle in both diff and history views.
   keymaps = {
     view = {
       { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+      { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
       ["<leader>b"] = false,
     },
     file_panel = {
       { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+      { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
       ["<leader>b"] = false,
     },
     file_history_panel = {
       { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+      { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
       ["<leader>b"] = false,
     },
   },
