@@ -201,6 +201,18 @@ require("lualine").setup({
     lualine_c = {},
     lualine_x = { { "filename", path = 1 } },
   },
+  -- Always show listed buffers on top; tab numbers only appear while extra tabs (e.g. diffview) are open.
+  tabline = {
+    lualine_a = { { "buffers", symbols = { alternate_file = "" } } },
+    lualine_z = {
+      {
+        "tabs",
+        cond = function()
+          return #vim.api.nvim_list_tabpages() > 1
+        end,
+      },
+    },
+  },
 })
 
 -- Async and a no-op for parsers that are already installed.
