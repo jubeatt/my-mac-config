@@ -150,6 +150,17 @@ require("evergarden").setup({
       CursorLineNr = { fg = c.green, style = { "bold" } },
       -- Teal-tinted so symbol references stand out from both the cursor line and Visual; Read/Write link here.
       LspReferenceText = { bg = "#334a4e", style = { "bold" } },
+      -- Completion kinds coloured like VS Code: values blue, callables purple, snippets green, plain text muted.
+      BlinkCmpKindVariable = { fg = c.blue },
+      BlinkCmpKindField = { fg = c.blue },
+      BlinkCmpKindProperty = { fg = c.blue },
+      BlinkCmpKindFunction = { fg = c.purple },
+      BlinkCmpKindMethod = { fg = c.purple },
+      BlinkCmpKindConstructor = { fg = c.purple },
+      BlinkCmpKindSnippet = { fg = c.green },
+      BlinkCmpKindText = { fg = c.overlay2 },
+      -- The menu background is close to the editor's, so outline it with the brighter float border.
+      BlinkCmpMenuBorder = { link = "FloatBorder" },
     }
   end,
 })
@@ -582,7 +593,12 @@ require("blink.cmp").setup({
     preset = "super-tab",
     ["<CR>"] = { "accept", "fallback" },
   },
-  completion = { documentation = { auto_show = true } },
+  completion = {
+    menu = { border = "rounded" },
+    documentation = { auto_show = true, window = { border = "rounded" } },
+    -- Don't append "()" on accept; functions are often passed, not called.
+    accept = { auto_brackets = { enabled = false } },
+  },
   -- Parameter hints while typing a call, like VS Code; <C-k> toggles them.
   signature = { enabled = true },
   sources = { default = { "lsp", "snippets" } },
