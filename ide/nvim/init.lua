@@ -97,6 +97,7 @@ vim.pack.add({
   "https://github.com/nvim-tree/nvim-tree.lua",
   "https://github.com/antosha417/nvim-lsp-file-operations",
   "https://github.com/nvim-mini/mini.icons",
+  "https://github.com/nvim-mini/mini.bufremove",
   "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/sindrets/diffview.nvim",
@@ -134,6 +135,20 @@ vim.cmd.colorscheme("evergarden")
 -- Icons: mocking nvim-web-devicons lets nvim-tree, lualine and fzf-lua pick up mini.icons.
 require("mini.icons").setup()
 MiniIcons.mock_nvim_web_devicons()
+
+-- Delete a buffer but keep its windows, so ]b / [b skip it without closing the split beside nvim-tree.
+require("mini.bufremove").setup()
+vim.keymap.set("n", "<leader>d", function()
+  require("mini.bufremove").delete()
+end, { desc = "Delete buffer" })
+vim.keymap.set("n", "<leader>D", function()
+  local current = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.fn.getbufinfo({ buflisted = 1 })) do
+    if buf.bufnr ~= current then
+      require("mini.bufremove").delete(buf.bufnr)
+    end
+  end
+end, { desc = "Delete other buffers" })
 
 -- Statusline
 require("lualine").setup({
@@ -400,9 +415,19 @@ require("grug-far").setup({
 vim.keymap.set("n", "<leader>sr", function()
   require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
 end, { desc = "Search and replace in project" })
+-- grug-far splits paths on spaces, so escape them the same way it does.
+local function current_file_path()
+  return (vim.fn.expand("%"):gsub(" ", "\\ "))
+end
+vim.keymap.set("n", "<leader>sf", function()
+  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>"), paths = current_file_path() } })
+end, { desc = "Search and replace in current file" })
 vim.keymap.set("v", "<leader>sr", function()
   require("grug-far").with_visual_selection()
 end, { desc = "Search and replace selection in project" })
+vim.keymap.set("v", "<leader>sf", function()
+  require("grug-far").with_visual_selection({ prefills = { paths = current_file_path() } })
+end, { desc = "Search and replace selection in current file" })
 
 -- LSP
 -- Built-in keymaps: K hover, grr references, grn rename, gra code action,
@@ -547,7 +572,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
       source_action("source.removeUnusedImports"),
       { buffer = ev.buf, desc = "Remove unused imports" }
     )
-    vim.keymap.set("n", "<leader>cD", source_action("source.fixAll"), { buffer = ev.buf, desc = "Fix all" })
 
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
 

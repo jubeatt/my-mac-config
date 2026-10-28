@@ -526,7 +526,8 @@
             <tr id="p-file-operations"><td><code>nvim-lsp-file-operations</code></td><td>串接 nvim-tree 的改名與剪下貼上事件，向 LSP 請求更新 imports；引用檔案的修改以 <kbd>Space</kbd> <kbd>W</kbd> 一次儲存</td></tr>
             <tr id="p-gitsigns"><td><code>gitsigns.nvim</code></td><td>行號旁標出 git 新增、修改、刪除的行；跳到變更、預覽變更、單行 blame 浮窗</td></tr>
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案或整個 repo 的 commit 歷史</td></tr>
-            <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>全專案搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改</td></tr>
+            <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改；範圍可以是全專案或只限目前檔案</td></tr>
+            <tr id="p-bufremove"><td><code>mini.bufremove</code></td><td>關掉 buffer 但保留視窗，視窗改顯示其他 buffer，不會連同分割視窗一起關掉</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
             <tr id="p-nvim-lint"><td><code>nvim-lint</code></td><td>呼叫外部 CSpell CLI 檢查拼字，結果發布成 Neovim diagnostics；讀取專案的 CSpell 字庫與忽略規則</td></tr>
             <tr id="p-blink-cmp"><td><code>blink.cmp</code>（v1）+ <code>friendly-snippets</code></td><td>自動補全，來源是 LSP 與 snippet；friendly-snippets 提供各語言的 snippet，包含 ES7 React（<code>rafce</code>、<code>imr</code>、<code>useStateSnippet</code>…）</td></tr>
@@ -633,7 +634,6 @@
       ["`gra`", "`gr` + code *a*ction", "code action", "tweak", "改用 [[fzf-lua]] 選單，關掉預覽"],
       ["`grx`", "`gr` + e*x*ecute code lens", "執行 code lens", "default"],
       ["`Space` `c` `u`", "*c*ode: *u*nused imports", "移除整個檔案所有沒用到的 import", "new"],
-      ["`Space` `c` `D`", "*c*ode: fix all *D*iagnostics", "Fix all：一次套用整個檔案可自動修正的問題（例如缺少的 interface 成員）", "new"],
       ["`Space` `c` `i`", "*c*ode: *i*nlay hints", "開關行內的型別與參數名提示", "new", "預設關閉"],
       ["`gO`", "*O*utline", "目前檔案的 symbol 選單", "override", "原本開 location list，改成 [[fzf-lua]] 選單"],
       ["`Space` `f` `s`", "*f*ind *s*ymbols", "搜尋整個專案的 symbol，邊打邊問 LSP", "new", "類似 VS Code 的 `#` symbol 搜尋"],
@@ -685,6 +685,8 @@
       ["`m` `a` / `'` `a`", "*m*ark", "在目前位置設書籤 `a` / 跳回書籤 `a` 那一行", "default", "小寫字母只在目前檔案有效，大寫（例如 `mA`）可跨檔案"],
       ["`Ctrl-^`", "", "切回上一個開過的檔案", "default", "macOS 鍵盤按 `Ctrl-6`；沒反應時用 `:e #`"],
       ["`]b` / `[b`", "`]` / `[` + *b*uffer", "切到下一個 / 上一個 buffer（已開啟的檔案）", "default"],
+      ["`Space` `d`", "*d*elete buffer", "關掉目前的 buffer，之後 `]b` / `[b` 不會再切到它", "new", "[[mini.bufremove]]；視窗保留並換成其他 buffer，不會只剩檔案樹；有未存檔修改時先詢問"],
+      ["`Space` `D`", "*D*elete（大寫 = 其他所有 buffer）", "保留目前的 buffer，關掉其他所有 buffer", "new", "大寫 `D`，按 `Shift-d`；類似 VS Code 的 Close Others，有未存檔修改的會逐一詢問"],
       ["`gf`", "*g*o to *f*ile", "開啟游標下的檔案路徑", "default", "import 路徑沒寫副檔名時找不到，改用 `gd`"],
       ["`gx`", "*g*o e*x*ternal：交給外部程式開", "用 macOS 預設應用程式開啟游標下的網址或路徑", "default", "類似 VS Code 按住 `Cmd` 點連結"],
     ]},
@@ -732,6 +734,7 @@
       ["`:noh`", "*no* *h*lsearch", "清除搜尋高亮", "default", "預設的 `Ctrl-l` 也能清，但已改成切視窗"],
       ["`*` 再 `cgn`，之後按 `.`", "*c*hange + *g*o to *n*ext match", "改掉下一個符合處，每按一次 `.` 改下一個", "default", "類似 VS Code `Cmd-D` 逐一選取再改；不想改的用 `n` 跳過"],
       ["`Space` `s` `r`", "*s*earch & *r*eplace", "開 [[grug-far]] 全專案搜尋取代，游標所在的字自動帶入搜尋欄", "new", "類似 VS Code `Cmd-Shift-H`；visual mode 帶入選取的文字"],
+      ["`Space` `s` `f`", "*s*earch & replace in *f*ile", "開 [[grug-far]]，只在目前檔案搜尋取代，游標所在的字自動帶入搜尋欄", "new", "Paths 欄預先填入目前檔案；visual mode 帶入選取的文字"],
       ["`:%s/舊/新/g`", "*s*ubstitute，`%` = 整個檔案，`g` = *g*lobal", "整個檔案取代，打字時即時預覽結果", "default", "結尾改成 `/gc` 逐一確認：`y` 換、`n` 跳過、`a` 全換、`q` 停止"],
       ["`Ctrl-r` `Ctrl-w`", "*r*egister: *w*ord", "在 `:` 指令列插入游標所在的字", "default", "例如打 `:%s/` 後按，不用手打要取代的字"],
       ["`:g/文字/d`", "*g*lobal + *d*elete，`:v` = in*v*ert", "刪掉所有含該文字的行", "default", "`:v/文字/d` 反過來，只留下含該文字的行"],
@@ -862,7 +865,8 @@
     "blink.cmp": { href: "#p-blink-cmp", def: "自動補全，來源是 LSP 與 snippet" },
     "gitsigns":  { href: "#p-gitsigns",  def: "行號旁標出 git 新增、修改、刪除的行" },
     "diffview":  { href: "#p-diffview",  def: "左右並排的 git diff" },
-    "grug-far":  { href: "#p-grug-far",  def: "全專案搜尋取代面板" },
+    "grug-far":  { href: "#p-grug-far",  def: "搜尋取代面板，可限定全專案或目前檔案" },
+    "mini.bufremove": { href: "#p-bufremove", def: "關掉 buffer 但保留視窗" },
     "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
     "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
     "LSP 檔案操作": { href: "#file-move-imports", def: "透過 nvim-lsp-file-operations 更新改名或搬移後的 imports；需要 LSP 支援" },
