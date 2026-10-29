@@ -47,12 +47,6 @@ vim.o.confirm = true
 -- Idle time before CursorHold fires (default 4000ms); drives symbol highlighting.
 vim.o.updatetime = 250
 
--- Move between windows (tree, editor, quickfix) without the <C-w> prefix.
-vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Focus left window" })
-vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Focus lower window" })
-vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Focus upper window" })
-vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
-
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
@@ -75,24 +69,8 @@ vim.keymap.set("n", "<leader>fn", function()
   vim.fn.setreg("+", vim.fn.expand("%:t"))
 end, { desc = "Copy file name" })
 
--- Treesitter
-local parsers = {
-  "javascript",
-  "typescript",
-  "tsx",
-  "vue",
-  "html",
-  "css",
-  "scss",
-  "json",
-  "yaml",
-  "markdown",
-  "lua",
-  "bash",
-  "python",
-}
-
--- Parsers must match the plugin version, so refresh them after each update.
+-- Plugins
+-- Treesitter parsers must match the plugin version, so refresh them after each update.
 -- Registered before vim.pack.add() so it also fires on lockfile installs.
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(ev)
@@ -188,8 +166,9 @@ require("evergarden").setup({
 vim.cmd.colorscheme("evergarden")
 
 -- Icons: mocking nvim-web-devicons lets nvim-tree, lualine and fzf-lua pick up mini.icons.
-require("mini.icons").setup()
-MiniIcons.mock_nvim_web_devicons()
+local mini_icons = require("mini.icons")
+mini_icons.setup()
+mini_icons.mock_nvim_web_devicons()
 
 -- Delete a buffer but keep its windows, so ]b / [b skip it without closing the split beside nvim-tree.
 require("mini.bufremove").setup()
@@ -234,6 +213,23 @@ require("lualine").setup({
     },
   },
 })
+
+-- Treesitter
+local parsers = {
+  "javascript",
+  "typescript",
+  "tsx",
+  "vue",
+  "html",
+  "css",
+  "scss",
+  "json",
+  "yaml",
+  "markdown",
+  "lua",
+  "bash",
+  "python",
+}
 
 -- Async and a no-op for parsers that are already installed.
 require("nvim-treesitter").install(parsers)
@@ -449,6 +445,12 @@ local function diffview_goto_file_and_close()
     diffview_lib.dispose_view(view)
   end
 end
+-- Shared by every view; diffview copies keymaps on setup, so one table is enough.
+local diffview_keymaps = {
+  { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
+  { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
+  ["<leader>b"] = false,
+}
 require("diffview").setup({
   -- Show removed lines in red on the old side instead of DiffAdd green.
   enhanced_diff_hl = true,
@@ -470,21 +472,9 @@ require("diffview").setup({
   },
   -- Match the file explorer toggle in both diff and history views.
   keymaps = {
-    view = {
-      { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
-      { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
-      ["<leader>b"] = false,
-    },
-    file_panel = {
-      { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
-      { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
-      ["<leader>b"] = false,
-    },
-    file_history_panel = {
-      { "n", "<leader>e", diffview_actions.toggle_files, { desc = "Toggle file panel" } },
-      { "n", "<leader>go", diffview_goto_file_and_close, { desc = "Open file and close diff view" } },
-      ["<leader>b"] = false,
-    },
+    view = diffview_keymaps,
+    file_panel = diffview_keymaps,
+    file_history_panel = diffview_keymaps,
   },
 })
 -- Run Lazygit inside Neovim so nvim-remote can open files in this instance.
@@ -577,15 +567,9 @@ require("toggleterm").setup({
   size = 15,
   -- The default -30 barely darkens the already dark base; go deeper so the terminal reads as its own pane.
   shading_factor = -60,
-  -- Buffer-local so Lazygit and vim-test terminals keep their own j and <C-hjkl>.
+  -- Same as insert mode's jk; buffer-local so Lazygit and vim-test terminals keep their own j.
   on_create = function(term)
-    local opts = { buffer = term.bufnr }
-    -- Same as insert mode's jk.
-    vim.keymap.set("t", "jk", [[<C-\><C-n>]], vim.tbl_extend("force", opts, { desc = "Exit terminal mode" }))
-    vim.keymap.set("t", "<C-h>", [[<C-\><C-n><C-w>h]], vim.tbl_extend("force", opts, { desc = "Focus left window" }))
-    vim.keymap.set("t", "<C-j>", [[<C-\><C-n><C-w>j]], vim.tbl_extend("force", opts, { desc = "Focus lower window" }))
-    vim.keymap.set("t", "<C-k>", [[<C-\><C-n><C-w>k]], vim.tbl_extend("force", opts, { desc = "Focus upper window" }))
-    vim.keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]], vim.tbl_extend("force", opts, { desc = "Focus right window" }))
+    vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = term.bufnr, desc = "Exit terminal mode" })
   end,
 })
 
@@ -704,8 +688,12 @@ end
 -- Synchronous variant for BufWritePre, where an async code action would land
 -- after the file is written.
 local function apply_source_action_sync(client, bufnr, kind)
-  local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-  params.context = { only = { kind }, diagnostics = {} }
+  local range_params = vim.lsp.util.make_range_params(0, client.offset_encoding)
+  local params = {
+    textDocument = range_params.textDocument,
+    range = range_params.range,
+    context = { only = { kind }, diagnostics = {} },
+  }
   local res = client:request_sync("textDocument/codeAction", params, 1000, bufnr)
   for _, action in ipairs(res and res.result or {}) do
     if not action.edit and client:supports_method("codeAction/resolve", bufnr) then
@@ -783,12 +771,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 vim.api.nvim_create_autocmd("LspDetach", {
   callback = function(ev)
-    vim.lsp.buf.clear_references()
-    pcall(vim.api.nvim_clear_autocmds, { group = "lsp-document-highlight", buffer = ev.buf })
-
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
     if client and client.name == "biome" then
       pcall(vim.api.nvim_clear_autocmds, { group = "biome-on-save", buffer = ev.buf })
     end
+
+    -- Keep symbol highlighting while another client (e.g. tsc) still provides it.
+    -- The detaching client is still listed while LspDetach runs, so skip it by id.
+    for _, other in ipairs(vim.lsp.get_clients({ bufnr = ev.buf, method = "textDocument/documentHighlight" })) do
+      if other.id ~= ev.data.client_id then
+        return
+      end
+    end
+    vim.lsp.util.buf_clear_references(ev.buf)
+    pcall(vim.api.nvim_clear_autocmds, { group = "lsp-document-highlight", buffer = ev.buf })
   end,
 })
