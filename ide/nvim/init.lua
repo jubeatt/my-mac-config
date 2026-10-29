@@ -1,3 +1,6 @@
+-- Plugin names and Vim API identifiers make spell checking too noisy here.
+-- cspell:disable
+
 -- Set before any <leader> mapping is defined.
 vim.g.mapleader = " "
 
