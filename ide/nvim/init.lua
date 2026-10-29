@@ -117,6 +117,7 @@ vim.pack.add({
   "https://github.com/sindrets/diffview.nvim",
   "https://github.com/MagicDuck/grug-far.nvim",
   "https://github.com/vim-test/vim-test",
+  "https://github.com/akinsho/toggleterm.nvim",
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mfussenegger/nvim-lint",
   "https://github.com/mason-org/mason.nvim",
@@ -532,6 +533,24 @@ vim.g["test#javascript#playwright#file_pattern"] = [[\v(^|/)(e2e|playwright)/.*(
 vim.keymap.set("n", "<leader>tt", "<cmd>TestNearest<cr>", { desc = "Run nearest test" })
 vim.keymap.set("n", "<leader>tf", "<cmd>TestFile<cr>", { desc = "Run tests in file" })
 vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>", { desc = "Rerun last test" })
+
+-- Long-running terminals (dev server, tsc --watch) in a bottom split: <C-\> toggles
+-- them, 1<C-\> / 2<C-\> open numbered ones side by side. Closing the window only
+-- hides a terminal; its job keeps running until the shell exits.
+require("toggleterm").setup({
+  open_mapping = [[<C-\>]],
+  size = 15,
+  -- Buffer-local so Lazygit and vim-test terminals keep their own j and <C-hjkl>.
+  on_create = function(term)
+    local opts = { buffer = term.bufnr }
+    -- Same as insert mode's jk.
+    vim.keymap.set("t", "jk", [[<C-\><C-n>]], vim.tbl_extend("force", opts, { desc = "Exit terminal mode" }))
+    vim.keymap.set("t", "<C-h>", [[<C-\><C-n><C-w>h]], vim.tbl_extend("force", opts, { desc = "Focus left window" }))
+    vim.keymap.set("t", "<C-j>", [[<C-\><C-n><C-w>j]], vim.tbl_extend("force", opts, { desc = "Focus lower window" }))
+    vim.keymap.set("t", "<C-k>", [[<C-\><C-n><C-w>k]], vim.tbl_extend("force", opts, { desc = "Focus upper window" }))
+    vim.keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]], vim.tbl_extend("force", opts, { desc = "Focus right window" }))
+  end,
+})
 
 -- LSP
 -- Built-in keymaps: K hover, grr references, grn rename, gra code action,

@@ -617,6 +617,7 @@
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案或整個 repo 的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改；範圍可以是全專案或只限目前檔案</td></tr>
             <tr id="p-vim-test"><td><code>vim-test</code></td><td>在 terminal 分割視窗跑游標所在的測試、整個檔案或上一次的測試；依檔名與 <code>package.json</code> 選 Vitest、Jest 或 Playwright。Playwright 只認 <code>e2e/</code>、<code>playwright/</code> 資料夾裡的測試檔，其餘交給 Vitest / Jest</td></tr>
+            <tr id="p-toggleterm"><td><code>toggleterm.nvim</code></td><td>常駐 terminal，例如 dev server、<code>tsc --watch</code>；開在下方分割視窗，多個並排。關掉視窗只是隱藏，程式繼續跑；terminal 不會出現在 buffer 清單</td></tr>
             <tr id="p-surround"><td><code>mini.surround</code></td><td>加上、刪除、替換包圍文字的括號、引號、函式呼叫與 HTML tag；按鍵前綴用 <kbd>gs</kbd>，避開 Flash 的 <kbd>s</kbd></td></tr>
             <tr id="p-bufremove"><td><code>mini.bufremove</code></td><td>關掉 buffer 但保留視窗，視窗改顯示其他 buffer，不會連同分割視窗一起關掉</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
@@ -763,6 +764,13 @@
       ["`Space` `t` `t`", "*t*est: *t*his", "用 [[vim-test]] 跑游標所在（或最接近）的測試", "new", "結果顯示在下方的 terminal 分割視窗，之後每次執行都重用同一個視窗；看完用 `Ctrl-j` 移過去按 `Ctrl-w` `q` 關掉，terminal 和還在跑的測試會一起結束，下次執行開新的"],
       ["`Space` `t` `f`", "*t*est *f*ile", "跑目前檔案的所有測試", "new", "[[vim-test]]"],
       ["`Space` `t` `l`", "*t*est *l*ast", "重跑上一次的測試", "new", "在其他檔案也能按，例如改完程式碼直接重跑剛才的測試"],
+    ]},
+    { id: "k-terminal", title: "Terminal", rows: [
+      ["`Ctrl-\\`", "", "叫出 / 收起 [[toggleterm]] 的 terminal", "new", "第一次按開 1 號；收起時所有開著的 terminal 一起隱藏，裡面的程式繼續跑。在 terminal mode 裡也能按"],
+      ["`1` `Ctrl-\\` / `2` `Ctrl-\\`", "數字 = terminal 編號", "叫出 / 收起指定編號的 terminal，同時開著的會在下方左右並排", "new", "例如 1 號跑 dev server、2 號跑 `tsc --watch`；要在 Normal mode 按，terminal mode 裡打的數字會送進 shell"],
+      ["`j` `k`", "", "離開 terminal mode，回到 Normal mode 捲動、複製輸出", "new", "跟 insert mode 一樣連續快速按；只在 [[toggleterm]] 的 terminal 有效，其他 terminal 用原生的 `Ctrl-\\` `Ctrl-n`。打 `j` 後畫面要等下一個鍵或停一秒才會出現 `j`。按 `i` 回到 terminal mode"],
+      ["`Ctrl-h` / `j` / `k` / `l`", "", "在 terminal mode 直接切到左 / 下 / 上 / 右的視窗", "new", "只在 [[toggleterm]] 的 terminal 有效，所以 shell 的 `Ctrl-l` 清畫面在這裡不能用，改打 `clear`"],
+      ["`Ctrl-w` `q`", "", "關掉 [[toggleterm]] 的視窗，只是隱藏，程式繼續跑", "default", "跟 [[vim-test]] 的 terminal 相反，那邊按了會連測試一起結束。要真的停掉，在裡面按 `Ctrl-c` 再打 `exit`"],
     ]},
     { id: "k-jump", title: "跳轉與捲動", rows: [
       ["`s` → 輸入文字 → 標籤", "", "用 [[Flash]] 跳到畫面內符合文字的位置，可跨分割視窗", "override", "Normal、Visual 與 operator-pending mode 使用；按 `Esc` 取消；單字元刪除後輸入可用 `cl`"],
@@ -979,6 +987,7 @@
     "grug-far":  { href: "#p-grug-far",  def: "搜尋取代面板，可限定全專案或目前檔案" },
     "vim-test":  { href: "#p-vim-test",  def: "在 terminal 跑游標所在的測試，自動選 Vitest / Jest / Playwright" },
     "mini.bufremove": { href: "#p-bufremove", def: "關掉 buffer 但保留視窗" },
+    "toggleterm": { href: "#p-toggleterm", def: "常駐 terminal，關掉視窗只是隱藏，程式繼續跑" },
     "mini.surround": { href: "#p-surround", def: "加上、刪除、替換包圍文字的符號" },
     "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
     "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
