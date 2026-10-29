@@ -140,6 +140,12 @@ require("evergarden").setup({
     mantle = "#12171a",
     crust = "#0f1315",
   },
+  -- Inactive statuslines default to mantle, which nearly vanishes against base; a lifted bar marks split boundaries.
+  editor = {
+    statusline = {
+      inactive = { fg = "subtext0", bg = "surface0" },
+    },
+  },
   overrides = function(c)
     return {
       -- Plain files read as muted grey instead of the bright text color.
@@ -164,6 +170,14 @@ require("evergarden").setup({
       BlinkCmpKindText = { fg = c.overlay2 },
       -- The menu background is close to the editor's, so outline it with the brighter float border.
       BlinkCmpMenuBorder = { link = "FloatBorder" },
+      -- Deep saturated tints; blending the pastel palette into the base reads greyish and washed out.
+      DiffAdd = { bg = "#1e4228" },
+      DiffDelete = { bg = "#4b1d24" },
+      -- Blue rather than teal so changed lines don't blend with added (green) ones.
+      DiffChange = { bg = "#1b3546" },
+      DiffText = { bg = "#3a7299" },
+      -- Darker than crust; diffview windows use it as Normal so the diff tints pop against the background.
+      DiffNormal = { bg = "#0b0e10" },
     }
   end,
 })
@@ -433,6 +447,24 @@ local function diffview_goto_file_and_close()
   end
 end
 require("diffview").setup({
+  -- Show removed lines in red on the old side instead of DiffAdd green.
+  enhanced_diff_hl = true,
+  hooks = {
+    -- Append to the winhighlight diffview just set, rather than replacing its Diff* remaps.
+    -- Set it window-local only: vim.wo acts like :set and would leak into the global value,
+    -- tinting every buffer opened later even after diffview closes.
+    diff_buf_win_enter = function(_, winid)
+      local winhl = vim.wo[winid].winhighlight
+      if not winhl:find("Normal:DiffNormal", 1, true) then
+        local dark = "Normal:DiffNormal,NormalNC:DiffNormal"
+        vim.api.nvim_set_option_value(
+          "winhighlight",
+          winhl == "" and dark or winhl .. "," .. dark,
+          { scope = "local", win = winid }
+        )
+      end
+    end,
+  },
   -- Match the file explorer toggle in both diff and history views.
   keymaps = {
     view = {
@@ -540,6 +572,8 @@ vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>", { desc = "Rerun last test
 require("toggleterm").setup({
   open_mapping = [[<C-\>]],
   size = 15,
+  -- The default -30 barely darkens the already dark base; go deeper so the terminal reads as its own pane.
+  shading_factor = -60,
   -- Buffer-local so Lazygit and vim-test terminals keep their own j and <C-hjkl>.
   on_create = function(term)
     local opts = { buffer = term.bufnr }
