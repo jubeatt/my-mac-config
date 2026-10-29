@@ -51,6 +51,7 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Focus upper window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
 
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
 -- A suspended nvim keeps its swap files, so opening the same file again hits E325.
 vim.keymap.set({ "n", "x" }, "<C-z>", "<Nop>", { desc = "Disable suspend" })
