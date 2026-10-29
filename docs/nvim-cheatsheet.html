@@ -617,6 +617,7 @@
             <tr id="p-diffview"><td><code>diffview.nvim</code></td><td>左右並排的 git diff，可一次看所有改動的檔案，也能看單一檔案或整個 repo 的 commit 歷史</td></tr>
             <tr id="p-grug-far"><td><code>grug-far.nvim</code></td><td>搜尋取代面板，用 ripgrep 搜尋，取代前即時預覽每一處修改；範圍可以是全專案或只限目前檔案</td></tr>
             <tr id="p-vim-test"><td><code>vim-test</code></td><td>在 terminal 分割視窗跑游標所在的測試、整個檔案或上一次的測試；依檔名與 <code>package.json</code> 選 Vitest、Jest 或 Playwright。Playwright 只認 <code>e2e/</code>、<code>playwright/</code> 資料夾裡的測試檔，其餘交給 Vitest / Jest</td></tr>
+            <tr id="p-surround"><td><code>mini.surround</code></td><td>加上、刪除、替換包圍文字的括號、引號、函式呼叫與 HTML tag；按鍵前綴用 <kbd>gs</kbd>，避開 Flash 的 <kbd>s</kbd></td></tr>
             <tr id="p-bufremove"><td><code>mini.bufremove</code></td><td>關掉 buffer 但保留視窗，視窗改顯示其他 buffer，不會連同分割視窗一起關掉</td></tr>
             <tr id="p-lspconfig"><td><code>nvim-lspconfig</code></td><td>各 language server 的預設設定</td></tr>
             <tr id="p-nvim-lint"><td><code>nvim-lint</code></td><td>呼叫外部 CSpell CLI 檢查拼字，結果發布成 Neovim diagnostics；讀取專案的 CSpell 字庫與忽略規則</td></tr>
@@ -802,6 +803,16 @@
       ["`Ctrl-a` / `Ctrl-x`", "*a*dd / `x` 減", "游標所在或之後的數字 +1 / -1", "default", "前面加數字一次加多，例如 `10` `Ctrl-a`"],
       ["`~`", "", "切換游標所在字元的大小寫", "default", "`gUiw` / `guiw` 把整個字轉大寫 / 小寫"],
     ]},
+    { id: "k-surround", title: "包圍符號（surround）", toc: "包圍符號", rows: [
+      ["`gsa` + 範圍 + 符號", "*s*urround *a*dd", "幫一段範圍加上包圍符號，例如 `gsaiw\"` 把游標所在的字包上 `\"`", "override", "[[mini.surround]]；visual mode 選取後按 `gsa` + 符號；`gs` 原本是 sleep"],
+      ["`gsd` + 符號", "*s*urround *d*elete", "刪除包圍符號，例如 `gsd\"` 把 `\"hello\"` 變成 `hello`", "override", "[[mini.surround]]"],
+      ["`gsr` + 舊符號 + 新符號", "*s*urround *r*eplace", "替換包圍符號，例如 `gsr\"'` 把雙引號換成單引號", "override", "[[mini.surround]]"],
+      ["`gsf` / `gsF` + 符號", "*s*urround *f*ind（大寫 = 往左）", "游標跳到右邊 / 左邊的包圍符號", "override", "[[mini.surround]]"],
+      ["`gsh` + 符號", "*s*urround *h*ighlight", "短暫高亮包圍符號，確認範圍到哪", "override", "[[mini.surround]]"],
+      ["`gsd` / `gsr` / `gsf` / `gsh` + `n` 或 `l`", "*n*ext / *l*ast", "改找游標後面下一組 / 前面上一組，例如 `gsdn)`", "override", "預設只找包住游標的那一組"],
+      ["符號：`)` `]` `}` `>` / `(` `[` `{` `<`", "", "括號；用結尾括號內側不留空格 `(foo)`，用開頭括號內側留空格 `( foo )`", "default", "其他字元（引號、`*` 等）左右用同一個字元"],
+      ["符號：`f` / `t` / `?`", "*f*unction / *t*ag", "函式呼叫 / HTML tag / 互動輸入左右兩邊", "default", "例如 `gsdf` 把 `foo(x)` 刪成 `x`、`gsrtt` 改 tag 名稱；加的時候會詢問函式名或 tag 名"],
+    ]},
     { id: "k-fold", title: "摺疊", rows: [
       ["`za`", "", "切換游標所在的摺疊", "tweak", "摺疊範圍依 Treesitter 語法結構（函式、物件、JSX 區塊）"],
       ["`zc` / `zo`", "*c*lose / *o*pen", "收合 / 展開游標所在的摺疊", "tweak", "同上"],
@@ -967,6 +978,7 @@
     "grug-far":  { href: "#p-grug-far",  def: "搜尋取代面板，可限定全專案或目前檔案" },
     "vim-test":  { href: "#p-vim-test",  def: "在 terminal 跑游標所在的測試，自動選 Vitest / Jest / Playwright" },
     "mini.bufremove": { href: "#p-bufremove", def: "關掉 buffer 但保留視窗" },
+    "mini.surround": { href: "#p-surround", def: "加上、刪除、替換包圍文字的符號" },
     "TreeSJ":    { href: "#p-treesj",    def: "透過 Treesitter 展開／收合程式碼與轉換箭頭函式 body" },
     "Flash":     { href: "#p-flash",     def: "以標籤快速跳轉與選取 Treesitter 語法節點" },
     "LSP 檔案操作": { href: "#file-move-imports", def: "透過 nvim-lsp-file-operations 更新改名或搬移後的 imports；需要 LSP 支援" },

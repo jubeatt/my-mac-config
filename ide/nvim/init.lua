@@ -110,6 +110,7 @@ vim.pack.add({
   "https://github.com/antosha417/nvim-lsp-file-operations",
   "https://github.com/nvim-mini/mini.icons",
   "https://github.com/nvim-mini/mini.bufremove",
+  "https://github.com/nvim-mini/mini.surround",
   "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/sindrets/diffview.nvim",
@@ -256,6 +257,18 @@ vim.keymap.set({ "n", "x", "o" }, "S", function()
   require("flash").treesitter()
 end, { desc = "Flash treesitter selection" })
 
+-- Add / delete / replace surrounding pairs; gs prefix because Flash owns s.
+require("mini.surround").setup({
+  mappings = {
+    add = "gsa",
+    delete = "gsd",
+    replace = "gsr",
+    find = "gsf",
+    find_left = "gsF",
+    highlight = "gsh",
+  },
+})
+
 -- Popup listing the next available keys after a pause, e.g. after <leader>.
 -- Keymap descriptions come from each mapping's desc.
 require("which-key").setup({
@@ -271,6 +284,14 @@ require("which-key").setup({
     { "<leader>s", group = "Search" },
     { "<leader>t", group = "Test" },
     { "<leader>x", group = "Diagnostics" },
+    { "gs", group = "Surround", mode = { "n", "x" } },
+    { "gsa", desc = "Add: motion + pair (iw\" / iW\")" },
+    { "gsa", desc = "Add: pair around selection (e.g. \")", mode = "x" },
+    { "gsd", desc = "Delete: pair around cursor (e.g. ' / \")" },
+    { "gsr", desc = "Replace: old + new pair (e.g. '\")" },
+    { "gsf", desc = "Find: pair's right edge" },
+    { "gsF", desc = "Find: pair's left edge" },
+    { "gsh", desc = "Highlight: pair around cursor" },
     -- The nav preset lists ]( ]{ ]< [< which aren't Vim motions; the real
     -- unmatched-bracket motions are [( [{ ]) ]}.
     { "](", hidden = true },
