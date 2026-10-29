@@ -47,6 +47,10 @@ vim.o.confirm = true
 -- Idle time before CursorHold fires (default 4000ms); drives symbol highlighting.
 vim.o.updatetime = 250
 
+-- Outline floats (hover, diagnostics, completion, git hunk preview); their background is
+-- barely darker than the editor's, so without a border they blend into the code.
+vim.o.winborder = "rounded"
+
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
@@ -292,6 +296,8 @@ require("which-key").setup({
   delay = function(ctx)
     return ctx.plugin and 0 or 500
   end,
+  -- which-key sizes its popup from this option and ignores winborder, so keep it explicit.
+  win = { border = "none" },
   spec = {
     { "<leader>f", group = "Find / file" },
     { "<leader>g", group = "Git" },
@@ -668,8 +674,7 @@ require("blink.cmp").setup({
     ["<CR>"] = { "accept", "fallback" },
   },
   completion = {
-    menu = { border = "rounded" },
-    documentation = { auto_show = true, window = { border = "rounded" } },
+    documentation = { auto_show = true },
     -- Don't append "()" on accept; functions are often passed, not called.
     accept = { auto_brackets = { enabled = false } },
   },
