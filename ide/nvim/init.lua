@@ -134,11 +134,11 @@ vim.pack.add({
 -- Colorscheme
 require("evergarden").setup({
   theme = { variant = "winter" },
-  -- Darker than winter's backgrounds for more contrast; base matches evergarden's twilight preset.
+  -- Darker than winter's backgrounds for more contrast, a notch below evergarden's twilight preset.
   color_overrides = {
-    base = "#151a1d",
-    mantle = "#12171a",
-    crust = "#0f1315",
+    base = "#121619",
+    mantle = "#0f1316",
+    crust = "#0c1012",
   },
   -- Inactive statuslines default to mantle, which nearly vanishes against base; a lifted bar marks split boundaries.
   editor = {
