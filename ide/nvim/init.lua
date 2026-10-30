@@ -349,10 +349,10 @@ require("nvim-tree").setup({
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
 
 -- Bridge nvim-tree renames and cut/paste moves to LSP import updates.
--- Keep edits unsaved, like symbol renames; :wall saves all changed files.
+-- Auto-save files touched by LSP workspace edits, including symbol renames.
 local file_operations = require("lsp-file-operations")
 file_operations.setup({
-  auto_save = false,
+  auto_save = true,
   operations = {
     willRenameFiles = true,
     didRenameFiles = true,
