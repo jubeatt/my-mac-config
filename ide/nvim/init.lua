@@ -306,14 +306,6 @@ vim.keymap.set("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Recent f
 vim.keymap.set("n", "<leader>fR", "<cmd>FzfLua resume<cr>", { desc = "Resume last picker" })
 vim.keymap.set("n", "<leader>xx", "<cmd>FzfLua diagnostics_workspace<cr>", { desc = "Workspace diagnostics" })
 vim.keymap.set("n", "<leader>xd", "<cmd>FzfLua diagnostics_document<cr>", { desc = "Document diagnostics" })
--- Like VS Code's breadcrumb dropdown: pick a sibling of the current file.
-vim.keymap.set("n", "<leader>fd", function()
-  require("fzf-lua").files({
-    cwd = vim.fn.expand("%:p:h"),
-    fd_opts = "--color=never --type f --type l --max-depth 1",
-  })
-end, { desc = "Find files in current directory" })
-
 vim.keymap.set("n", "<leader>fo", function()
   local path = vim.api.nvim_buf_get_name(0)
   if vim.bo.buftype ~= "" or path == "" or vim.fn.filereadable(path) ~= 1 then
@@ -363,6 +355,82 @@ file_operations.setup({
   },
 })
 vim.lsp.config("*", { capabilities = file_operations.default_capabilities() })
+
+-- Single-file create / move from the command line; batches and folders stay in nvim-tree.
+-- Create missing parent folders on save, so `:e new/dir/file.ts` just works.
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function(ev)
+    if vim.bo[ev.buf].buftype == "" and not ev.match:match("^%w+://") then
+      vim.fn.mkdir(vim.fs.dirname(ev.match), "p")
+    end
+  end,
+})
+
+-- Prefill `:e` with the current file's folder, or the working directory when there is none.
+local function current_dir()
+  local name = vim.api.nvim_buf_get_name(0)
+  if vim.bo.buftype ~= "" or name == "" then
+    return ""
+  end
+  local dir = vim.fn.fnamemodify(name, ":.:h")
+  return dir == "." and "" or vim.fn.fnameescape(dir) .. "/"
+end
+
+vim.keymap.set("n", "<leader>fa", function()
+  return ":e " .. current_dir()
+end, { expr = true, desc = "Add file in current folder" })
+
+vim.keymap.set("n", "<leader>fA", ":e ", { desc = "Add file in project root" })
+
+-- Move or rename the current file; LSP servers update imports before the move.
+vim.api.nvim_create_user_command("Mv", function(opts)
+  local old = vim.api.nvim_buf_get_name(0)
+  local new = vim.fn.fnamemodify(opts.args, ":p")
+  if vim.bo.buftype ~= "" or not vim.uv.fs_stat(old) then
+    vim.notify("Mv: current buffer is not a file on disk", vim.log.levels.ERROR)
+    return
+  end
+  -- Check before willRename, so imports aren't rewritten for a move that won't happen.
+  if vim.uv.fs_stat(new) then
+    vim.notify("Mv: " .. opts.args .. " already exists", vim.log.levels.ERROR)
+    return
+  end
+  local data = { old_name = old, new_name = new }
+  file_operations.will_rename(data)
+  vim.lsp.util.rename(old, new)
+  file_operations.did_rename(data)
+end, { nargs = 1, complete = "file", desc = "Move or rename the current file" })
+
+vim.keymap.set("n", "<leader>fm", function()
+  return ":Mv " .. vim.fn.expand("%:.")
+end, { expr = true, desc = "Move / rename current file" })
+
+-- Move the current file to the macOS Trash (`:Rm!` deletes it permanently) and close
+-- its buffer, keeping the window.
+vim.api.nvim_create_user_command("Rm", function(opts)
+  local name = vim.api.nvim_buf_get_name(0)
+  if vim.bo.buftype ~= "" or not vim.uv.fs_stat(name) then
+    vim.notify("Rm: current buffer is not a file on disk", vim.log.levels.ERROR)
+    return
+  end
+  local rel = vim.fn.fnamemodify(name, ":.")
+  local prompt = opts.bang and ("Permanently delete " .. rel .. "?") or ("Move " .. rel .. " to Trash?")
+  if vim.bo.modified then
+    prompt = prompt .. " Unsaved changes will be lost."
+  end
+  if vim.fn.confirm(prompt, "&Yes\n&No", 2) ~= 1 then
+    return
+  end
+  local result = vim.system(opts.bang and { "rm", name } or { "trash", name }):wait()
+  if result.code ~= 0 then
+    vim.notify("Rm: " .. vim.trim(result.stderr or ""), vim.log.levels.ERROR)
+    return
+  end
+  require("mini.bufremove").delete(0, true)
+end, { bang = true, desc = "Move the current file to Trash, or delete it with !" })
+
+vim.keymap.set("n", "<leader>fd", "<cmd>Rm<cr>", { desc = "Delete current file (Trash)" })
+vim.keymap.set("n", "<leader>fD", "<cmd>Rm!<cr>", { desc = "Delete current file permanently" })
 
 -- Git: change markers in the sign column, hunk navigation and line blame.
 require("gitsigns").setup({

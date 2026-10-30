@@ -548,11 +548,11 @@
 
       <section>
         <h3 id="file-move-imports" data-toc="搬檔與 imports">搬檔與 imports</h3>
-        <p>在 nvim-tree 用 <kbd>r</kbd> 改名或輸入新路徑、用 <kbd>x</kbd> / <kbd>p</kbd> 剪下貼上時，<code>nvim-lsp-file-operations</code> 會請 LSP 更新引用路徑。TypeScript 7 支援檔案與資料夾改名，也會調整搬走檔案內自己的相對 import。</p>
+        <p>在 nvim-tree 用 <kbd>r</kbd> 改名或輸入新路徑、用 <kbd>x</kbd> / <kbd>p</kbd> 剪下貼上，或用 <kbd>Space</kbd> <kbd>f</kbd> <kbd>m</kbd>（<code>:Mv</code>）搬移目前檔案時，<code>nvim-lsp-file-operations</code> 會請 LSP 更新引用路徑。TypeScript 7 支援檔案與資料夾改名，也會調整搬走檔案內自己的相對 import。</p>
         <ul>
           <li>專案的 LSP 必須已啟動，並支援檔案改名請求；其他語言的行為依各自的 server 而定。</li>
           <li>其他引用檔案即使原本沒開啟，也可能被載入並修改；用 <code>:wa</code> 儲存所有修改過的檔案。</li>
-          <li>這個串接處理 nvim-tree 的檔案操作；在 Finder 或終端機搬檔時不會透過這條流程更新 imports。</li>
+          <li>這個串接只處理 nvim-tree 和 <code>:Mv</code> 的檔案操作；在 Finder 或終端機搬檔時不會透過這條流程更新 imports。</li>
         </ul>
       </section>
 
@@ -712,12 +712,16 @@
       ["`Space` `f` `g`", "*f*ind by *g*rep", "搜尋內容（ripgrep，邊打邊搜）", "new"],
       ["`Space` `f` `r`", "*f*ind *r*ecent files", "搜尋這個專案裡最近開過的檔案", "new", "[[fzf-lua]] oldfiles，列出這個專案的 ShaDa 裡仍存在的檔案；每個專案各自記錄，見選項的 `shadafile`"],
       ["`Space` `f` `R`", "*f*ind: *R*esume", "回到上一次的搜尋選單", "new", "[[fzf-lua]] resume，保留上次查詢內容；大寫 `R`，按 `Shift-r`"],
-      ["`Space` `f` `d`", "*f*ind in *d*irectory", "列出目前檔案同一層的檔案，選了就跳過去", "new"],
       ["`Space` `f` `o`", "*f*ile *o*pen", "用 macOS 預設應用程式開啟目前檔案（`open`）", "new", "開啟磁碟上的版本；先用 `:w` 儲存修改，適用於 Markdown、HTML 等檔案"],
       ["`Space` `e`", "*e*xplorer", "開關左側檔案樹，並定位到目前檔案", "new"],
       ["`Space` `f` `p`", "*f*ile *p*ath", "複製目前檔案的相對路徑到系統剪貼簿", "new", "相對於 Neovim 工作目錄，可用 `:pwd` 查看"],
       ["`Space` `f` `P`", "*f*ile *P*ath（大寫 = 完整路徑）", "複製目前檔案的絕對路徑到系統剪貼簿", "new", "大寫 `P`，按 `Shift-p`"],
       ["`Space` `f` `n`", "*f*ile *n*ame", "複製目前檔案名稱到系統剪貼簿", "new", "含副檔名，不含資料夾路徑，例如 `init.lua`"],
+      ["`Space` `f` `a`", "*f*ile *a*dd", "在目前檔案的資料夾新增檔案", "new", "命令列帶入 `:e 資料夾/`，接著輸入檔名；路徑可含新資料夾，`:w` 時自動建立"],
+      ["`Space` `f` `A`", "*f*ile *A*dd（大寫 = 根目錄）", "在專案根目錄新增檔案", "new", "根目錄指 Neovim 工作目錄，可用 `:pwd` 查看；大寫 `A`，按 `Shift-a`"],
+      ["`Space` `f` `m`", "*f*ile *m*ove", "搬移或改名目前的檔案", "new", "命令列帶入 `:Mv 目前路徑`，改成新路徑後按 `Enter`；路徑相對於工作目錄，目標資料夾不存在會自動建立，目標已存在則取消；[[LSP 檔案操作]] 會更新 imports。多個檔案或整個資料夾用 nvim-tree 搬"],
+      ["`Space` `f` `d`", "*f*ile *d*elete", "把目前檔案移到垃圾桶並關閉 buffer", "new", "指令是 `:Rm`；先跳確認，可從 macOS 垃圾桶救回；視窗保留，不會關掉旁邊的 nvim-tree"],
+      ["`Space` `f` `D`", "*f*ile *D*elete（大寫 = 永久）", "永久刪除目前檔案並關閉 buffer", "new", "指令是 `:Rm!`；先跳確認，刪除後無法從垃圾桶救回；大寫 `D`，按 `Shift-d`"],
     ]},
     { id: "k-lsp", title: "LSP", rows: [
       ["`gd`", "*g*o to *d*efinition", "跳到 definition（只在有 LSP 的 buffer）", "override", "原本是跳到區域變數宣告"],
