@@ -23,6 +23,10 @@ vim.o.signcolumn = "yes"
 -- Keep undo history across sessions.
 vim.o.undofile = true
 
+-- No swap files: fzf-lua opens buffers via the API, where a stale swap only
+-- prints E325 with no recover/delete prompt.
+vim.o.swapfile = false
+
 -- One ShaDa file per project, so jumps, recent files and marks stay within the
 -- Git repo (or working directory) Neovim starts in. -i still picks its own file.
 if vim.o.shadafile == "" then
