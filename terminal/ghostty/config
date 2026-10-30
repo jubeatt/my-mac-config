@@ -6,3 +6,4 @@ window-padding-y = 8
 cursor-style = block
 shell-integration-features = no-cursor
 macos-option-as-alt = left
+mouse-scroll-multiplier = discrete:0.5
