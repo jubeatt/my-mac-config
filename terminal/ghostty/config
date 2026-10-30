@@ -1,9 +1,8 @@
-theme = Night Owl
+theme = Catppuccin Mocha
 font-family = JetBrainsMono Nerd Font Mono
 font-size = 18
 window-padding-x = 16
 window-padding-y = 8
-cursor-color = #d1d7e0
 cursor-style = block
 shell-integration-features = no-cursor
 macos-option-as-alt = left

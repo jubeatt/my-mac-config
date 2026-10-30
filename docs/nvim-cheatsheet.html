@@ -608,8 +608,8 @@
             <tr id="p-treesitter"><td><code>nvim-treesitter</code>（<code>main</code> branch）</td><td>安裝 parser，Treesitter 語法高亮</td></tr>
             <tr id="p-treesj"><td><code>TreeSJ</code></td><td>依 Treesitter 節點展開／收合程式碼；支援箭頭函式 expression body 與 block body 轉換，不依賴 LSP</td></tr>
             <tr id="p-flash"><td><code>flash.nvim</code></td><td>用 <kbd>s</kbd> 輸入文字，再按標籤跳到畫面內的位置；<kbd>S</kbd> 用標籤選取 Treesitter 語法節點。Normal、Visual 與 operator-pending mode 都能使用；<kbd>f</kbd> / <kbd>t</kbd> 與一般搜尋維持原生行為</td></tr>
-            <tr id="p-evergarden"><td><code>evergarden</code></td><td>主題，用 winter 變體；在 <code>setup()</code> 指定變體與 icon 配色微調</td></tr>
-            <tr id="p-lualine"><td><code>lualine.nvim</code></td><td>底部狀態列，配色用 evergarden 附的 <code>evergarden</code>；左側顯示縮寫模式（N / I / V / VL / VB…）、git branch、diff、錯誤數；右側顯示相對路徑檔名、捲動位置、行列位置</td></tr>
+            <tr id="p-catppuccin"><td><code>catppuccin</code></td><td>主題，用 mocha 變體；自動偵測已安裝的 plugin 套用對應配色，Ghostty 也用同一套 <code>Catppuccin Mocha</code></td></tr>
+            <tr id="p-lualine"><td><code>lualine.nvim</code></td><td>底部狀態列，配色用 catppuccin 附的 <code>catppuccin-nvim</code>；左側顯示縮寫模式（N / I / V / VL / VB…）、git branch、diff、錯誤數；右側顯示相對路徑檔名、捲動位置、行列位置</td></tr>
             <tr id="p-fzf-lua"><td><code>fzf-lua</code></td><td>搜尋檔案、搜尋內容、reference / symbol 選單；預設上方清單、下方預覽，預覽占視窗高度 45%；也接手 <code>vim.ui.select</code>（code action 選單，不含預覽）</td></tr>
             <tr id="p-nvim-tree"><td><code>nvim-tree.lua</code> + <code>mini.icons</code></td><td>左側檔案樹與 icon；取代 netrw。mini.icons 模擬 nvim-web-devicons，lualine、fzf-lua 也共用同一套 icon</td></tr>
             <tr id="p-file-operations"><td><code>nvim-lsp-file-operations</code></td><td>串接 nvim-tree 的改名與剪下貼上事件，向 LSP 請求更新 imports；引用檔案的修改以 <code>:wa</code> 一次儲存</td></tr>

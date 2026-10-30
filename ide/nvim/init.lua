@@ -94,7 +94,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 vim.pack.add({
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
   "https://github.com/Wansmer/treesj",
-  { src = "https://github.com/evergardentheme/nvim", name = "evergarden" },
+  { src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/nvim-tree/nvim-tree.lua",
   "https://github.com/antosha417/nvim-lsp-file-operations",
@@ -121,57 +121,11 @@ vim.pack.add({
 })
 
 -- Colorscheme
-require("evergarden").setup({
-  theme = { variant = "winter" },
-  -- Darker than winter's backgrounds for more contrast, a notch below evergarden's twilight preset.
-  color_overrides = {
-    base = "#121619",
-    mantle = "#0f1316",
-    crust = "#0c1012",
-  },
-  -- Inactive statuslines default to mantle, which nearly vanishes against base; a lifted bar marks split boundaries.
-  editor = {
-    statusline = {
-      inactive = { fg = "subtext0", bg = "surface0" },
-    },
-  },
-  overrides = function(c)
-    return {
-      -- Plain files read as muted grey instead of the bright text color.
-      MiniIconsGrey = { fg = c.overlay2 },
-      -- The default maps purple to pink, which nvim-tree already uses for its root and opened file.
-      MiniIconsPurple = { fg = c.purple },
-      -- Match nvim-tree's folder glyphs to mini.icons' directory color.
-      NvimTreeFolderIcon = { fg = c.skye },
-      -- Lift the cursor line between surface0 and Visual's surface1 so it stands out without looking like a selection.
-      CursorLine = { bg = "#2d373b" },
-      CursorLineNr = { fg = c.green, style = { "bold" } },
-      -- Teal-tinted so symbol references stand out from both the cursor line and Visual; Read/Write link here.
-      LspReferenceText = { bg = "#334a4e", style = { "bold" } },
-      -- Completion kinds coloured like VS Code: values blue, callables purple, snippets green, plain text muted.
-      BlinkCmpKindVariable = { fg = c.blue },
-      BlinkCmpKindField = { fg = c.blue },
-      BlinkCmpKindProperty = { fg = c.blue },
-      BlinkCmpKindFunction = { fg = c.purple },
-      BlinkCmpKindMethod = { fg = c.purple },
-      BlinkCmpKindConstructor = { fg = c.purple },
-      BlinkCmpKindSnippet = { fg = c.green },
-      BlinkCmpKindText = { fg = c.overlay2 },
-      -- The menu background is close to the editor's, so outline it with the brighter float border.
-      BlinkCmpMenuBorder = { link = "FloatBorder" },
-      -- Deep saturated tints; blending the pastel palette into the base reads greyish and washed out.
-      DiffAdd = { bg = "#1e4228" },
-      DiffDelete = { bg = "#4b1d24" },
-      -- Blue rather than teal so changed lines don't blend with added (green) ones.
-      DiffChange = { bg = "#1b3546" },
-      DiffText = { bg = "#3a7299" },
-      -- Darker than crust; diffview windows use it as Normal so the diff tints pop against the background.
-      DiffNormal = { bg = "#0b0e10" },
-    }
-  end,
+-- Plugin integrations (blink.cmp, nvim-tree, fzf-lua, gitsigns…) are detected from vim.pack automatically.
+require("catppuccin").setup({
+  flavour = "mocha",
 })
--- Variant colorschemes (evergarden-winter etc.) ignore setup(), so pick the variant there instead.
-vim.cmd.colorscheme("evergarden")
+vim.cmd.colorscheme("catppuccin")
 
 -- Icons: mocking nvim-web-devicons lets nvim-tree, lualine and fzf-lua pick up mini.icons.
 local mini_icons = require("mini.icons")
@@ -194,7 +148,7 @@ end, { desc = "Delete other buffers" })
 
 -- Statusline
 require("lualine").setup({
-  options = { theme = "evergarden" },
+  options = { theme = "catppuccin-nvim" },
   sections = {
     lualine_a = {
       {
@@ -464,22 +418,6 @@ local diffview_keymaps = {
 require("diffview").setup({
   -- Show removed lines in red on the old side instead of DiffAdd green.
   enhanced_diff_hl = true,
-  hooks = {
-    -- Append to the winhighlight diffview just set, rather than replacing its Diff* remaps.
-    -- Set it window-local only: vim.wo acts like :set and would leak into the global value,
-    -- tinting every buffer opened later even after diffview closes.
-    diff_buf_win_enter = function(_, winid)
-      local winhl = vim.wo[winid].winhighlight
-      if not winhl:find("Normal:DiffNormal", 1, true) then
-        local dark = "Normal:DiffNormal,NormalNC:DiffNormal"
-        vim.api.nvim_set_option_value(
-          "winhighlight",
-          winhl == "" and dark or winhl .. "," .. dark,
-          { scope = "local", win = winid }
-        )
-      end
-    end,
-  },
   -- Match the file explorer toggle in both diff and history views.
   keymaps = {
     view = diffview_keymaps,
@@ -575,8 +513,6 @@ vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>", { desc = "Rerun last test
 require("toggleterm").setup({
   open_mapping = [[<C-\>]],
   size = 15,
-  -- The default -30 barely darkens the already dark base; go deeper so the terminal reads as its own pane.
-  shading_factor = -60,
   -- Same as insert mode's jk; buffer-local so Lazygit and vim-test terminals keep their own j.
   on_create = function(term)
     vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = term.bufnr, desc = "Exit terminal mode" })
