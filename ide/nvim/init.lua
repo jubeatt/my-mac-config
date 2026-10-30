@@ -96,6 +96,7 @@ vim.pack.add({
   "https://github.com/Wansmer/treesj",
   { src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
   "https://github.com/ibhagwan/fzf-lua",
+  "https://github.com/folke/trouble.nvim",
   "https://github.com/nvim-tree/nvim-tree.lua",
   "https://github.com/antosha417/nvim-lsp-file-operations",
   "https://github.com/nvim-mini/mini.icons",
@@ -317,6 +318,25 @@ vim.keymap.set("n", "<leader>fo", function()
     vim.notify(err, vim.log.levels.ERROR)
   end
 end, { desc = "Open file in default app" })
+
+-- Results grouped by file in a foldable tree, like VS Code's references panel.
+require("trouble").setup({
+  focus = true,
+  keys = {
+    -- Like VS Code: jump and close on an item, toggle the fold on a file node.
+    ["<cr>"] = {
+      action = function(view, ctx)
+        if ctx.item then
+          view:jump(ctx.item)
+          view:close()
+        elseif ctx.node then
+          view:fold(ctx.node)
+        end
+      end,
+      desc = "Jump and close",
+    },
+  },
+})
 
 -- File explorer
 require("nvim-tree").setup({
@@ -722,8 +742,20 @@ end
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(ev)
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = ev.buf, desc = "Go to definition" })
+    vim.keymap.set("n", "grr", function()
+      local trouble = require("trouble")
+      if trouble.is_open("lsp_references") then
+        return trouble.close("lsp_references")
+      end
+      local view = trouble.open("lsp_references")
+      if view then
+        -- Trouble forces foldlevel=99 on its window; level 1 keeps the "References" header open but folds each file.
+        view:wait(function()
+          view:fold_level({ level = 1 })
+        end)
+      end
+    end, { buffer = ev.buf, desc = "References" })
     -- fzf-lua pickers with preview instead of the built-in quickfix / location lists.
-    vim.keymap.set("n", "grr", "<cmd>FzfLua lsp_references<cr>", { buffer = ev.buf, desc = "References" })
     vim.keymap.set("n", "gO", "<cmd>FzfLua lsp_document_symbols<cr>", { buffer = ev.buf, desc = "Document symbols" })
     -- Live variant re-queries the server on every keystroke, like VS Code's `#` symbol search.
     vim.keymap.set(
