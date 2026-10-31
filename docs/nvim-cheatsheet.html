@@ -626,6 +626,7 @@
             <tr id="p-mason"><td><code>mason.nvim</code> + <code>mason-lspconfig.nvim</code></td><td>安裝 language server（tailwindcss、lua_ls、jsonls、cssls、html），裝好的自動啟用</td></tr>
             <tr id="p-autopairs"><td><code>nvim-autopairs</code></td><td>打 <code>(</code>、<code>[</code>、<code>{</code>、引號時自動補上結尾；在結尾前打結尾字元會直接跳過</td></tr>
             <tr id="p-ts-autotag"><td><code>nvim-ts-autotag</code></td><td>HTML / JSX / Vue 打完開頭標籤自動補結尾標籤；改開頭標籤名稱時結尾同步跟著改</td></tr>
+            <tr id="p-smart-splits"><td><code>smart-splits.nvim</code></td><td>按住 <kbd>Alt</kbd> + <kbd>h/j/k/l</kbd> 或方向鍵，把分隔線往該方向移，不管目前在哪一側的視窗。視窗已經貼到外框時，改去調整外層的 herdr pane；nvim-tree 的寬度不會跟著變</td></tr>
             <tr id="p-which-key"><td><code>which-key.nvim</code></td><td>按 <kbd>Space</kbd> 等前綴鍵後停 0.5 秒，跳出面板列出接下來能按的鍵，說明文字取自各 keymap 的 <code>desc</code></td></tr>
           </tbody>
         </table></div>
@@ -897,6 +898,7 @@
       ["`Ctrl-w` `v` / `Ctrl-w` `s`", "*w*indow: *v*ertical / *s*plit", "往右 / 往下分割目前視窗", "tweak", "類似 VS Code `Cmd-\\`；新視窗方向由 `splitright` / `splitbelow` 設定"],
       ["`Ctrl-w` `q` / `Ctrl-w` `o`", "*w*indow: *q*uit / *o*nly", "關閉目前視窗 / 只留下目前視窗", "default"],
       ["`Ctrl-w` `=`", "*w*indow: `=` 等寬等高", "所有視窗平均分配大小", "default"],
+      ["`Alt` + `h/j/k/l` 或方向鍵", "", "用 [[smart-splits]] 把分隔線往左 / 下 / 上 / 右移 3 格，按住連續調整", "new", "Alt 是左邊的 Option（Ghostty 的 `macos-option-as-alt = left`）。Ghostty 把 `Alt-←` / `Alt-→` 送成 `Alt-b` / `Alt-f`，所以這兩個鍵也是左右調整"],
     ]},
     { id: "k-save", title: "存檔與離開", rows: [
       ["`:w` / `:wq`", "*w*rite / *w*rite + *q*uit", "存目前檔案 / 存檔並離開", "default", "`:w` 會觸發已設定的存檔修正與格式化"],
@@ -999,6 +1001,7 @@
     "Lazygit":   { href: "#lazygit", def: "在 Neovim terminal 中操作 Git，以 nvim-remote 開回選取的檔案" },
     "nvim-autopairs":  { href: "#p-autopairs",  def: "自動補上括號與引號的結尾" },
     "nvim-ts-autotag": { href: "#p-ts-autotag", def: "HTML / JSX / Vue 標籤自動關閉與同步改名" },
+    "smart-splits": { href: "#p-smart-splits", def: "依視窗位置移動分隔線，貼邊時改調 herdr pane" },
     "which-key": { href: "#p-which-key", def: "按前綴鍵後列出接下來能按的鍵" },
     "which-key 面板": { href: "#which-key", def: "面板裡按鍵說明的三種來源" },
     "swap 檔提示": { href: "#swap", def: "E325：同一個檔案已有 swap 檔時的處理方式" },

@@ -86,6 +86,11 @@
       "rev": "d7220b55e16ed3c04e88086256def5d282429493",
       "src": "https://github.com/windwp/nvim-ts-autotag"
     },
+    "smart-splits.nvim": {
+      "rev": "5fd4fe53c2df2009e689f61511e3c474a9eccbaf",
+      "src": "https://github.com/smart-splits-nvim/smart-splits.nvim",
+      "version": "3.0.0 - 4.0.0"
+    },
     "toggleterm.nvim": {
       "rev": "9a88eae817ef395952e08650b3283726786fb5fb",
       "src": "https://github.com/akinsho/toggleterm.nvim"
