@@ -113,6 +113,7 @@ vim.pack.add({
   "https://github.com/akinsho/toggleterm.nvim",
   "https://github.com/neovim/nvim-lspconfig",
   "https://github.com/mfussenegger/nvim-lint",
+  "https://github.com/stevearc/conform.nvim",
   "https://github.com/mason-org/mason.nvim",
   "https://github.com/mason-org/mason-lspconfig.nvim",
   "https://github.com/rafamadriz/friendly-snippets",
@@ -717,6 +718,12 @@ vim.lsp.enable("tsc")
 -- biome.json is found above the file.
 vim.lsp.enable("biome")
 
+-- Oxlint ships its own LSP (`oxlint --lsp`) and prefers the project's node_modules.
+-- Its root_dir reports nil when no config is found; workspace_required keeps the server
+-- from starting anyway. Oxfmt needs no LSP: conform formats on save.
+vim.lsp.config("oxlint", { workspace_required = true })
+vim.lsp.enable("oxlint")
+
 -- Global rather than in LspAttach, so they still work when no server attached.
 vim.keymap.set("n", "<leader>cl", function()
   local names = vim.tbl_map(function(client)
@@ -725,6 +732,34 @@ vim.keymap.set("n", "<leader>cl", function()
   vim.notify(#names > 0 and table.concat(names, ", ") or "No LSP attached", vim.log.levels.INFO)
 end, { desc = "Show attached LSP clients" })
 vim.keymap.set("n", "<leader>cL", "<cmd>checkhealth vim.lsp<cr>", { desc = "LSP health report" })
+
+-- Format on save with each tool's CLI: safe lint fixes, then formatting, like VS Code's
+-- codeActionsOnSave + formatOnSave. LSP formatting stays off so tsc / jsonls never touch the file.
+-- Filetypes follow the matching LSP configs; entries are added in run order.
+local formatters_by_ft = {}
+for _, tool in ipairs({ { "biome-check", "biome" }, { "oxlint", "oxlint" }, { "oxfmt", "oxfmt" } }) do
+  local formatter, server = tool[1], tool[2]
+  for _, ft in ipairs(vim.lsp.config[server].filetypes) do
+    formatters_by_ft[ft] = formatters_by_ft[ft] or {}
+    table.insert(formatters_by_ft[ft], formatter)
+  end
+end
+
+require("conform").setup({
+  formatters_by_ft = formatters_by_ft,
+  -- Run a tool only where the project has its config file.
+  formatters = {
+    ["biome-check"] = { require_cwd = true },
+    oxlint = {
+      cwd = require("conform.util").root_file({ ".oxlintrc.json", ".oxlintrc.jsonc", "oxlint.config.ts" }),
+      require_cwd = true,
+    },
+    oxfmt = { require_cwd = true },
+  },
+  format_on_save = { timeout_ms = 1000 },
+  -- Most projects use only one of these tools, so silently skip the rest.
+  notify_no_formatters = false,
+})
 
 -- Completion (LSP items plus friendly-snippets, e.g. ES7 React's rafce)
 require("blink.cmp").setup({
@@ -747,27 +782,6 @@ require("blink.cmp").setup({
 local function source_action(kind)
   return function()
     vim.lsp.buf.code_action({ apply = true, context = { only = { kind }, diagnostics = {} } })
-  end
-end
-
--- Synchronous variant for BufWritePre, where an async code action would land
--- after the file is written.
-local function apply_source_action_sync(client, bufnr, kind)
-  local range_params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-  local params = {
-    textDocument = range_params.textDocument,
-    range = range_params.range,
-    context = { only = { kind }, diagnostics = {} },
-  }
-  local res = client:request_sync("textDocument/codeAction", params, 1000, bufnr)
-  for _, action in ipairs(res and res.result or {}) do
-    if not action.edit and client:supports_method("codeAction/resolve", bufnr) then
-      local resolved = client:request_sync("codeAction/resolve", action, 1000, bufnr)
-      action = resolved and resolved.result or action
-    end
-    if action.edit then
-      vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
-    end
   end
 end
 
@@ -810,24 +824,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
     end, { buffer = ev.buf, desc = "Toggle inlay hints" })
 
-    -- On save, apply Biome's safe fixes then format with Biome only, so tsc /
-    -- jsonls never touch the file. Same as VS Code's source.fixAll.biome + format on save.
-    if client and client.name == "biome" then
-      local group = vim.api.nvim_create_augroup("biome-on-save", { clear = false })
-      vim.api.nvim_clear_autocmds({ group = group, buffer = ev.buf })
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = group,
-        buffer = ev.buf,
-        callback = function()
-          apply_source_action_sync(client, ev.buf, "source.fixAll.biome")
-          -- Biome registers formatting dynamically, shortly after attaching.
-          if client:supports_method("textDocument/formatting", ev.buf) then
-            vim.lsp.buf.format({ bufnr = ev.buf, id = client.id })
-          end
-        end,
-      })
-    end
-
     -- Highlight other references of the symbol under the cursor while it rests.
     if client and client:supports_method("textDocument/documentHighlight", ev.buf) then
       local group = vim.api.nvim_create_augroup("lsp-document-highlight", { clear = false })
@@ -848,11 +844,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 vim.api.nvim_create_autocmd("LspDetach", {
   callback = function(ev)
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-    if client and client.name == "biome" then
-      pcall(vim.api.nvim_clear_autocmds, { group = "biome-on-save", buffer = ev.buf })
-    end
-
     -- Keep symbol highlighting while another client (e.g. tsc) still provides it.
     -- The detaching client is still listed while LspDetach runs, so skip it by id.
     for _, other in ipairs(vim.lsp.get_clients({ bufnr = ev.buf, method = "textDocument/documentHighlight" })) do
