@@ -260,11 +260,14 @@ require("which-key").setup({
   win = { border = "none" },
   spec = {
     { "<leader>f", group = "Find / file" },
-    { "<leader>g", group = "Git" },
+    -- Git and Search also have visual-mode mappings (reset lines, replace selection).
+    { "<leader>g", group = "Git", mode = { "n", "x" } },
     { "<leader>c", group = "Code" },
-    { "<leader>s", group = "Search" },
+    { "<leader>s", group = "Search", mode = { "n", "x" } },
     { "<leader>t", group = "Test" },
     { "<leader>x", group = "Diagnostics" },
+    -- Built-in LSP keymaps (grn, gra, grr, gri, grt…); gra also works in visual mode.
+    { "gr", group = "LSP", mode = { "n", "x" } },
     { "gs", group = "Surround", mode = { "n", "x" } },
     { "gsa", desc = "Add: motion + pair (iw\" / iW\")" },
     { "gsa", desc = "Add: pair around selection (e.g. \")", mode = "x" },
