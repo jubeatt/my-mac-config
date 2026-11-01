@@ -710,7 +710,7 @@ vim.lsp.config("tsc", {
 })
 vim.lsp.enable("tsc")
 
--- Biome from Homebrew (or the project's node_modules); attaches only when a
+-- Biome from the project's node_modules; attaches only when a
 -- biome.json is found above the file.
 vim.lsp.enable("biome")
 

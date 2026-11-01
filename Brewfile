@@ -1,7 +1,5 @@
 tap "aviator-co/tap"
 tap "ejoffe/tap"
-# Toolchain of the web
-brew "biome"
 # Image format providing lossless and lossy compression for web images
 brew "webp"
 # TIFF library and utilities
