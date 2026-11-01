@@ -77,6 +77,9 @@ vim.keymap.set("n", "<leader>fn", function()
   vim.fn.setreg("+", vim.fn.expand("%:t"))
 end, { desc = "Copy file name" })
 
+-- autoread only checks on focus or buffer events, so edits from other tools can go unnoticed.
+vim.keymap.set("n", "<leader>fc", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
+
 -- Plugins
 -- Treesitter parsers must match the plugin version, so refresh them after each update.
 -- Registered before vim.pack.add() so it also fires on lockfile installs.
