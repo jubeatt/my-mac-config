@@ -78,7 +78,7 @@ vim.keymap.set("n", "<leader>fn", function()
 end, { desc = "Copy file name" })
 
 -- autoread only checks on focus or buffer events, so edits from other tools can go unnoticed.
-vim.keymap.set("n", "<leader>fc", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
+vim.keymap.set("n", "<leader>fR", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
 
 -- Plugins
 -- Treesitter parsers must match the plugin version, so refresh them after each update.
@@ -328,7 +328,6 @@ vim.keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files"
 vim.keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find open buffers" })
 vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Search content" })
 vim.keymap.set("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Recent files" })
-vim.keymap.set("n", "<leader>fR", "<cmd>FzfLua resume<cr>", { desc = "Resume last picker" })
 vim.keymap.set("n", "<leader>xx", "<cmd>FzfLua diagnostics_workspace<cr>", { desc = "Workspace diagnostics" })
 vim.keymap.set("n", "<leader>xd", "<cmd>FzfLua diagnostics_document<cr>", { desc = "Document diagnostics" })
 vim.keymap.set("n", "<leader>fo", function()
