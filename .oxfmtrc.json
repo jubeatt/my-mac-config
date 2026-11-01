@@ -10,5 +10,11 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "bracketSpacing": true,
-  "ignorePatterns": []
+  "ignorePatterns": [],
+  "overrides": [
+    {
+      "files": ["*.jsonc"],
+      "options": { "trailingComma": "none" }
+    }
+  ]
 }
