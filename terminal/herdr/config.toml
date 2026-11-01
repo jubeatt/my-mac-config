@@ -88,10 +88,7 @@ mouse_scroll_lines = 1
 
 [ui.sidebar.agents]
 row_gap = 1
-rows = [
-  ["state_icon", "workspace"],
-  ["state_text", "agent"],
-]
+rows = [["state_icon", "workspace"], ["state_text", "agent"]]
 
 [ui.toast]
 delivery = "terminal"

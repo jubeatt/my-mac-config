@@ -86,20 +86,20 @@ node scripts/gen-vscode-extensions.js --dryrun
 
 ## Symlink 對照表
 
-| 設定      | Repo 位置                                  | 目標位置                                           |
-| --------- | ------------------------------------------ | -------------------------------------------------- |
-| VS Code   | `ide/vscode/`                              | `~/Library/Application Support/Code/User/`         |
-| Neovim    | `ide/nvim/`                                | `~/.config/nvim`                                   |
-| uv        | `uv.toml`                                  | `~/.config/uv/uv.toml`                              |
-| Git       | `.gitconfig`                               | `~/.gitconfig`                                     |
-| Git ignore | `.gitignore_global`                        | `~/.gitignore_global`                              |
-| oxfmt     | `.oxfmtrc.json`                            | `~/.oxfmtrc.json`                                  |
-| Zsh       | `.zshrc`                                   | `~/.zshrc`                                         |
-| Zsh Theme | `terminal/oh-my-zsh/tonotdo.zsh-theme`     | `~/.oh-my-zsh/custom/themes/`                      |
-| iTerm2    | `terminal/iterm2/`                         | iTerm2 Preferences → Custom Folder                 |
-| Ghostty   | `terminal/ghostty/config`                  | `~/.config/ghostty/config`                         |
-| herdr     | `terminal/herdr/config.toml`               | `~/.config/herdr/config.toml`                      |
-| Lazygit   | `terminal/lazygit/config.yml`              | `~/Library/Application Support/lazygit/config.yml` |
+| 設定       | Repo 位置                              | 目標位置                                           |
+| ---------- | -------------------------------------- | -------------------------------------------------- |
+| VS Code    | `ide/vscode/`                          | `~/Library/Application Support/Code/User/`         |
+| Neovim     | `ide/nvim/`                            | `~/.config/nvim`                                   |
+| uv         | `uv.toml`                              | `~/.config/uv/uv.toml`                             |
+| Git        | `.gitconfig`                           | `~/.gitconfig`                                     |
+| Git ignore | `.gitignore_global`                    | `~/.gitignore_global`                              |
+| oxfmt      | `.oxfmtrc.json`                        | `~/.oxfmtrc.json`                                  |
+| Zsh        | `.zshrc`                               | `~/.zshrc`                                         |
+| Zsh Theme  | `terminal/oh-my-zsh/tonotdo.zsh-theme` | `~/.oh-my-zsh/custom/themes/`                      |
+| iTerm2     | `terminal/iterm2/`                     | iTerm2 Preferences → Custom Folder                 |
+| Ghostty    | `terminal/ghostty/config`              | `~/.config/ghostty/config`                         |
+| herdr      | `terminal/herdr/config.toml`           | `~/.config/herdr/config.toml`                      |
+| Lazygit    | `terminal/lazygit/config.yml`          | `~/Library/Application Support/lazygit/config.yml` |
 
 ## Python 環境
 
