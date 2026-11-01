@@ -36,6 +36,8 @@ brew "playwright-cli"
 brew "pnpm"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
 # Parser generator tool
