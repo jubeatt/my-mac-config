@@ -545,6 +545,34 @@
               </ul>
             </div>
           </div>
+          <p>新工具放哪，先看 nvim 怎麼用它：</p>
+          <ul>
+            <li>
+              <strong>LSP server</strong>：在背景常駐，nvim 透過 LSP
+              協定向它要診斷、補全、跳轉。通用的放 Mason，寫進
+              <code>ensure_installed</code> 就會自動安裝並 enable。
+            </li>
+            <li>
+              <strong>非 LSP 的 CLI</strong>：一般命令列工具，由
+              conform（formatter）、nvim-lint（linter）或 LSP server
+              在背後呼叫，例如 <code>oxfmt</code>、<code>cspell</code>，以及
+              bashls 呼叫的 <code>shellcheck</code>。這類工具放 Brewfile，因為
+              <code>ensure_installed</code> 只認得 LSP server，用 Mason
+              裝就只能手動
+              <code>:MasonInstall</code>，換機器時不會自動裝回來。放在 Brewfile
+              就跟其他工具一起由
+              <code>brew bundle</code> 安裝，在終端機也能直接用。
+            </li>
+            <li>
+              <strong>版本跟著專案走的工具</strong>：用專案
+              <code>node_modules</code> 裡的，例如
+              <code>biome</code>、<code>oxlint</code>。
+            </li>
+          </ul>
+          <p>
+            例外是 <code>typescript</code>：<code>tsc --lsp</code> 是 LSP
+            server，但 <code>tsc</code> 本身也是編譯器 CLI，所以走 Homebrew。
+          </p>
         </section>
 
         <section>
@@ -838,6 +866,11 @@
               的錯誤一起顯示。
             </li>
           </ul>
+          <p>
+            不跟專案走的 CLI 加進 Brewfile，理由見<a href="#sources"
+              >工具從哪裡來</a
+            >。
+          </p>
 
           <h3 id="add-keymap">新增 keymap</h3>
           <ul>
