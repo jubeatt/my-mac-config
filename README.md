@@ -36,7 +36,7 @@
 ├── .editorconfig         # EditorConfig
 ├── Brewfile              # Homebrew 套件清單
 ├── uv.toml               # uv 的 Python 來源設定
-└── biome.json            # Biome formatter/linter 設定
+└── .oxfmtrc.json         # oxfmt 設定，也是全域預設的 formatter 設定
 ```
 
 ## 快速開始
@@ -93,6 +93,7 @@ node scripts/gen-vscode-extensions.js --dryrun
 | uv        | `uv.toml`                                  | `~/.config/uv/uv.toml`                              |
 | Git       | `.gitconfig`                               | `~/.gitconfig`                                     |
 | Git ignore | `.gitignore_global`                        | `~/.gitignore_global`                              |
+| oxfmt     | `.oxfmtrc.json`                            | `~/.oxfmtrc.json`                                  |
 | Zsh       | `.zshrc`                                   | `~/.zshrc`                                         |
 | Zsh Theme | `terminal/oh-my-zsh/tonotdo.zsh-theme`     | `~/.oh-my-zsh/custom/themes/`                      |
 | iTerm2    | `terminal/iterm2/`                         | iTerm2 Preferences → Custom Folder                 |
@@ -126,7 +127,7 @@ git config core.hooksPath hooks
 
 目前包含：
 
-- **pre-commit** — 自動對 staged 的 JS/TS/JSON 檔案執行 `biome format --write`
+- **pre-commit** — 自動對 staged 檔案執行 `oxfmt`，oxfmt 不支援的檔案類型會略過
 
 ## 備註
 

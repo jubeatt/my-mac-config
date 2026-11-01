@@ -741,16 +741,24 @@ for _, tool in ipairs({ { "biome-check", "biome" }, { "oxlint", "oxlint" }, { "o
   end
 end
 
+local biome_configs = { "biome.json", "biome.jsonc", ".biome.json", ".biome.jsonc" }
+
 require("conform").setup({
   formatters_by_ft = formatters_by_ft,
-  -- Run a tool only where the project has its config file.
   formatters = {
+    -- Biome and oxlint run only where the project has their config file.
     ["biome-check"] = { require_cwd = true },
     oxlint = {
       cwd = require("conform.util").root_file({ ".oxlintrc.json", ".oxlintrc.jsonc", "oxlint.config.ts" }),
       require_cwd = true,
     },
-    oxfmt = { require_cwd = true },
+    -- Oxfmt is the fallback formatter for every project that doesn't use Biome. It picks the
+    -- nearest .oxfmtrc.json, so a project without one gets ~/.oxfmtrc.json (linked from this repo).
+    oxfmt = {
+      condition = function(_, ctx)
+        return not vim.fs.root(ctx.dirname, biome_configs)
+      end,
+    },
   },
   format_on_save = { timeout_ms = 1000 },
   -- Most projects use only one of these tools, so silently skip the rest.

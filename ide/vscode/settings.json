@@ -24,13 +24,16 @@
   "editor.fontFamily": "'JetBrainsMono Nerd Font', Monaco, 'Courier New', monospace",
   "editor.tabSize": 2,
   "editor.fontLigatures": true,
-  "editor.defaultFormatter": "biomejs.biome",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
   "editor.letterSpacing": 1,
   "editor.suggest.showStatusBar": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.biome": "explicit"
+    "source.fixAll.biome": "explicit",
+    "source.fixAll.oxc": "explicit"
   },
+  "biome.requireConfiguration": true,
+  "oxc.requireConfig": true,
   "explorer.compactFolders": false,
   "explorer.fileNesting.enabled": false,
   "explorer.confirmDelete": false,
@@ -49,15 +52,6 @@
   "js/ts.experimental.useTsgo": true,
   "[mdx]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "biomejs.biome"
   },
   "liveServer.settings.donotShowInfoMsg": true,
   "diffEditor.ignoreTrimWhitespace": true,

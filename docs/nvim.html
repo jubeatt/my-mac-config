@@ -274,7 +274,7 @@
         <li>yank 和貼上直接用系統剪貼簿。</li>
         <li>最近開過的檔案和跳轉紀錄依 repo 分開，在哪個 repo 開就只看到那個 repo 的。</li>
         <li>不產生 swap file；undo 紀錄關掉 nvim 後仍然保留。<code>&lt;C-z&gt;</code> 不會把 nvim 丟到背景。</li>
-        <li>存檔時自動 format，但只在專案有 Biome、oxlint 或 oxfmt 設定檔時才會跑。</li>
+        <li>存檔時自動 format：有 Biome 設定的專案用 Biome，其他專案一律用 oxfmt，專案沒有 <code>.oxfmtrc.json</code> 時套用 <code>~/.oxfmtrc.json</code>。oxlint fix 只在專案有它的設定檔時跑。</li>
         <li>LSP rename、在檔案樹搬移檔案時，import 會跟著更新，被改到的檔案自動存檔。</li>
         <li><code>:e</code> 開一個資料夾還不存在的新檔，存檔時會自動建立資料夾。</li>
         <li>其他工具（例如 AI agent）改了檔案，畫面沒更新時按 <code>&lt;leader&gt;fR</code> 重新讀取。</li>
@@ -328,7 +328,7 @@
             <li><code>fd</code>、<code>ripgrep</code>、<code>fzf</code>：fzf-lua</li>
             <li><code>lazygit</code></li>
             <li><code>typescript</code>：TS 7 原生 LSP（<code>tsc --lsp</code>）</li>
-            <li><code>biome</code>、<code>cspell</code></li>
+            <li><code>biome</code>、<code>oxfmt</code>、<code>cspell</code></li>
           </ul>
         </div>
         <div class="card">
@@ -336,8 +336,8 @@
           <p class="via">專案有裝就優先用</p>
           <ul>
             <li><code>tsc</code>（7 以上才用專案的）</li>
-            <li><code>biome</code></li>
-            <li><code>oxlint</code>、<code>oxfmt</code>：只來自專案</li>
+            <li><code>biome</code>、<code>oxfmt</code></li>
+            <li><code>oxlint</code>：只來自專案</li>
           </ul>
         </div>
       </div>
@@ -382,8 +382,10 @@
               <td>Format</td>
               <td>conform.nvim</td>
               <td>
-                存檔時依序跑 CLI：<code>biome check</code> → <code>oxlint</code> fix → <code>oxfmt</code>，
-                每個工具只在專案有它的設定檔時執行。LSP formatting 不使用，<code>tsc</code>、<code>jsonls</code> 不會動到檔案
+                存檔時依序跑 CLI：<code>biome check</code> → <code>oxlint</code> fix → <code>oxfmt</code>。
+                Biome、oxlint 只在專案有它的設定檔時執行；oxfmt 是預設 formatter，專案用 Biome 時才略過，
+                設定取離檔案最近的 <code>.oxfmtrc.json</code>，找不到專案的就用 <code>~/.oxfmtrc.json</code>。
+                LSP formatting 不使用，<code>tsc</code>、<code>jsonls</code> 不會動到檔案
               </td>
             </tr>
             <tr>

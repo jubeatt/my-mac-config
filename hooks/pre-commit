@@ -2,7 +2,7 @@
 
 # Pre-commit hook:
 #   1. Strip volatile Playwright extension toggle keys from settings.json
-#   2. Auto-format staged files with Biome
+#   2. Auto-format staged files with Oxfmt
 
 # --- 1. Strip Playwright toggle keys ---------------------------------------
 # The Playwright VSCode extension always writes "playwright.reuseBrowser" and
@@ -23,19 +23,19 @@ if command -v jq >/dev/null 2>&1; then
   done
 fi
 
-# --- 2. Biome format --------------------------------------------------------
-# Get staged files that Biome can handle (js, ts, jsx, tsx, json, jsonc)
-STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|jsx|tsx|json|jsonc)$')
+# --- 2. Oxfmt format --------------------------------------------------------
+# Oxfmt skips file types it can't format, so pass every staged file.
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
 
 if [ -z "$STAGED" ]; then
   exit 0
 fi
 
 # Format staged files in place
-echo "$STAGED" | xargs biome format --write 2>&1
+echo "$STAGED" | xargs oxfmt --no-error-on-unmatched-pattern 2>&1
 
 if [ $? -ne 0 ]; then
-  echo "\n✗ Biome format failed. Please fix errors and try again."
+  echo "\n✗ Oxfmt format failed. Please fix errors and try again."
   exit 1
 fi
 

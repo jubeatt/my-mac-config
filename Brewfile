@@ -30,6 +30,8 @@ brew "lazygit"
 brew "neovim"
 # SSL/TLS VPN implementing OSI layer 2 or 3 secure network extension
 brew "openvpn"
+# High-performance formatting tool for JavaScript and TypeScript
+brew "oxfmt"
 # CLI for Playwright: record/generate code, inspect selectors, take screenshots
 brew "playwright-cli"
 # Fast, disk space efficient package manager

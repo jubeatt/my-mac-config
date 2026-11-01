@@ -44,6 +44,13 @@ const CONFIGS = {
     target: home,
     files: [".gitconfig", ".gitignore_global"],
   },
+  // Fallback formatter config: oxfmt walks up from each file, so projects
+  // without their own .oxfmtrc.json end up using this one.
+  oxfmt: {
+    source: resolve(__dirname, ".."),
+    target: home,
+    files: [".oxfmtrc.json"],
+  },
   zsh: {
     source: resolve(__dirname, ".."),
     target: home,
