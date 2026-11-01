@@ -598,19 +598,16 @@ vim.keymap.set("v", "<leader>sf", function()
 end, { desc = "Search and replace selection in current file" })
 
 -- Run tests via the project's runner (Vitest, Jest, Playwright…), picked from
--- the file name and package.json. Output goes to a reused :terminal split.
--- Closing the split kills the terminal, so the next run starts a fresh one.
+-- the file name and package.json. Output goes to toggleterm's terminal 9, so
+-- 9<C-\> toggles it and it behaves like the other toggleterm terminals.
+-- vim-test's built-in toggleterm strategy sends to the last toggled terminal,
+-- which could be a running dev server, so pin the test runs to their own one.
 vim.g["test#custom_strategies"] = {
-  sticky_wipe = function(cmd)
-    vim.fn["test#strategy#neovim_sticky"](cmd)
-    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-      if vim.b[buf]._test_vim_neovim_sticky then
-        vim.bo[buf].bufhidden = "wipe"
-      end
-    end
+  toggleterm_test = function(cmd)
+    require("toggleterm").exec(cmd, 9, nil, nil, nil, "test")
   end,
 }
-vim.g["test#strategy"] = "sticky_wipe"
+vim.g["test#strategy"] = "toggleterm_test"
 -- Playwright claims every *.test / *.spec file once @playwright/test is in
 -- package.json, so limit it to e2e/ or playwright/ folders and leave the rest to Vitest / Jest.
 vim.g["test#javascript#playwright#file_pattern"] = [[\v(^|/)(e2e|playwright)/.*(spec|test)\.(js|jsx|ts|tsx)$]]
@@ -624,7 +621,7 @@ vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>", { desc = "Rerun last test
 require("toggleterm").setup({
   open_mapping = [[<C-\>]],
   size = 15,
-  -- Same as insert mode's jk; buffer-local so Lazygit and vim-test terminals keep their own j.
+  -- Same as insert mode's jk; buffer-local so the Lazygit terminal keeps its own j.
   on_create = function(term)
     vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = term.bufnr, desc = "Exit terminal mode" })
   end,
