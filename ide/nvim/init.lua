@@ -714,6 +714,15 @@ vim.lsp.enable("tsc")
 -- biome.json is found above the file.
 vim.lsp.enable("biome")
 
+-- Global rather than in LspAttach, so they still work when no server attached.
+vim.keymap.set("n", "<leader>cl", function()
+  local names = vim.tbl_map(function(client)
+    return client.name
+  end, vim.lsp.get_clients({ bufnr = 0 }))
+  vim.notify(#names > 0 and table.concat(names, ", ") or "No LSP attached", vim.log.levels.INFO)
+end, { desc = "Show attached LSP clients" })
+vim.keymap.set("n", "<leader>cL", "<cmd>checkhealth vim.lsp<cr>", { desc = "LSP health report" })
+
 -- Completion (LSP items plus friendly-snippets, e.g. ES7 React's rafce)
 require("blink.cmp").setup({
   -- Tab or Enter accepts, like VS Code.
