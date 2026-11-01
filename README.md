@@ -14,6 +14,8 @@
 .
 ├── ai/
 │   └── AGENTS.md        # Claude Code / Codex 共用的全域 rules
+├── docs/
+│   └── nvim.html        # Neovim 架構、選用取捨與日常操作說明
 ├── ide/
 │   ├── nvim/            # Neovim 設定（init.lua、vim.pack lockfile）
 │   └── vscode/          # VS Code settings, keybindings, extensions
