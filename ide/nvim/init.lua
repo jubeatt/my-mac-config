@@ -359,6 +359,10 @@ require("trouble").setup({
       desc = "Jump and close",
     },
   },
+  modes = {
+    -- Keep the symbol grr was invoked on; `r` still refreshes manually.
+    lsp_references = { auto_refresh = false },
+  },
 })
 
 -- File explorer
