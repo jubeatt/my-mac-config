@@ -360,8 +360,10 @@ require("trouble").setup({
     },
   },
   modes = {
-    -- Keep the symbol grr was invoked on; `r` still refreshes manually.
-    lsp_references = { auto_refresh = false },
+    -- Keep the symbol gd / grr was invoked on; `r` still refreshes manually.
+    -- gd / grr print their own one-line warning on no results.
+    lsp_definitions = { auto_refresh = false, warn_no_results = false },
+    lsp_references = { auto_refresh = false, warn_no_results = false },
   },
 })
 
@@ -793,15 +795,32 @@ local function source_action(kind)
   end
 end
 
+-- Open a Trouble LSP view; on no results, show a one-line warning instead of
+-- Trouble's two-line one, which triggers a hit-enter prompt.
+local function trouble_lsp(mode, empty_msg)
+  local view = require("trouble").open(mode)
+  if view then
+    view.first_update:next(function()
+      if view:count() == 0 then
+        vim.notify(empty_msg, vim.log.levels.WARN)
+      end
+    end)
+  end
+  return view
+end
+
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(ev)
-    vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = ev.buf, desc = "Go to definition" })
+    -- Trouble jumps straight to a single definition and lists multiple ones like grr.
+    vim.keymap.set("n", "gd", function()
+      trouble_lsp("lsp_definitions", "No definition found")
+    end, { buffer = ev.buf, desc = "Go to definition" })
     vim.keymap.set("n", "grr", function()
       local trouble = require("trouble")
       if trouble.is_open("lsp_references") then
         return trouble.close("lsp_references")
       end
-      local view = trouble.open("lsp_references")
+      local view = trouble_lsp("lsp_references", "No references found")
       if view then
         -- Trouble forces foldlevel=99 on its window; level 1 keeps the "References" header open but folds each file.
         view:wait(function()
