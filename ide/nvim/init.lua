@@ -328,6 +328,13 @@ vim.keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files"
 vim.keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find open buffers" })
 vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Search content" })
 vim.keymap.set("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Recent files" })
+-- Like VS Code's breadcrumb dropdown: pick a sibling of the current file.
+vim.keymap.set("n", "<leader>fd", function()
+  require("fzf-lua").files({
+    cwd = vim.fn.expand("%:p:h"),
+    fd_opts = "--color=never --type f --type l --max-depth 1",
+  })
+end, { desc = "Find files in current directory" })
 vim.keymap.set("n", "<leader>xx", "<cmd>FzfLua diagnostics_workspace<cr>", { desc = "Workspace diagnostics" })
 vim.keymap.set("n", "<leader>xd", "<cmd>FzfLua diagnostics_document<cr>", { desc = "Document diagnostics" })
 vim.keymap.set("n", "<leader>fo", function()
@@ -478,8 +485,8 @@ vim.api.nvim_create_user_command("Rm", function(opts)
   require("mini.bufremove").delete(0, true)
 end, { bang = true, desc = "Move the current file to Trash, or delete it with !" })
 
-vim.keymap.set("n", "<leader>fd", "<cmd>Rm<cr>", { desc = "Delete current file (Trash)" })
-vim.keymap.set("n", "<leader>fD", "<cmd>Rm!<cr>", { desc = "Delete current file permanently" })
+vim.keymap.set("n", "<leader>fx", "<cmd>Rm<cr>", { desc = "Delete current file (Trash)" })
+vim.keymap.set("n", "<leader>fX", "<cmd>Rm!<cr>", { desc = "Delete current file permanently" })
 
 -- Git: change markers in the sign column, hunk navigation and line blame.
 require("gitsigns").setup({
