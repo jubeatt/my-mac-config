@@ -550,6 +550,18 @@ require("diffview").setup({
   },
 })
 -- Run Lazygit inside Neovim so nvim-remote can open files in this instance.
+local lazygit_session = nil
+-- Called by Lazygit's edit commands before `nvim --remote`, so files open in the tab Lazygit came from.
+function _G.LazygitReturnToEditor()
+  if not lazygit_session then
+    return
+  end
+  if vim.api.nvim_tabpage_is_valid(lazygit_session.origin_tab) then
+    vim.api.nvim_set_current_tabpage(lazygit_session.origin_tab)
+  end
+  -- Lazygit reads this after its edit command returns, quits, and on_exit closes its tab.
+  vim.fn.chansend(lazygit_session.job, "q")
+end
 vim.keymap.set("n", "<leader>gg", function()
   if vim.fn.executable("lazygit") ~= 1 then
     vim.notify("Install lazygit from the Brewfile first", vim.log.levels.WARN)
@@ -560,14 +572,18 @@ vim.keymap.set("n", "<leader>gg", function()
     vim.notify("Open a file or directory in a Git repository first", vim.log.levels.WARN)
     return
   end
+  local origin_tab = vim.api.nvim_get_current_tabpage()
   vim.cmd.tabnew()
   local bufnr = vim.api.nvim_get_current_buf()
   vim.bo[bufnr].bufhidden = "wipe"
-  vim.fn.jobstart({ "lazygit" }, {
+  local job = vim.fn.jobstart({ "lazygit" }, {
     term = true,
     cwd = root,
-    on_exit = function(_, code)
+    on_exit = function(job_id, code)
       vim.schedule(function()
+        if lazygit_session and lazygit_session.job == job_id then
+          lazygit_session = nil
+        end
         if code ~= 0 then
           vim.notify("Lazygit exited with code " .. code .. "; see the terminal output", vim.log.levels.WARN)
           return
@@ -581,6 +597,7 @@ vim.keymap.set("n", "<leader>gg", function()
       end)
     end,
   })
+  lazygit_session = { job = job, origin_tab = origin_tab }
   vim.cmd.startinsert()
 end, { desc = "Open Lazygit" })
 vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Open git diff view" })
