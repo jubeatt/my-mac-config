@@ -94,6 +94,10 @@ vim.api.nvim_create_autocmd("PackChanged", {
   end,
 })
 
+-- vim-abolish's own cr reads the next key itself, which hides it from which-key; the
+-- which-key spec maps each coercion instead. Set before vim.pack.add() loads the plugin.
+vim.g.abolish_no_mappings = 1
+
 vim.pack.add({
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
   "https://github.com/Wansmer/treesj",
@@ -281,6 +285,15 @@ require("which-key").setup({
     { "gsf", desc = "Find: pair's right edge" },
     { "gsF", desc = "Find: pair's left edge" },
     { "gsh", desc = "Highlight: pair around cursor" },
+    -- One mapping per vim-abolish coercion, so cr gets a popup.
+    { "cr", group = "Coerce case" },
+    { "crc", "<Plug>(abolish-coerce-word)c", desc = "camelCase", remap = true },
+    { "crp", "<Plug>(abolish-coerce-word)p", desc = "PascalCase", remap = true },
+    { "crs", "<Plug>(abolish-coerce-word)s", desc = "snake_case", remap = true },
+    { "cru", "<Plug>(abolish-coerce-word)u", desc = "UPPER_CASE", remap = true },
+    { "cr-", "<Plug>(abolish-coerce-word)-", desc = "dash-case", remap = true },
+    { "cr.", "<Plug>(abolish-coerce-word).", desc = "dot.case", remap = true },
+    { "cr<Space>", "<Plug>(abolish-coerce-word)<Space>", desc = "space case", remap = true },
     -- The nav preset lists ]( ]{ ]< [< which aren't Vim motions; the real
     -- unmatched-bracket motions are [( [{ ]) ]}.
     { "](", hidden = true },
