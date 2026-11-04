@@ -105,6 +105,7 @@ vim.pack.add({
   "https://github.com/nvim-mini/mini.icons",
   "https://github.com/nvim-mini/mini.bufremove",
   "https://github.com/nvim-mini/mini.surround",
+  "https://github.com/tpope/vim-abolish",
   "https://github.com/nvim-lualine/lualine.nvim",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/sindrets/diffview.nvim",
