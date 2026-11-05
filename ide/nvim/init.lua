@@ -363,6 +363,18 @@ vim.keymap.set("n", "<leader>fo", function()
   end
 end, { desc = "Open file in default app" })
 
+vim.keymap.set("n", "<leader>fO", function()
+  local path = vim.api.nvim_buf_get_name(0)
+  if vim.bo.buftype ~= "" or path == "" then
+    vim.notify("Open a file before opening its folder in Finder", vim.log.levels.WARN)
+    return
+  end
+  local _, err = vim.ui.open(vim.fn.fnamemodify(path, ":h"))
+  if err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end, { desc = "Open current folder in Finder" })
+
 -- Results grouped by file in a foldable tree, like VS Code's references panel.
 require("trouble").setup({
   focus = true,
