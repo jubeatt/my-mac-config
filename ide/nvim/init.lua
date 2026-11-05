@@ -776,6 +776,17 @@ vim.lsp.enable("biome")
 vim.lsp.config("oxlint", { workspace_required = true })
 vim.lsp.enable("oxlint")
 
+-- ast-grep ships its own LSP (`ast-grep lsp`); it starts only when an sgconfig.yml is found.
+-- Prefer the project's node_modules, like biome and oxlint.
+vim.lsp.config("ast_grep", {
+  cmd = function(dispatchers, config)
+    local local_cmd = config.root_dir and vim.fs.joinpath(config.root_dir, "node_modules/.bin/ast-grep")
+    local cmd = local_cmd and vim.fn.executable(local_cmd) == 1 and local_cmd or "ast-grep"
+    return vim.lsp.rpc.start({ cmd, "lsp" }, dispatchers)
+  end,
+})
+vim.lsp.enable("ast_grep")
+
 -- Global rather than in LspAttach, so they still work when no server attached.
 vim.keymap.set("n", "<leader>cl", function()
   local names = vim.tbl_map(function(client)
