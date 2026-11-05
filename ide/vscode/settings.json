@@ -29,10 +29,8 @@
   "editor.letterSpacing": 1,
   "editor.suggest.showStatusBar": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.biome": "explicit",
     "source.fixAll.oxc": "explicit"
   },
-  "biome.requireConfiguration": true,
   "oxc.requireConfig": true,
   "explorer.compactFolders": false,
   "explorer.fileNesting.enabled": false,
@@ -89,7 +87,6 @@
   ],
   "gitlens.rebaseEditor.openOnPausedRebase": false,
   "json.schemaDownload.trustedDomains": {
-    "https://biomejs.dev": true,
     "https://developer.microsoft.com/json-schemas/": true,
     "https://docs.renovatebot.com": true,
     "https://json-schema.org/": true,
