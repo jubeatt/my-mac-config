@@ -100,6 +100,7 @@ vim.g.abolish_no_mappings = 1
 
 vim.pack.add({
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+  "https://github.com/davidmh/mdx.nvim",
   "https://github.com/Wansmer/treesj",
   { src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
   "https://github.com/ibhagwan/fzf-lua",
