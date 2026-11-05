@@ -59,6 +59,8 @@ cask "codex"
 cask "dockdoor"
 # App to build and share containerised applications and microservices
 cask "docker-desktop"
+# Per-application volume mixer, equalizer, and audio router
+cask "finetune"
 cask "font-jetbrains-mono-nerd-font"
 # GIT client
 cask "fork"
