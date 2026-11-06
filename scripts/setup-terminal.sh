@@ -1,18 +1,11 @@
 #!/bin/bash
-# Set up terminal environment: font, oh-my-zsh, plugins, iTerm2 config, zshrc symlink.
+# Set up terminal environment: oh-my-zsh, zsh plugins, iTerm2 config.
+# Usage: bash scripts/setup-terminal.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
-
-# -- Font --
-if ls ~/Library/Fonts/JetBrainsMonoNerdFont* &>/dev/null; then
-  echo "✓ JetBrains Mono Nerd Font already installed"
-else
-  echo "Installing JetBrains Mono Nerd Font..."
-  brew install --cask font-jetbrains-mono-nerd-font
-fi
 
 # -- Oh My Zsh --
 if [ -d "$HOME/.oh-my-zsh" ]; then
@@ -51,32 +44,3 @@ else
   defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
   echo "  → Restart iTerm2 to apply settings"
 fi
-
-# -- Custom zsh theme --
-THEME_SRC="$REPO_DIR/terminal/oh-my-zsh/tonotdo.zsh-theme"
-THEME_DEST="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/tonotdo.zsh-theme"
-if [ -L "$THEME_DEST" ] && [ "$(readlink "$THEME_DEST")" = "$THEME_SRC" ]; then
-  echo "✓ tonotdo theme symlink already set"
-else
-  echo "Linking tonotdo theme..."
-  mkdir -p "$(dirname "$THEME_DEST")"
-  ln -sf "$THEME_SRC" "$THEME_DEST"
-  echo "  ✓ tonotdo.zsh-theme -> $THEME_SRC"
-fi
-
-# -- Node.js via fnm --
-# Keep the active Node.js version under fnm; pnpm is installed separately by Homebrew.
-eval "$(fnm env --use-on-cd)"
-if ! fnm list 2>/dev/null | grep -q 'v'; then
-  echo "Installing Node.js LTS via fnm..."
-  fnm install --lts
-fi
-fnm default lts-latest >/dev/null 2>&1 || true
-eval "$(fnm env --use-on-cd)"
-
-# -- .zshrc symlink --
-echo ""
-node "$SCRIPT_DIR/link-configs.js" --zsh
-
-echo ""
-echo "Done."

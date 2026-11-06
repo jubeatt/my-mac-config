@@ -56,6 +56,13 @@ const CONFIGS = {
     target: home,
     files: [".zshrc"],
   },
+  // Run after Oh My Zsh is installed: creating ~/.oh-my-zsh here first makes
+  // its installer abort.
+  ohMyZshTheme: {
+    source: resolve(__dirname, "../terminal/oh-my-zsh"),
+    target: `${home}/.oh-my-zsh/custom/themes`,
+    files: ["tonotdo.zsh-theme"],
+  },
   ghostty: {
     source: resolve(__dirname, "../terminal/ghostty"),
     target: `${home}/.config/ghostty`,

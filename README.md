@@ -4,9 +4,7 @@
 
 ## 前置需求
 
-- macOS
-- [Homebrew](https://brew.sh)
-- fnm（由 Brewfile 安裝，Node.js 由 setup script 管理）
+- macOS（Apple Silicon）
 
 ## 目錄結構
 
@@ -27,10 +25,12 @@
 │   ├── herdr-app/       # Herdr 桌面 App 設定（版面、主題）
 │   └── lazygit/         # Lazygit 設定
 ├── scripts/
-│   ├── link-configs.js  # 建立 symlink
-│   ├── setup-terminal.sh        # 終端環境一鍵設定
+│   ├── link-configs.js          # 建立 symlink
+│   ├── setup-terminal.sh        # 安裝 Oh My Zsh、zsh plugin，設定 iTerm2
 │   ├── install-extensions.js    # 安裝 VS Code extensions
 │   └── gen-vscode-extensions.js # 同步 VS Code extensions 清單
+├── hooks/               # git hooks
+├── setup.sh             # 依序執行所有 setup 步驟
 ├── .zshrc               # zsh 設定
 ├── .gitconfig            # Git 設定
 ├── .gitignore_global     # Git global ignore 設定
@@ -42,47 +42,50 @@
 
 ## 快速開始
 
-### 1. 安裝 Homebrew 套件
-
 ```bash
-brew bundle
+git clone https://github.com/jubeatt/my-mac-config.git ~/Projects/my-mac-config
+cd ~/Projects/my-mac-config
+./setup.sh
 ```
 
-### 2. 設定終端環境
+每個步驟都會先檢查是否已完成，重跑只會補上缺的部分。symlink 的目標位置已有檔案時會直接覆寫，以 repo 的設定為準。
 
-一鍵安裝字體、Oh My Zsh、plugin、iTerm2 設定、zsh theme 和 .zshrc symlink：
+## setup.sh 會做的事
 
-```bash
-bash scripts/setup-terminal.sh
-```
+1. 安裝 Homebrew（沒裝才裝）
+2. `brew bundle` 安裝 `Brewfile` 的套件，包含 fnm、字體與各個 App
+3. 透過 fnm 安裝 Node.js LTS 並設為預設版本
+4. `scripts/setup-terminal.sh`：安裝 Oh My Zsh、zsh-autosuggestions、zsh-syntax-highlighting，並把 iTerm2 的設定資料夾指向 `terminal/iterm2/`
+5. `scripts/link-configs.js`：建立所有設定的 symlink，見下方對照表
+6. 設定 `core.hooksPath` 為 `hooks/`
+7. 安裝 Herdr App 的 desktop-notifications mod
+8. `scripts/install-extensions.js`：安裝 `ide/vscode/extensions.json` 裡還沒裝的 VS Code extensions
 
-完成後重啟 iTerm2 即可。
+跑完後要手動處理：
 
-### 3. 建立 Symlink
+- 重啟 iTerm2 載入設定
+- 到「系統設定 → 通知」允許 `terminal-notifier`
+- 執行 `exec zsh` 重新載入 shell
+
+`scripts/` 裡的每支 script 都可以單獨執行，例如只重建 symlink：
 
 ```bash
 node scripts/link-configs.js
 ```
 
-> 會一次建立所有設定的 symlink，目標目錄不存在時會自動建立。目標位置已有的檔案會直接被覆寫。
+## 維護用指令
 
-### 4. 安裝 IDE Extensions
-
-```bash
-node scripts/install-extensions.js
-```
-
-## 其他 Script
-
-### 同步 Extensions 清單
-
-以目前 VS Code 已安裝的 extensions 為主，更新 `ide/vscode/extensions.json`：
+把本機的狀態寫回 repo：
 
 ```bash
+# 以目前 VS Code 已安裝的 extensions 為主，更新 ide/vscode/extensions.json
 node scripts/gen-vscode-extensions.js
 
 # 預覽變更，不寫入檔案
 node scripts/gen-vscode-extensions.js --dryrun
+
+# 重新產生 Brewfile（不會移除套件）
+bbd
 ```
 
 ## Symlink 對照表
@@ -110,14 +113,7 @@ node scripts/gen-vscode-extensions.js --dryrun
 - `keys.json`：以 App 預設快捷鍵為底，改掉會撞到 nvim fzf-lua 的 F 鍵：重新命名 tab／space 改用 `cmd-r`／`cmd-shift-r`。App 只會替沒改過的 `keys.json` 換上新版預設，這份改過就整份歸自己管，App 更新新增的快捷鍵要看 update notes 手動補上。
 
 - `layouts/peanu.json`：複製自內建的 `main` 版面，多一個 0px 區塊給 desktop-notifications mod 執行。內建版面每次啟動都會被覆蓋，所以自訂都放這份。
-- desktop-notifications mod 沒有授權條款，不收進 repo。新電腦要另外安裝：
-
-```bash
-git clone https://github.com/benjaminsicard/herdr-mods.git /tmp/herdr-mods
-cp -R /tmp/herdr-mods/desktop-notifications/mods/desktop-notifications ~/.config/herdr-app/mods/
-```
-
-通知走 `terminal-notifier`（Brewfile 已列），第一次使用要到「系統設定 → 通知」允許它。
+- desktop-notifications mod 沒有授權條款，不收進 repo，由 `setup.sh` 從 [benjaminsicard/herdr-mods](https://github.com/benjaminsicard/herdr-mods) 下載安裝。通知走 `terminal-notifier`。
 
 ## Python 環境
 
@@ -133,22 +129,10 @@ uv run python -c "import sys; print(sys.version); print(sys.executable); print(s
 
 專案的 `.python-version` 指定 Python 版本，`pyproject.toml` 與 `uv.lock` 記錄套件依賴；`.venv` 留在本機。上面的檢查指令會列出版本、專案解譯器與基底 Python 路徑。
 
-`bbd` 會重新產生 Homebrew 套件清單 `Brewfile`，本身不會移除套件。uv 管理的 Python 安裝與專案環境由 uv 維護。
+uv 管理的 Python 安裝與專案環境由 uv 維護。
 
 ## Git Hooks
 
-專案使用 `hooks/` 目錄管理 git hooks，clone 後需設定一次：
-
-```bash
-git config core.hooksPath hooks
-```
-
-目前包含：
+`setup.sh` 會把 `core.hooksPath` 指向 `hooks/`，目前包含：
 
 - **pre-commit** — 自動對 staged 檔案執行 `oxfmt`，oxfmt 不支援的檔案類型會略過
-
-## 備註
-
-- iTerm2 設定透過內建的 Custom Folder 功能自動同步，不需要手動 symlink
-- 字體（JetBrains Mono Nerd Font）透過 Homebrew Cask 管理，記錄在 Brewfile
-- Oh My Zsh 和 zsh-autosuggestions 由 `setup-terminal.sh` 自動安裝

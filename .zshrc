@@ -124,7 +124,7 @@ kcc() {
   kiro-cli chat --no-interactive --trust-all-tools "$*"
 }
 alias lg="lazygit"
-alias bbd="brew bundle dump --force --no-vscode --file=Brewfile"
+alias bbd="brew bundle dump --force --no-vscode --no-npm --file=Brewfile"
 alias vs="code"
 alias n="nvim"
 alias pn="pnpm"

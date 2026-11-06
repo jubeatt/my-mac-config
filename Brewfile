@@ -1,5 +1,7 @@
 tap "aviator-co/tap"
 tap "ejoffe/tap"
+# Spell checker for code
+brew "cspell"
 # Image format providing lossless and lossy compression for web images
 brew "webp"
 # TIFF library and utilities
@@ -74,5 +76,3 @@ cask "herdr-app"
 cask "hiddenbar"
 # Open-source code editor
 cask "visual-studio-code"
-npm "corepack"
-npm "cspell"

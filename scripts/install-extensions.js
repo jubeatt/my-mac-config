@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 // Install VS Code extensions from ide/vscode/extensions.json.
+// Skips extensions that are already installed.
 // Usage: node scripts/install-extensions.js
 
 import { execSync } from "node:child_process"
@@ -21,11 +22,29 @@ function readExtensions() {
   }
 }
 
-function main() {
-  const extensions = readExtensions()
-  console.log(`Installing ${extensions.length} extensions...`)
+function getInstalledExtensions() {
+  const ids = execSync("code --list-extensions", { encoding: "utf-8" })
+    .trim()
+    .split("\n")
+    .map((id) => id.toLowerCase())
+    .filter(Boolean)
+  return new Set(ids)
+}
 
-  for (const ext of extensions) {
+function main() {
+  const installed = getInstalledExtensions()
+  const missing = readExtensions().filter(
+    (ext) => !installed.has(ext.toLowerCase()),
+  )
+
+  if (missing.length === 0) {
+    console.log("✓ All extensions already installed")
+    return
+  }
+
+  console.log(`Installing ${missing.length} extensions...`)
+
+  for (const ext of missing) {
     try {
       execSync(`code --install-extension ${ext}`, { stdio: "pipe" })
       console.log(`  ✓ ${ext}`)
