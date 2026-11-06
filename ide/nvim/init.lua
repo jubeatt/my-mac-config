@@ -1,4 +1,3 @@
--- Plugin names and Vim API identifiers make spell checking too noisy here.
 -- cspell:disable
 
 -- Set before any <leader> mapping is defined.
@@ -8,7 +7,6 @@ vim.g.mapleader = " "
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- Options (only those that differ from Neovim defaults)
 vim.o.clipboard = "unnamed"
 vim.o.wrap = false
 vim.o.splitright = true
@@ -17,10 +15,8 @@ vim.o.splitbelow = true
 vim.o.number = true
 vim.o.cursorline = true
 vim.o.scrolloff = 5
--- Reserve the sign column so gitsigns / diagnostics don't shift the text.
 vim.o.signcolumn = "yes"
 
--- Keep undo history across sessions.
 vim.o.undofile = true
 
 -- No swap files: fzf-lua opens buffers via the API, where a stale swap only
@@ -35,7 +31,6 @@ if vim.o.shadafile == "" then
   vim.o.shadafile = vim.fn.stdpath("state") .. "/shada/" .. (root:gsub("/", "%%")) .. ".shada"
 end
 
--- Open files fully unfolded; treesitter folds only close on demand.
 vim.o.foldlevel = 99
 
 vim.o.ignorecase = true
@@ -48,23 +43,20 @@ vim.o.expandtab = true
 -- Ask to save instead of failing with E37, e.g. after grn edits other files.
 vim.o.confirm = true
 
--- Idle time before CursorHold fires (default 4000ms); drives symbol highlighting.
+-- Drives the CursorHold symbol highlighting.
 vim.o.updatetime = 250
 
--- Outline floats (hover, diagnostics, completion, git hunk preview); their background is
--- barely darker than the editor's, so without a border they blend into the code.
+-- Float backgrounds are barely darker than the editor's, so they blend in without a border.
 vim.o.winborder = "rounded"
 
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
--- A suspended nvim keeps its swap files, so opening the same file again hits E325.
 vim.keymap.set({ "n", "x" }, "<C-z>", "<Nop>", { desc = "Disable suspend" })
 
 -- Exiting merges jumps back from the project's ShaDa file, so overwrite it right away.
 vim.keymap.set("n", "<leader>j", "<cmd>clearjumps | wshada!<cr>", { desc = "Clear jumplist" })
 
--- Copy the current file path or name to the system clipboard.
 vim.keymap.set("n", "<leader>fp", function()
   vim.fn.setreg("+", vim.fn.expand("%:."))
 end, { desc = "Copy relative path" })
@@ -80,10 +72,9 @@ end, { desc = "Copy file name" })
 -- autoread only checks on focus or buffer events, so edits from other tools can go unnoticed.
 vim.keymap.set("n", "<leader>fR", "<cmd>checktime<cr>", { desc = "Reload files changed on disk" })
 
--- Plugins
 -- Treesitter parsers must match the plugin version, so refresh them after each update.
--- Registered before vim.pack.add() so it also fires on lockfile installs.
 vim.api.nvim_create_autocmd("PackChanged", {
+  group = vim.api.nvim_create_augroup("treesitter-update", { clear = true }),
   callback = function(ev)
     if ev.data.spec.name == "nvim-treesitter" and ev.data.kind == "update" then
       if not ev.data.active then
@@ -132,33 +123,29 @@ vim.pack.add({
   { src = "https://github.com/smart-splits-nvim/smart-splits.nvim", version = vim.version.range("3.*") },
 })
 
--- Colorscheme
--- Plugin integrations (blink.cmp, nvim-tree, fzf-lua, gitsigns…) are detected from vim.pack automatically.
 require("catppuccin").setup({
   flavour = "mocha",
 })
 vim.cmd.colorscheme("catppuccin")
 
--- Icons: mocking nvim-web-devicons lets nvim-tree, lualine and fzf-lua pick up mini.icons.
+-- Mocking nvim-web-devicons lets nvim-tree, lualine and fzf-lua pick up mini.icons.
 local mini_icons = require("mini.icons")
 mini_icons.setup()
 mini_icons.mock_nvim_web_devicons()
 
--- Delete a buffer but keep its windows, so ]b / [b skip it without closing the split beside nvim-tree.
-require("mini.bufremove").setup()
-vim.keymap.set("n", "<leader>d", function()
-  require("mini.bufremove").delete()
-end, { desc = "Delete buffer" })
+-- Keep windows when deleting buffers, so the split beside nvim-tree survives.
+local bufremove = require("mini.bufremove")
+bufremove.setup()
+vim.keymap.set("n", "<leader>d", bufremove.delete, { desc = "Delete buffer" })
 vim.keymap.set("n", "<leader>D", function()
   local current = vim.api.nvim_get_current_buf()
   for _, buf in ipairs(vim.fn.getbufinfo({ buflisted = 1 })) do
     if buf.bufnr ~= current then
-      require("mini.bufremove").delete(buf.bufnr)
+      bufremove.delete(buf.bufnr)
     end
   end
 end, { desc = "Delete other buffers" })
 
--- Statusline
 require("lualine").setup({
   options = { theme = "catppuccin-nvim" },
   sections = {
@@ -174,7 +161,6 @@ require("lualine").setup({
     lualine_c = {},
     lualine_x = { { "filename", path = 1 } },
   },
-  -- Always show listed buffers on top; tab numbers only appear while extra tabs (e.g. diffview) are open.
   tabline = {
     lualine_a = { { "buffers", symbols = { alternate_file = "" } } },
     lualine_z = {
@@ -188,7 +174,6 @@ require("lualine").setup({
   },
 })
 
--- Treesitter
 local parsers = {
   "javascript",
   "typescript",
@@ -205,10 +190,10 @@ local parsers = {
   "python",
 }
 
--- Async and a no-op for parsers that are already installed.
 require("nvim-treesitter").install(parsers)
 
 vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("treesitter-start", { clear = true }),
   callback = function(ev)
     local lang = vim.treesitter.language.get_lang(ev.match)
     -- language.add() fails while a parser is still installing on first launch.
@@ -221,32 +206,26 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Split / join syntax nodes, including arrow-function bodies.
-require("treesj").setup({
+local treesj = require("treesj")
+treesj.setup({
   use_default_keymaps = false,
   max_join_length = 1000,
 })
-vim.keymap.set("n", "<leader>cs", require("treesj").split, { desc = "Split code block" })
-vim.keymap.set("n", "<leader>cj", require("treesj").join, { desc = "Join code block" })
+vim.keymap.set("n", "<leader>cs", treesj.split, { desc = "Split code block" })
+vim.keymap.set("n", "<leader>cj", treesj.join, { desc = "Join code block" })
 
--- Auto-close brackets and quotes as they are typed, like VS Code.
 require("nvim-autopairs").setup()
-
--- Auto-close and rename paired HTML / JSX / Vue tags via treesitter.
 require("nvim-ts-autotag").setup()
 
--- Use explicit Flash jumps while keeping native f / t character motions.
-require("flash").setup({
+local flash = require("flash")
+flash.setup({
+  -- Keep native f / t motions.
   modes = { char = { enabled = false } },
 })
-vim.keymap.set({ "n", "x", "o" }, "s", function()
-  require("flash").jump()
-end, { desc = "Flash jump" })
-vim.keymap.set({ "n", "x", "o" }, "S", function()
-  require("flash").treesitter()
-end, { desc = "Flash treesitter selection" })
+vim.keymap.set({ "n", "x", "o" }, "s", flash.jump, { desc = "Flash jump" })
+vim.keymap.set({ "n", "x", "o" }, "S", flash.treesitter, { desc = "Flash treesitter selection" })
 
--- Add / delete / replace surrounding pairs; gs prefix because Flash owns s.
+-- gs prefix because Flash owns s.
 require("mini.surround").setup({
   mappings = {
     add = "gsa",
@@ -258,11 +237,8 @@ require("mini.surround").setup({
   },
 })
 
--- Popup listing the next available keys after a pause, e.g. after <leader>.
--- Keymap descriptions come from each mapping's desc.
 require("which-key").setup({
-  -- Wait longer than the 200ms default before showing the popup; the marks /
-  -- registers plugins still open immediately.
+  -- The marks / registers plugins still open immediately.
   delay = function(ctx)
     return ctx.plugin and 0 or 500
   end,
@@ -270,7 +246,6 @@ require("which-key").setup({
   win = { border = "none" },
   spec = {
     { "<leader>f", group = "Find / file" },
-    -- Git and Search also have visual-mode mappings (reset lines, replace selection).
     { "<leader>g", group = "Git", mode = { "n", "x" } },
     { "<leader>c", group = "Code" },
     { "<leader>s", group = "Search", mode = { "n", "x" } },
@@ -286,7 +261,6 @@ require("which-key").setup({
     { "gsf", desc = "Find: pair's right edge" },
     { "gsF", desc = "Find: pair's left edge" },
     { "gsh", desc = "Highlight: pair around cursor" },
-    -- One mapping per vim-abolish coercion, so cr gets a popup.
     { "cr", group = "Coerce case" },
     { "crc", "<Plug>(abolish-coerce-word)c", desc = "camelCase", remap = true },
     { "crp", "<Plug>(abolish-coerce-word)p", desc = "PascalCase", remap = true },
@@ -308,8 +282,7 @@ require("which-key").setup({
   },
 })
 
--- Hold Alt + hjkl / arrows to move the split border in that direction, like
--- smart-splits' README; at the outer edge it resizes the surrounding herdr pane instead.
+-- At the outer edge this resizes the surrounding herdr pane instead.
 local smart_splits = require("smart-splits")
 vim.keymap.set("n", "<A-h>", smart_splits.resize_left, { desc = "Resize left" })
 vim.keymap.set("n", "<A-j>", smart_splits.resize_down, { desc = "Resize down" })
@@ -324,44 +297,45 @@ vim.keymap.set("n", "<A-Right>", smart_splits.resize_right, { desc = "Resize rig
 vim.keymap.set("n", "<A-b>", smart_splits.resize_left, { desc = "Resize left" })
 vim.keymap.set("n", "<A-f>", smart_splits.resize_right, { desc = "Resize right" })
 
--- Fuzzy finder (files via fd, content via ripgrep)
-require("fzf-lua").setup({
+local fzf = require("fzf-lua")
+fzf.setup({
   winopts = {
     preview = { layout = "vertical", vertical = "down:45%" },
   },
   files = {
     -- Parse file:line queries and jump to the requested line.
-    -- Ref: https://github.com/ibhagwan/fzf-lua/blob/main/OPTIONS.md#filesline_query
     line_query = true,
   },
   -- Previewing resolves each action, which vtsls rejects for disabled refactors.
   lsp = { code_actions = { previewer = false } },
 })
--- Also render vim.ui.select (e.g. code actions) with fzf-lua.
-require("fzf-lua").register_ui_select()
+fzf.register_ui_select()
 vim.keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files" })
 vim.keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find open buffers" })
 vim.keymap.set("n", "<leader>fg", "<cmd>FzfLua live_grep<cr>", { desc = "Search content" })
 vim.keymap.set("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Recent files" })
--- Like VS Code's breadcrumb dropdown: pick a sibling of the current file.
 vim.keymap.set("n", "<leader>fd", function()
-  require("fzf-lua").files({
+  fzf.files({
     cwd = vim.fn.expand("%:p:h"),
     fd_opts = "--color=never --type f --type l --max-depth 1",
   })
 end, { desc = "Find files in current directory" })
 vim.keymap.set("n", "<leader>xx", "<cmd>FzfLua diagnostics_workspace<cr>", { desc = "Workspace diagnostics" })
 vim.keymap.set("n", "<leader>xd", "<cmd>FzfLua diagnostics_document<cr>", { desc = "Document diagnostics" })
+local function system_open(path)
+  local _, err = vim.ui.open(path)
+  if err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end
+
 vim.keymap.set("n", "<leader>fo", function()
   local path = vim.api.nvim_buf_get_name(0)
   if vim.bo.buftype ~= "" or path == "" or vim.fn.filereadable(path) ~= 1 then
     vim.notify("Save the file before opening it in the default app", vim.log.levels.WARN)
     return
   end
-  local _, err = vim.ui.open(path)
-  if err then
-    vim.notify(err, vim.log.levels.ERROR)
-  end
+  system_open(path)
 end, { desc = "Open file in default app" })
 
 vim.keymap.set("n", "<leader>fO", function()
@@ -370,17 +344,13 @@ vim.keymap.set("n", "<leader>fO", function()
     vim.notify("Open a file before opening its folder in Finder", vim.log.levels.WARN)
     return
   end
-  local _, err = vim.ui.open(vim.fn.fnamemodify(path, ":h"))
-  if err then
-    vim.notify(err, vim.log.levels.ERROR)
-  end
+  system_open(vim.fn.fnamemodify(path, ":h"))
 end, { desc = "Open current folder in Finder" })
 
--- Results grouped by file in a foldable tree, like VS Code's references panel.
-require("trouble").setup({
+local trouble = require("trouble")
+trouble.setup({
   focus = true,
   keys = {
-    -- Like VS Code: jump and close on an item, toggle the fold on a file node.
     ["<cr>"] = {
       action = function(view, ctx)
         if ctx.item then
@@ -401,9 +371,7 @@ require("trouble").setup({
   },
 })
 
--- File explorer
 require("nvim-tree").setup({
-  -- Show gitignored files by default; `I` still toggles them.
   filters = { git_ignored = false },
   -- `D` moves to the macOS Trash; the default `gio trash` isn't installed.
   trash = { cmd = "trash" },
@@ -423,7 +391,6 @@ require("nvim-tree").setup({
 })
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle file explorer" })
 
--- Bridge nvim-tree renames and cut/paste moves to LSP import updates.
 -- Auto-save files touched by LSP workspace edits, including symbol renames.
 local file_operations = require("lsp-file-operations")
 file_operations.setup({
@@ -439,9 +406,8 @@ file_operations.setup({
 })
 vim.lsp.config("*", { capabilities = file_operations.default_capabilities() })
 
--- Single-file create / move from the command line; batches and folders stay in nvim-tree.
--- Create missing parent folders on save, so `:e new/dir/file.ts` just works.
 vim.api.nvim_create_autocmd("BufWritePre", {
+  group = vim.api.nvim_create_augroup("mkdir-on-save", { clear = true }),
   callback = function(ev)
     if vim.bo[ev.buf].buftype == "" and not ev.match:match("^%w+://") then
       vim.fn.mkdir(vim.fs.dirname(ev.match), "p")
@@ -449,7 +415,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
--- Prefill `:e` with the current file's folder, or the working directory when there is none.
 local function current_dir()
   local name = vim.api.nvim_buf_get_name(0)
   if vim.bo.buftype ~= "" or name == "" then
@@ -465,7 +430,6 @@ end, { expr = true, desc = "Add file in current folder" })
 
 vim.keymap.set("n", "<leader>fA", ":e ", { desc = "Add file in project root" })
 
--- Move or rename the current file; LSP servers update imports before the move.
 vim.api.nvim_create_user_command("Mv", function(opts)
   local old = vim.api.nvim_buf_get_name(0)
   local new = vim.fn.fnamemodify(opts.args, ":p")
@@ -488,8 +452,6 @@ vim.keymap.set("n", "<leader>fm", function()
   return ":Mv " .. vim.fn.expand("%:.")
 end, { expr = true, desc = "Move / rename current file" })
 
--- Move the current file to the macOS Trash (`:Rm!` deletes it permanently) and close
--- its buffer, keeping the window.
 vim.api.nvim_create_user_command("Rm", function(opts)
   local name = vim.api.nvim_buf_get_name(0)
   if vim.bo.buftype ~= "" or not vim.uv.fs_stat(name) then
@@ -509,18 +471,16 @@ vim.api.nvim_create_user_command("Rm", function(opts)
     vim.notify("Rm: " .. vim.trim(result.stderr or ""), vim.log.levels.ERROR)
     return
   end
-  require("mini.bufremove").delete(0, true)
+  bufremove.delete(0, true)
 end, { bang = true, desc = "Move the current file to Trash, or delete it with !" })
 
 vim.keymap.set("n", "<leader>fx", "<cmd>Rm<cr>", { desc = "Delete current file (Trash)" })
 vim.keymap.set("n", "<leader>fX", "<cmd>Rm!<cr>", { desc = "Delete current file permanently" })
 
--- Git: change markers in the sign column, hunk navigation and line blame.
 require("gitsigns").setup({
   on_attach = function(bufnr)
     local gitsigns = require("gitsigns")
 
-    -- Keep the built-in ]c / [c behaviour inside diff mode (e.g. diffview).
     vim.keymap.set("n", "]c", function()
       if vim.wo.diff then
         vim.cmd.normal({ "]c", bang = true })
@@ -538,7 +498,7 @@ require("gitsigns").setup({
 
     vim.keymap.set("n", "<leader>gp", gitsigns.preview_hunk, { buffer = bufnr, desc = "Preview git hunk" })
     vim.keymap.set("n", "<leader>gr", gitsigns.reset_hunk, { buffer = bufnr, desc = "Reset git hunk" })
-    vim.keymap.set("v", "<leader>gr", function()
+    vim.keymap.set("x", "<leader>gr", function()
       gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
     end, { buffer = bufnr, desc = "Reset selected lines" })
     vim.keymap.set("n", "<leader>gR", gitsigns.reset_buffer, { buffer = bufnr, desc = "Reset git buffer" })
@@ -548,9 +508,7 @@ require("gitsigns").setup({
   end,
 })
 
--- Side-by-side diff of the working tree, and per-file commit history.
 local diffview_actions = require("diffview.actions")
--- Open the file under the cursor in the previous tab, then close the diff view it came from.
 local function diffview_goto_file_and_close()
   local diffview_lib = require("diffview.lib")
   local view = diffview_lib.get_current_view()
@@ -569,7 +527,6 @@ local diffview_keymaps = {
 require("diffview").setup({
   -- Show removed lines in red on the old side instead of DiffAdd green.
   enhanced_diff_hl = true,
-  -- Match the file explorer toggle in both diff and history views.
   keymaps = {
     view = diffview_keymaps,
     file_panel = diffview_keymaps,
@@ -632,33 +589,28 @@ vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "Cu
 vim.keymap.set("n", "<leader>gH", "<cmd>DiffviewFileHistory<cr>", { desc = "Repository git history" })
 vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close git diff view" })
 
--- Project-wide search and replace with a live preview of every change.
-require("grug-far").setup({
+local grug_far = require("grug-far")
+grug_far.setup({
   -- Keep arrow keys as plain movement instead of opening each result on the left.
   keymaps = { openNextLocation = false, openPrevLocation = false },
 })
 vim.keymap.set("n", "<leader>sr", function()
-  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
+  grug_far.open({ prefills = { search = vim.fn.expand("<cword>") } })
 end, { desc = "Search and replace in project" })
 -- grug-far splits paths on spaces, so escape them the same way it does.
 local function current_file_path()
   return (vim.fn.expand("%"):gsub(" ", "\\ "))
 end
 vim.keymap.set("n", "<leader>sf", function()
-  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>"), paths = current_file_path() } })
+  grug_far.open({ prefills = { search = vim.fn.expand("<cword>"), paths = current_file_path() } })
 end, { desc = "Search and replace in current file" })
-vim.keymap.set("v", "<leader>sr", function()
-  require("grug-far").with_visual_selection()
-end, { desc = "Search and replace selection in project" })
-vim.keymap.set("v", "<leader>sf", function()
-  require("grug-far").with_visual_selection({ prefills = { paths = current_file_path() } })
+vim.keymap.set("x", "<leader>sr", grug_far.with_visual_selection, { desc = "Search and replace selection in project" })
+vim.keymap.set("x", "<leader>sf", function()
+  grug_far.with_visual_selection({ prefills = { paths = current_file_path() } })
 end, { desc = "Search and replace selection in current file" })
 
--- Run tests via the project's runner (Vitest, Jest, Playwright…), picked from
--- the file name and package.json. Output goes to toggleterm's terminal 9, so
--- 9<C-\> toggles it and it behaves like the other toggleterm terminals.
--- vim-test's built-in toggleterm strategy sends to the last toggled terminal,
--- which could be a running dev server, so pin the test runs to their own one.
+-- vim-test's built-in toggleterm strategy sends to the last toggled terminal, which
+-- could be a running dev server, so pin test runs to terminal 9 (9<C-\> toggles it).
 vim.g["test#custom_strategies"] = {
   toggleterm_test = function(cmd)
     require("toggleterm").exec(cmd, 9, nil, nil, nil, "test")
@@ -674,19 +626,15 @@ vim.g["test#javascript#playwright#file_pattern"] = [[\v(^|/)(e2e|playwright)/.*(
 -- The autoload file assigns the patterns unconditionally, so load it before extending them.
 vim.cmd.runtime("autoload/test/javascript.vim")
 local js_test_patterns = vim.g["test#javascript#patterns"]
-table.insert(js_test_patterns.test, 1, [[\v^\s*%(\]\)\s*\(\s*)?([''"`])\zs[^%''"`]+\ze%(\%[sdifjoO#%]|\$\w)]])
+table.insert(js_test_patterns.test, 1, [[\v^\s*%(\]\)\s*\(\s*)?(['"`])\zs[^%'"`]+\ze%(\%[sdifjoO#%]|\$\w)]])
 vim.g["test#javascript#patterns"] = js_test_patterns
 vim.keymap.set("n", "<leader>tt", "<cmd>TestNearest<cr>", { desc = "Run nearest test" })
 vim.keymap.set("n", "<leader>tf", "<cmd>TestFile<cr>", { desc = "Run tests in file" })
 vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>", { desc = "Rerun last test" })
 -- Playwright only: Vitest rejects these flags.
 vim.keymap.set("n", "<leader>th", "<cmd>TestNearest --headed<cr>", { desc = "Run nearest e2e test headed" })
--- UI mode keeps running in terminal 9; <C-c> there to quit it.
 vim.keymap.set("n", "<leader>tu", "<cmd>TestFile --ui<cr>", { desc = "Open e2e file in Playwright UI" })
 
--- Long-running terminals (dev server, tsc --watch) in a bottom split: <C-\> toggles
--- them, 1<C-\> / 2<C-\> open numbered ones side by side. Closing the window only
--- hides a terminal; its job keeps running until the shell exits.
 require("toggleterm").setup({
   open_mapping = [[<C-\>]],
   size = 15,
@@ -696,11 +644,7 @@ require("toggleterm").setup({
   end,
 })
 
--- LSP
--- Built-in keymaps: K hover, grr references, grn rename, gra code action,
--- gri implementation, grt type definition, <C-w>d diagnostic at cursor.
 vim.diagnostic.config({
-  -- Show the full message when jumping with ]d / [d.
   jump = {
     on_jump = function(diagnostic, bufnr)
       if diagnostic then
@@ -710,7 +654,6 @@ vim.diagnostic.config({
   },
 })
 
--- CSpell is an external CLI; nvim-lint publishes its results as diagnostics.
 local lint = require("lint")
 for _, filetype in ipairs({
   "javascript", "javascriptreact", "typescript", "typescriptreact",
@@ -744,11 +687,8 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
     end)
   end,
 })
-vim.keymap.set("n", "<leader>xs", function()
-  check_spelling()
-end, { desc = "Check spelling" })
+vim.keymap.set("n", "<leader>xs", check_spelling, { desc = "Check spelling" })
 
--- Make lua_ls aware of the Neovim runtime when editing this config.
 vim.lsp.config("lua_ls", {
   settings = {
     Lua = {
@@ -764,8 +704,7 @@ require("mason-lspconfig").setup({
   ensure_installed = { "tailwindcss", "lua_ls", "jsonls", "cssls", "html", "pyright", "ruff", "bashls", "yamlls" },
 })
 
--- TypeScript 7 native LSP: uses the project's tsc when it is 7+, otherwise the
--- global one from Homebrew.
+-- TypeScript 7's native LSP.
 vim.lsp.config("tsc", {
   on_init = function(client)
     -- TS7 handles folder renames but advertises only file-extension filters.
@@ -779,18 +718,13 @@ vim.lsp.config("tsc", {
 })
 vim.lsp.enable("tsc")
 
--- Biome from the project's node_modules; attaches only when a
--- biome.json is found above the file.
 vim.lsp.enable("biome")
 
--- Oxlint ships its own LSP (`oxlint --lsp`) and prefers the project's node_modules.
--- Its root_dir reports nil when no config is found; workspace_required keeps the server
+-- Oxlint's root_dir reports nil when no config is found; workspace_required keeps the server
 -- from starting anyway. Oxfmt needs no LSP: conform formats on save.
 vim.lsp.config("oxlint", { workspace_required = true })
 vim.lsp.enable("oxlint")
 
--- ast-grep ships its own LSP (`ast-grep lsp`); it starts only when an sgconfig.yml is found.
--- Prefer the project's node_modules, like biome and oxlint.
 vim.lsp.config("ast_grep", {
   cmd = function(dispatchers, config)
     local local_cmd = config.root_dir and vim.fs.joinpath(config.root_dir, "node_modules/.bin/ast-grep")
@@ -809,17 +743,19 @@ vim.keymap.set("n", "<leader>cl", function()
 end, { desc = "Show attached LSP clients" })
 vim.keymap.set("n", "<leader>cL", "<cmd>checkhealth vim.lsp<cr>", { desc = "LSP health report" })
 
--- Format on save with each tool's CLI, like VS Code's formatOnSave; biome-check also applies
--- safe lint fixes. Oxlint fixes stay off the save path: each `oxlint --fix` run rebuilds the
--- type-aware program and reloads JS plugins (~700 ms), so run the project's lint fix instead.
+-- biome-check also applies safe lint fixes. Oxlint fixes stay off the save path: each
+-- `oxlint --fix` run rebuilds the type-aware program and reloads JS plugins (~700 ms),
+-- so run the project's lint fix instead.
 -- LSP formatting stays off so tsc / jsonls never touch the file.
 -- Filetypes follow the matching LSP configs; entries are added in run order.
 local formatters_by_ft = {}
-for _, tool in ipairs({ { "biome-check", "biome" }, { "oxfmt", "oxfmt" } }) do
-  local formatter, server = tool[1], tool[2]
-  for _, ft in ipairs(vim.lsp.config[server].filetypes) do
+for _, tool in ipairs({
+  { formatter = "biome-check", server = "biome" },
+  { formatter = "oxfmt", server = "oxfmt" },
+}) do
+  for _, ft in ipairs(vim.lsp.config[tool.server].filetypes) do
     formatters_by_ft[ft] = formatters_by_ft[ft] or {}
-    table.insert(formatters_by_ft[ft], formatter)
+    table.insert(formatters_by_ft[ft], tool.formatter)
   end
 end
 
@@ -843,9 +779,8 @@ require("conform").setup({
   notify_no_formatters = false,
 })
 
--- Completion (LSP items plus friendly-snippets, e.g. ES7 React's rafce)
+-- The snippets source picks up friendly-snippets.
 require("blink.cmp").setup({
-  -- Tab or Enter accepts, like VS Code.
   keymap = {
     preset = "super-tab",
     ["<CR>"] = { "accept", "fallback" },
@@ -855,12 +790,10 @@ require("blink.cmp").setup({
     -- Don't append "()" on accept; functions are often passed, not called.
     accept = { auto_brackets = { enabled = false } },
   },
-  -- Parameter hints while typing a call, like VS Code; <C-k> toggles them.
   signature = { enabled = true },
   sources = { default = { "lsp", "snippets" } },
 })
 
--- Apply a whole-file source action, e.g. remove every unused import at once.
 local function source_action(kind)
   return function()
     vim.lsp.buf.code_action({ apply = true, context = { only = { kind }, diagnostics = {} } })
@@ -870,7 +803,7 @@ end
 -- Open a Trouble LSP view; on no results, show a one-line warning instead of
 -- Trouble's two-line one, which triggers a hit-enter prompt.
 local function trouble_lsp(mode, empty_msg)
-  local view = require("trouble").open(mode)
+  local view = trouble.open(mode)
   if view then
     view.first_update:next(function()
       if view:count() == 0 then
@@ -882,15 +815,16 @@ local function trouble_lsp(mode, empty_msg)
 end
 
 vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
   callback = function(ev)
     -- Trouble jumps straight to a single definition and lists multiple ones like grr.
     vim.keymap.set("n", "gd", function()
       trouble_lsp("lsp_definitions", "No definition found")
     end, { buffer = ev.buf, desc = "Go to definition" })
     vim.keymap.set("n", "grr", function()
-      local trouble = require("trouble")
       if trouble.is_open("lsp_references") then
-        return trouble.close("lsp_references")
+        trouble.close("lsp_references")
+        return
       end
       local view = trouble_lsp("lsp_references", "No references found")
       if view then
@@ -900,7 +834,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
         end)
       end
     end, { buffer = ev.buf, desc = "References" })
-    -- fzf-lua pickers with preview instead of the built-in quickfix / location lists.
     vim.keymap.set("n", "gO", "<cmd>FzfLua lsp_document_symbols<cr>", { buffer = ev.buf, desc = "Document symbols" })
     -- Live variant re-queries the server on every keystroke, like VS Code's `#` symbol search.
     vim.keymap.set(
@@ -918,12 +851,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
-    -- Inlay hints stay off by default; toggle them on demand.
     vim.keymap.set("n", "<leader>ci", function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
     end, { buffer = ev.buf, desc = "Toggle inlay hints" })
 
-    -- Highlight other references of the symbol under the cursor while it rests.
     if client and client:supports_method("textDocument/documentHighlight", ev.buf) then
       local group = vim.api.nvim_create_augroup("lsp-document-highlight", { clear = false })
       vim.api.nvim_clear_autocmds({ group = group, buffer = ev.buf })
@@ -942,6 +873,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 vim.api.nvim_create_autocmd("LspDetach", {
+  group = vim.api.nvim_create_augroup("lsp-detach", { clear = true }),
   callback = function(ev)
     -- Keep symbol highlighting while another client (e.g. tsc) still provides it.
     -- The detaching client is still listed while LspDetach runs, so skip it by id.
