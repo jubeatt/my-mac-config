@@ -66,6 +66,18 @@ const CONFIGS = {
     target: `${home}/.config/herdr`,
     files: ["config.toml"],
   },
+  // Link only what is hand-written: herdr-app keeps its own state files beside
+  // these, and rewrites shipped layouts and mods on every start.
+  herdrApp: {
+    source: resolve(__dirname, "../terminal/herdr-app"),
+    target: `${home}/.config/herdr-app`,
+    files: [
+      "settings.json",
+      "keys.json",
+      "themes/catppuccin-mocha.json",
+      "layouts/peanu.json",
+    ],
+  },
   claude: {
     source: resolve(__dirname, "../ai"),
     target: `${home}/.claude`,
@@ -133,6 +145,7 @@ function linkConfig(name) {
         const mode = statSync(src).mode
         chmodSync(src, mode | 0o111)
       }
+      mkdirSync(dirname(dest), { recursive: true })
       symlinkSync(src, dest)
       console.log(`  ✓ ${to} -> ${src}`)
       result.linked++

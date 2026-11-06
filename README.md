@@ -24,6 +24,7 @@
 │   ├── oh-my-zsh/       # 自訂 zsh theme
 │   ├── ghostty/         # Ghostty 終端設定
 │   ├── herdr/           # herdr 終端設定
+│   ├── herdr-app/       # Herdr 桌面 App 設定（版面、主題）
 │   └── lazygit/         # Lazygit 設定
 ├── scripts/
 │   ├── link-configs.js  # 建立 symlink
@@ -99,7 +100,24 @@ node scripts/gen-vscode-extensions.js --dryrun
 | iTerm2     | `terminal/iterm2/`                     | iTerm2 Preferences → Custom Folder                 |
 | Ghostty    | `terminal/ghostty/config`              | `~/.config/ghostty/config`                         |
 | herdr      | `terminal/herdr/config.toml`           | `~/.config/herdr/config.toml`                      |
+| Herdr App  | `terminal/herdr-app/`                  | `~/.config/herdr-app/`（逐檔連結，見下方）         |
 | Lazygit    | `terminal/lazygit/config.yml`          | `~/Library/Application Support/lazygit/config.yml` |
+
+## Herdr App
+
+`~/.config/herdr-app/` 同時放著手寫設定和 App 自己寫的狀態檔，所以只連結手寫的部分：`settings.json`、`keys.json`、`themes/catppuccin-mocha.json` 與 `layouts/peanu.json`。App 寫檔時會沿著 symlink 寫回 repo，改 repo 裡的檔案也會即時套用。
+
+- `keys.json`：以 App 預設快捷鍵為底，改掉會撞到 nvim fzf-lua 的 F 鍵：重新命名 tab／space 改用 `cmd-r`／`cmd-shift-r`。App 只會替沒改過的 `keys.json` 換上新版預設，這份改過就整份歸自己管，App 更新新增的快捷鍵要看 update notes 手動補上。
+
+- `layouts/peanu.json`：複製自內建的 `main` 版面，多一個 0px 區塊給 desktop-notifications mod 執行。內建版面每次啟動都會被覆蓋，所以自訂都放這份。
+- desktop-notifications mod 沒有授權條款，不收進 repo。新電腦要另外安裝：
+
+```bash
+git clone https://github.com/benjaminsicard/herdr-mods.git /tmp/herdr-mods
+cp -R /tmp/herdr-mods/desktop-notifications/mods/desktop-notifications ~/.config/herdr-app/mods/
+```
+
+通知走 `terminal-notifier`（Brewfile 已列），第一次使用要到「系統設定 → 通知」允許它。
 
 ## Python 環境
 

@@ -38,6 +38,8 @@ brew "pnpm"
 brew "ripgrep"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
+# Send macOS User Notifications from the command-line
+brew "terminal-notifier"
 # Display directories as trees (with optional color/HTML output)
 brew "tree"
 # Parser generator tool
@@ -66,6 +68,8 @@ cask "font-jetbrains-mono-nerd-font"
 cask "fork"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
+# Desktop app for terminals and coding agents
+cask "herdr-app"
 # Utility to hide menu bar items
 cask "hiddenbar"
 # Open-source code editor

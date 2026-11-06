@@ -1,0 +1,11 @@
+{
+  "zoom": 1.0,
+  "sounds": {
+    "enabled": true
+  },
+  "font_size": 18.0,
+  "font_ligatures": true,
+  "minimum_contrast": 1.0,
+  "option_as_alt": "left",
+  "theme": "catppuccin-mocha"
+}
