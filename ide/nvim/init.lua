@@ -49,6 +49,8 @@ vim.o.updatetime = 250
 -- Float backgrounds are barely darker than the editor's, so they blend in without a border.
 vim.o.winborder = "rounded"
 
+vim.o.tabclose = "uselast"
+
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
@@ -109,6 +111,7 @@ vim.pack.add({
   "https://github.com/vim-test/vim-test",
   "https://github.com/akinsho/toggleterm.nvim",
   "https://github.com/neovim/nvim-lspconfig",
+  "https://github.com/folke/lazydev.nvim",
   "https://github.com/mfussenegger/nvim-lint",
   "https://github.com/stevearc/conform.nvim",
   "https://github.com/mason-org/mason.nvim",
@@ -406,6 +409,13 @@ file_operations.setup({
 })
 vim.lsp.config("*", { capabilities = file_operations.default_capabilities() })
 
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+  callback = function()
+    vim.hl.on_yank()
+  end,
+})
+
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup("mkdir-on-save", { clear = true }),
   callback = function(ev)
@@ -689,14 +699,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
 })
 vim.keymap.set("n", "<leader>xs", check_spelling, { desc = "Check spelling" })
 
-vim.lsp.config("lua_ls", {
-  settings = {
-    Lua = {
-      runtime = { version = "LuaJIT" },
-      workspace = { library = { vim.env.VIMRUNTIME }, checkThirdParty = false },
-    },
-  },
-})
+require("lazydev").setup()
 
 require("mason").setup()
 -- Installed servers are enabled automatically.
@@ -747,7 +750,7 @@ vim.keymap.set("n", "<leader>cL", "<cmd>checkhealth vim.lsp<cr>", { desc = "LSP 
 -- `oxlint --fix` run rebuilds the type-aware program and reloads JS plugins (~700 ms),
 -- so run the project's lint fix instead.
 -- LSP formatting stays off so tsc / jsonls never touch the file.
--- Filetypes follow the matching LSP configs; entries are added in run order.
+-- Filetypes follow the matching LSP configs; entries are added in priority order.
 local formatters_by_ft = {}
 for _, tool in ipairs({
   { formatter = "biome-check", server = "biome" },
@@ -759,20 +762,14 @@ for _, tool in ipairs({
   end
 end
 
-local biome_configs = { "biome.json", "biome.jsonc", ".biome.json", ".biome.jsonc" }
-
 require("conform").setup({
   formatters_by_ft = formatters_by_ft,
+  -- Oxfmt picks the nearest .oxfmtrc.json, so a project without one gets ~/.oxfmtrc.json
+  -- (linked from this repo).
+  default_format_opts = { stop_after_first = true },
   formatters = {
     -- Biome runs only where the project has its config file.
     ["biome-check"] = { require_cwd = true },
-    -- Oxfmt is the fallback formatter for every project that doesn't use Biome. It picks the
-    -- nearest .oxfmtrc.json, so a project without one gets ~/.oxfmtrc.json (linked from this repo).
-    oxfmt = {
-      condition = function(_, ctx)
-        return not vim.fs.root(ctx.dirname, biome_configs)
-      end,
-    },
   },
   format_on_save = { timeout_ms = 1000 },
   -- Most projects use only one of these tools, so silently skip the rest.
@@ -791,7 +788,13 @@ require("blink.cmp").setup({
     accept = { auto_brackets = { enabled = false } },
   },
   signature = { enabled = true },
-  sources = { default = { "lsp", "snippets" } },
+  sources = {
+    default = { "lsp", "snippets" },
+    per_filetype = { lua = { inherit_defaults = true, "lazydev" } },
+    providers = {
+      lazydev = { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 },
+    },
+  },
 })
 
 local function source_action(kind)

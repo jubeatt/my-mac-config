@@ -629,24 +629,30 @@
                   <td>內建 LSP + nvim-lspconfig</td>
                   <td>
                     server 預設設定來自 nvim-lspconfig，<code>init.lua</code>
-                    只寫覆寫的部分
+                    只寫覆寫的部分。<code>lua_ls</code> 由 lazydev.nvim 設定，
+                    <code>require()</code> 到的 plugin 會加進 library，plugin
+                    API 有型別與補全
                   </td>
                 </tr>
                 <tr>
                   <td>補全</td>
                   <td>blink.cmp</td>
-                  <td>來源只有 LSP 與 friendly-snippets</td>
+                  <td>
+                    來源是 LSP 與 friendly-snippets；Lua 檔另有 lazydev，補全
+                    <code>require("…")</code> 的 module 名稱
+                  </td>
                 </tr>
                 <tr>
                   <td>Format</td>
                   <td>conform.nvim</td>
                   <td>
-                    存檔時依序跑 CLI：<code>biome check</code> →
-                    <code>oxlint</code> fix → <code>oxfmt</code>。 Biome、oxlint
-                    只在專案有它的設定檔時執行；oxfmt 是預設 formatter，專案用
-                    Biome 時才略過， 設定取離檔案最近的
+                    存檔時只跑第一個可用的 CLI：專案有 Biome 設定檔、也找得到
+                    <code>biome</code> 執行檔時跑
+                    <code>biome check</code>（含安全的 lint fix），否則跑
+                    <code>oxfmt</code>。oxfmt 的設定取離檔案最近的
                     <code>.oxfmtrc.json</code>，找不到專案的就用
-                    <code>~/.oxfmtrc.json</code>。 LSP formatting
+                    <code>~/.oxfmtrc.json</code>。oxlint 的 fix
+                    不在存檔流程裡，改跑專案的 lint fix。LSP formatting
                     不使用，<code>tsc</code>、<code>jsonls</code> 不會動到檔案
                   </td>
                 </tr>
