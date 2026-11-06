@@ -809,11 +809,13 @@ vim.keymap.set("n", "<leader>cl", function()
 end, { desc = "Show attached LSP clients" })
 vim.keymap.set("n", "<leader>cL", "<cmd>checkhealth vim.lsp<cr>", { desc = "LSP health report" })
 
--- Format on save with each tool's CLI: safe lint fixes, then formatting, like VS Code's
--- codeActionsOnSave + formatOnSave. LSP formatting stays off so tsc / jsonls never touch the file.
+-- Format on save with each tool's CLI, like VS Code's formatOnSave; biome-check also applies
+-- safe lint fixes. Oxlint fixes stay off the save path: each `oxlint --fix` run rebuilds the
+-- type-aware program and reloads JS plugins (~700 ms), so run the project's lint fix instead.
+-- LSP formatting stays off so tsc / jsonls never touch the file.
 -- Filetypes follow the matching LSP configs; entries are added in run order.
 local formatters_by_ft = {}
-for _, tool in ipairs({ { "biome-check", "biome" }, { "oxlint", "oxlint" }, { "oxfmt", "oxfmt" } }) do
+for _, tool in ipairs({ { "biome-check", "biome" }, { "oxfmt", "oxfmt" } }) do
   local formatter, server = tool[1], tool[2]
   for _, ft in ipairs(vim.lsp.config[server].filetypes) do
     formatters_by_ft[ft] = formatters_by_ft[ft] or {}
@@ -826,12 +828,8 @@ local biome_configs = { "biome.json", "biome.jsonc", ".biome.json", ".biome.json
 require("conform").setup({
   formatters_by_ft = formatters_by_ft,
   formatters = {
-    -- Biome and oxlint run only where the project has their config file.
+    -- Biome runs only where the project has its config file.
     ["biome-check"] = { require_cwd = true },
-    oxlint = {
-      cwd = require("conform.util").root_file({ ".oxlintrc.json", ".oxlintrc.jsonc", "oxlint.config.ts" }),
-      require_cwd = true,
-    },
     -- Oxfmt is the fallback formatter for every project that doesn't use Biome. It picks the
     -- nearest .oxfmtrc.json, so a project without one gets ~/.oxfmtrc.json (linked from this repo).
     oxfmt = {
