@@ -707,6 +707,18 @@ require("mason-lspconfig").setup({
   ensure_installed = { "tailwindcss", "lua_ls", "jsonls", "cssls", "html", "pyright", "ruff", "bashls", "yamlls" },
 })
 
+-- Pyright infers the Python version from `python3` on PATH (macOS ships 3.9) unless the
+-- project venv is active, so point it at the project's .venv when there is one.
+-- Mutate settings in place: the client already holds this table when before_init runs.
+vim.lsp.config("pyright", {
+  before_init = function(_, config)
+    local venv_python = config.root_dir and vim.fs.joinpath(config.root_dir, ".venv/bin/python")
+    if venv_python and vim.uv.fs_stat(venv_python) then
+      config.settings.python.pythonPath = venv_python
+    end
+  end,
+})
+
 -- TypeScript 7's native LSP.
 vim.lsp.config("tsc", {
   on_init = function(client)
