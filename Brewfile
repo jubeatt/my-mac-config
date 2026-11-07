@@ -24,6 +24,8 @@ brew "gh"
 brew "git"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
+# Tools and libraries to manipulate images in select formats
+brew "imagemagick"
 # Simple terminal UI for git commands
 brew "lazygit"
 # Ambitious Vim-fork focused on extensibility and agility
