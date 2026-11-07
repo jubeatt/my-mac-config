@@ -15,7 +15,7 @@
 ├── docs/
 │   └── nvim.html        # Neovim 架構、選用取捨與日常操作說明
 ├── ide/
-│   ├── nvim/            # Neovim 設定（init.lua、vim.pack lockfile）
+│   ├── nvim/            # Neovim 設定（init.lua 入口、lua/ 模組、vim.pack lockfile）
 │   └── vscode/          # VS Code settings, keybindings, extensions
 ├── terminal/
 │   ├── iterm2/          # iTerm2 設定（自動同步）

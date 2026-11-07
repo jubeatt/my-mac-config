@@ -384,10 +384,8 @@
           </p>
           <p class="lede">
             plugin 清單、選項、keymap 都以
-            <button class="path" data-path="ide/nvim/init.lua">
-              ide/nvim/init.lua
-            </button>
-            為準；這份文件只記 code
+            <button class="path" data-path="ide/nvim/">ide/nvim/</button>
+            裡的 Lua 檔為準；這份文件只記 code
             看不出來的部分：整體架構、選用取捨、日常操作流程。
           </p>
           <details class="toc-mobile">
@@ -465,23 +463,43 @@
         <section>
           <h2 id="architecture">架構</h2>
 
-          <h3 id="files">兩個檔案</h3>
+          <h3 id="files">檔案結構</h3>
           <ul>
             <li>
               <button class="path" data-path="ide/nvim/init.lua">
                 ide/nvim/init.lua</button
-              >：唯一的設定檔。由上而下是 選項與全域 keymap →
-              <code>vim.pack.add()</code> → 各功能區塊 →
-              LSP、lint、format、補全。 每個區塊以
-              <code>-- 名稱</code> 註解開頭，plugin 的
-              <code>setup()</code> 和它的 keymap 寫在同一段。
+              >：入口，只依序 <code>require</code> 下面兩個目錄的模組。
+              順序有意義：後面的模組會用到前面已設定好的 plugin，例如
+              <code>ui</code> 先設定 mini.icons 與 which-key，<code
+                >format</code
+              >
+              要讀 <code>lsp</code> 載入的 nvim-lspconfig 設定。
+            </li>
+            <li>
+              <button class="path" data-path="ide/nvim/lua/config/">
+                ide/nvim/lua/config/</button
+              >：不依賴 plugin 的選項（<code>options</code>）、全域 keymap
+              （<code>keymaps</code>）、autocmd（<code>autocmds</code>）。
+            </li>
+            <li>
+              <button class="path" data-path="ide/nvim/lua/plugins/">
+                ide/nvim/lua/plugins/</button
+              >：一個功能一個檔，例如 <code>git</code>、<code>lsp</code>、
+              <code>format</code>。每個檔先用
+              <code>vim.pack.add()</code> 加入自己的 plugin，再寫
+              <code>setup()</code>、keymap 和以這些 plugin 為基礎的指令。
+            </li>
+            <li>
+              <button class="path" data-path="ide/nvim/cspell.json">
+                ide/nvim/cspell.json</button
+              >：Lua 檔滿是 plugin 與 API 名稱，cspell 不檢查。
             </li>
             <li>
               <button class="path" data-path="ide/nvim/nvim-pack-lock.json">
                 ide/nvim/nvim-pack-lock.json</button
               >：vim.pack 的 lockfile， 記錄每個 plugin 鎖定的
-              commit。內容只透過 <code>vim.pack</code> 的指令變動，跟
-              <code>init.lua</code> 一起 commit。
+              commit。內容只透過 <code>vim.pack</code> 的指令變動，跟 設定檔一起
+              commit。
             </li>
           </ul>
           <p>
@@ -580,9 +598,7 @@
 
           <h3 id="vim-pack">Plugin 管理：vim.pack</h3>
           <ul>
-            <li>
-              Neovim 內建，<code>init.lua</code> 不需要 bootstrap 程式碼。
-            </li>
+            <li>Neovim 內建，設定檔不需要 bootstrap 程式碼。</li>
             <li>
               lockfile 進 git，每台機器裝到同一組 commit；更新出問題就用 git
               回退（見<a href="#revert">回退更新</a>）。
@@ -628,7 +644,7 @@
                   <td>語言功能</td>
                   <td>內建 LSP + nvim-lspconfig</td>
                   <td>
-                    server 預設設定來自 nvim-lspconfig，<code>init.lua</code>
+                    server 預設設定來自 nvim-lspconfig，<code>lsp.lua</code>
                     只寫覆寫的部分。<code>lua_ls</code> 由 lazydev.nvim 設定，
                     <code>require()</code> 到的 plugin 會加進 library，plugin
                     API 有型別與補全
@@ -709,27 +725,28 @@
           <h2 id="howto">日常操作</h2>
           <div class="callout">
             <p>
-              改完 <code>init.lua</code> 用 <code>:restart</code> 重開套用。動到
-              plugin 的操作，最後都把 <code>init.lua</code> 和 lockfile 一起
-              commit。
+              改完設定用 <code>:restart</code> 重開套用。動到 plugin
+              的操作，最後都把改過的 Lua 檔和 lockfile 一起 commit。
             </p>
           </div>
 
           <h3 id="add-plugin">新增 plugin</h3>
           <ol class="steps">
             <li>
-              在 <code>vim.pack.add({ ... })</code> 加上 repo URL。要跟著
-              release tag 更新，寫成：
+              在對應功能檔（<code>lua/plugins/*.lua</code>）的
+              <code>vim.pack.add({ ... })</code> 加上 repo
+              URL；新功能就開一個新檔，並在 <code>init.lua</code>
+              <code>require</code> 它。要跟著 release tag 更新，寫成：
               <div class="code">
                 <pre><code>{ src = "https://github.com/owner/repo", version = vim.version.range("1.*") }</code></pre>
               </div>
             </li>
             <li>
-              在對應的功能區塊加 <code>require("xxx").setup(...)</code> 和它的
+              在同一個檔加 <code>require("xxx").setup(...)</code> 和它的
               keymap。
             </li>
             <li><code>:restart</code>：啟動時自動 clone，並寫進 lockfile。</li>
-            <li>commit <code>init.lua</code> 與 lockfile。</li>
+            <li>commit 設定檔與 lockfile。</li>
           </ol>
 
           <h3 id="update-plugin">更新 plugin</h3>
@@ -762,7 +779,9 @@
             <summary>移除 plugin</summary>
             <div class="acc-body">
               <ol class="steps">
-                <li>從 <code>vim.pack.add()</code> 和它的 setup 區塊刪掉。</li>
+                <li>
+                  從功能檔的 <code>vim.pack.add()</code> 和它的 setup 刪掉。
+                </li>
                 <li>
                   <code>:restart</code>，再從磁碟刪除（名稱是 lockfile 裡的
                   key）：
@@ -770,7 +789,7 @@
                     <pre><code>:lua vim.pack.del({ "plugin-name" })</code></pre>
                   </div>
                 </li>
-                <li>commit <code>init.lua</code> 與 lockfile。</li>
+                <li>commit 設定檔與 lockfile。</li>
               </ol>
             </div>
           </details>
@@ -840,7 +859,7 @@
             </li>
             <li>
               <strong>CLI 走 Homebrew 或專案 node_modules</strong>：CLI
-              自己裝，<code>init.lua</code> 加一行
+              自己裝，<code>lsp.lua</code> 加一行
               <code>vim.lsp.enable("name")</code>。
             </li>
           </ul>
@@ -853,9 +872,8 @@
 
           <h3 id="add-parser">新增 treesitter 語言</h3>
           <p>
-            把語言加進 <code>init.lua</code> 的 <code>parsers</code> 清單，<code
-              >:restart</code
-            >
+            把語言加進 <code>treesitter.lua</code> 的
+            <code>parsers</code> 清單，<code>:restart</code>
             後會在背景用
             <code>tree-sitter-cli</code> 編譯安裝。不在清單裡的語言不會開
             treesitter highlight。
@@ -864,14 +882,14 @@
           <h3 id="add-formatter">新增 formatter 或 linter</h3>
           <ul>
             <li>
-              <strong>Formatter</strong>：加在 <code>init.lua</code> 的 conform
-              區塊，存檔時就會跑。
+              <strong>Formatter</strong>：加在 <code>format.lua</code> 的
+              conform 設定，存檔時就會跑。
             </li>
             <li>
               <strong>Linter</strong>：有 LSP 的照<a href="#add-lsp"
                 >新增 LSP server</a
-              >；只有 CLI 的加在 nvim-lint 區塊（cspell 那段），結果會跟 LSP
-              的錯誤一起顯示。
+              >；只有 CLI 的加在 <code>lint.lua</code>（cspell 那段），結果會跟
+              LSP 的錯誤一起顯示。
             </li>
           </ul>
           <p>
@@ -883,14 +901,24 @@
           <h3 id="add-keymap">新增 keymap</h3>
           <ul>
             <li>
-              寫在相關 plugin 的區塊旁邊，並帶 <code>desc</code>，which-key
-              才會顯示說明。
+              寫在相關 plugin 的功能檔裡，並帶 <code>desc</code>，which-key
+              才會顯示說明。不屬於任何 plugin 的放
+              <code>config/keymaps.lua</code>。
             </li>
             <li>
-              開了新的 <code>&lt;leader&gt;</code> 前綴，在 which-key
-              區塊補上群組名稱，選單上才不會只顯示一個 <code>+</code>。
+              開了新的 <code>&lt;leader&gt;</code> 前綴，在
+              <code>ui.lua</code> 的 which-key spec
+              補上群組名稱，選單上才不會只顯示一個 <code>+</code>。
             </li>
-            <li>只跟 LSP 有關的 keymap 放在 <code>LspAttach</code> 那段。</li>
+            <li>
+              只屬於某個 plugin 的 which-key 說明（例如 surround、case
+              coercion），用 <code>require("which-key").add()</code>
+              寫在那個 plugin 的檔裡。
+            </li>
+            <li>
+              只跟 LSP 有關的 keymap 放在 <code>lsp.lua</code> 的
+              <code>LspAttach</code> 那段。
+            </li>
           </ul>
         </section>
 
