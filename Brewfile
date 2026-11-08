@@ -76,5 +76,7 @@ cask "ghostty"
 cask "herdr-app"
 # Utility to hide menu bar items
 cask "hiddenbar"
+# Mesh VPN based on WireGuard
+cask "tailscale-app"
 # Open-source code editor
 cask "visual-studio-code"

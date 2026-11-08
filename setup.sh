@@ -64,6 +64,13 @@ else
   echo "✓ desktop-notifications installed"
 fi
 
+step "Collie"
+if [ -x "$HOME/.local/bin/collie" ]; then
+  echo "✓ Collie already installed"
+else
+  sh -c "$(curl -fsSL https://colliepwa.dev/install.sh)"
+fi
+
 step "VS Code extensions"
 node "$SCRIPTS_DIR/install-extensions.js"
 
@@ -73,4 +80,5 @@ Done. Remaining manual steps:
   - Restart iTerm2 to load the custom preferences folder
   - Allow terminal-notifier in System Settings → Notifications
   - Run `exec zsh` to reload the shell
+  - Sign in to Tailscale and pair Collie (see README)
 EOF

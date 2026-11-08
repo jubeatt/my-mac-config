@@ -59,13 +59,15 @@ cd ~/Projects/my-mac-config
 5. `scripts/link-configs.js`：建立所有設定的 symlink，見下方對照表
 6. 設定 `core.hooksPath` 為 `hooks/`
 7. 安裝 Herdr App 的 desktop-notifications mod
-8. `scripts/install-extensions.js`：安裝 `ide/vscode/extensions.json` 裡還沒裝的 VS Code extensions
+8. 執行官方腳本安裝 Collie（沒裝才裝）
+9. `scripts/install-extensions.js`：安裝 `ide/vscode/extensions.json` 裡還沒裝的 VS Code extensions
 
 跑完後要手動處理：
 
 - 重啟 iTerm2 載入設定
 - 到「系統設定 → 通知」允許 `terminal-notifier`
 - 執行 `exec zsh` 重新載入 shell
+- 登入 Tailscale 並配對 Collie，見[手機遠端操作](#手機遠端操作collie)
 
 `scripts/` 裡的每支 script 都可以單獨執行，例如只重建 symlink：
 
@@ -114,6 +116,30 @@ bbd
 
 - `layouts/peanu.json`：複製自內建的 `main` 版面，多一個 0px 區塊給 desktop-notifications mod 執行。內建版面每次啟動都會被覆蓋，所以自訂都放這份。
 - desktop-notifications mod 沒有授權條款，不收進 repo，由 `setup.sh` 從 [benjaminsicard/herdr-mods](https://github.com/benjaminsicard/herdr-mods) 下載安裝。通知走 `terminal-notifier`。
+
+## 手機遠端操作（Collie）
+
+用 iPhone 上的 [ColliePWA](https://colliepwa.dev) 透過 Tailscale 私有網路操作 Herdr TUI 裡的 agent。Tailscale 由 `Brewfile` 安裝；Collie 沒有 Homebrew 套件，由 `setup.sh` 執行官方腳本安裝。
+
+`setup.sh` 跑完後手動完成：
+
+1. 開啟 Tailscale App 登入並啟用 CLI，iPhone 的 Tailscale 登入同一個 tailnet。
+2. 到 [Tailscale DNS 設定](https://login.tailscale.com/admin/dns)確認 MagicDNS 與 HTTPS Certificates 已啟用。
+3. 在一個終端機執行 `herdr` 並保持開啟，再從另一個終端機啟動 Collie：
+
+   ```bash
+   COLLIE_MUX=herdr collie start
+   collie status
+   collie qr
+   ```
+
+4. 用 iPhone 掃描 QR code，在 Safari 開啟後加入主畫面，之後都從主畫面圖示開啟。
+5. 執行 `collie pair`，到 Collie 的 Settings → System → Paired devices 輸入配對碼。
+
+- Collie 只看得到 Herdr TUI 的 pane，Herdr App 的 session 不會出現。
+- 網址跟著機器名稱走，換電腦後手機要重新加入主畫面並配對。
+- 對外只走 Tailscale Serve，不開 Funnel。
+- 遠端操作時 Mac 要保持開機、連網且不睡眠。
 
 ## Python 環境
 
