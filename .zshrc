@@ -127,18 +127,6 @@ alias lg="lazygit"
 alias bbd="brew bundle dump --force --no-vscode --no-npm --file=Brewfile"
 alias vs="code"
 alias n="nvim"
-
-# Herdr panes report 0 pixels in TIOCGWINSZ, so query the cell size for snacks.nvim images.
-if [[ ( "$HERDR_ENV" == 1 || -n "$HC_TERMINAL_ID" ) && -t 0 ]]; then
-  printf '\e[16t'
-  if read -rs -t 0.5 -d t herdr_cell_reply && [[ "$herdr_cell_reply" =~ '6;([0-9]+);([0-9]+)$' ]]; then
-    export HERDR_CELL_SIZE="${match[2]}x${match[1]}"
-  fi
-  unset herdr_cell_reply
-  # Herdr can't load images from file paths; snacks.nvim sends image data over ssh.
-  export SNACKS_SSH=true
-fi
-
 alias pn="pnpm"
 alias co="codex"
 alias cc="claude"
