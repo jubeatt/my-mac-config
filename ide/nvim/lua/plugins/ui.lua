@@ -5,8 +5,26 @@ vim.pack.add({
   "https://github.com/folke/which-key.nvim",
 })
 
+local no_bold = { a = { gui = "" } }
+
 require("catppuccin").setup({
   flavour = "mocha",
+  integrations = {
+    lualine = {
+      all = {
+        normal = no_bold,
+        insert = no_bold,
+        terminal = no_bold,
+        command = no_bold,
+        visual = no_bold,
+        replace = no_bold,
+        inactive = { b = { gui = "" } },
+      },
+    },
+  },
+  custom_highlights = {
+    ModeMsg = { style = {} },
+  },
 })
 vim.cmd.colorscheme("catppuccin")
 
