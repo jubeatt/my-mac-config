@@ -71,7 +71,7 @@ const CONFIGS = {
   herdr: {
     source: resolve(__dirname, "../terminal/herdr"),
     target: `${home}/.config/herdr`,
-    files: ["config.toml"],
+    files: ["config.toml", "picker.zsh"],
   },
   // Link only what is hand-written: herdr-app keeps its own state files beside
   // these, and rewrites shipped layouts and mods on every start.
