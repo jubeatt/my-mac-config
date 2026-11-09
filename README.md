@@ -140,6 +140,7 @@ bbd
 - 網址跟著機器名稱走，換電腦後手機要重新加入主畫面並配對。
 - 對外只走 Tailscale Serve，不開 Funnel。
 - 遠端操作時 Mac 要保持開機、連網且不睡眠。
+- 和其他 VPN 同時連線時若網址解析逾時、網頁打不開，執行 `tailscale set --accept-dns=false`，不使用 Tailscale DNS。這台 Mac 的 App 會無法解析 tailnet 名稱，連其他裝置要改用 `100.x` IP，手機連 Mac 不受影響。還原用 `tailscale set --accept-dns=true`。
 
 ## Python 環境
 
