@@ -11,7 +11,8 @@
 ```
 .
 ├── ai/
-│   └── AGENTS.md        # Claude Code / Codex 共用的全域 rules
+│   ├── AGENTS.md        # Claude Code / Codex 共用的全域 rules
+│   └── claude/          # Claude Code 設定（settings、statusline、hooks）
 ├── docs/
 │   └── nvim.html        # Neovim 架構、選用取捨與日常操作說明
 ├── ide/
@@ -68,6 +69,7 @@ cd ~/Projects/my-mac-config
 - 到「系統設定 → 通知」允許 `terminal-notifier`
 - 執行 `exec zsh` 重新載入 shell
 - 登入 Tailscale 並配對 Collie，見[手機遠端操作](#手機遠端操作collie)
+- 執行 `herdr integration install claude` 產生 Claude Code 的 herdr hook，見 [Claude Code](#claude-code)
 
 `scripts/` 裡的每支 script 都可以單獨執行，例如只重建 symlink：
 
@@ -92,21 +94,28 @@ bbd
 
 ## Symlink 對照表
 
-| 設定       | Repo 位置                              | 目標位置                                           |
-| ---------- | -------------------------------------- | -------------------------------------------------- |
-| VS Code    | `ide/vscode/`                          | `~/Library/Application Support/Code/User/`         |
-| Neovim     | `ide/nvim/`                            | `~/.config/nvim`                                   |
-| uv         | `uv.toml`                              | `~/.config/uv/uv.toml`                             |
-| Git        | `.gitconfig`                           | `~/.gitconfig`                                     |
-| Git ignore | `.gitignore_global`                    | `~/.gitignore_global`                              |
-| oxfmt      | `.oxfmtrc.json`                        | `~/.oxfmtrc.json`                                  |
-| Zsh        | `.zshrc`                               | `~/.zshrc`                                         |
-| Zsh Theme  | `terminal/oh-my-zsh/tonotdo.zsh-theme` | `~/.oh-my-zsh/custom/themes/`                      |
-| iTerm2     | `terminal/iterm2/`                     | iTerm2 Preferences → Custom Folder                 |
-| Ghostty    | `terminal/ghostty/config`              | `~/.config/ghostty/config`                         |
-| herdr      | `terminal/herdr/config.toml`           | `~/.config/herdr/config.toml`                      |
-| Herdr App  | `terminal/herdr-app/`                  | `~/.config/herdr-app/`（逐檔連結，見下方）         |
-| Lazygit    | `terminal/lazygit/config.yml`          | `~/Library/Application Support/lazygit/config.yml` |
+| 設定        | Repo 位置                              | 目標位置                                           |
+| ----------- | -------------------------------------- | -------------------------------------------------- |
+| VS Code     | `ide/vscode/`                          | `~/Library/Application Support/Code/User/`         |
+| Neovim      | `ide/nvim/`                            | `~/.config/nvim`                                   |
+| uv          | `uv.toml`                              | `~/.config/uv/uv.toml`                             |
+| Git         | `.gitconfig`                           | `~/.gitconfig`                                     |
+| Git ignore  | `.gitignore_global`                    | `~/.gitignore_global`                              |
+| oxfmt       | `.oxfmtrc.json`                        | `~/.oxfmtrc.json`                                  |
+| Zsh         | `.zshrc`                               | `~/.zshrc`                                         |
+| Zsh Theme   | `terminal/oh-my-zsh/tonotdo.zsh-theme` | `~/.oh-my-zsh/custom/themes/`                      |
+| iTerm2      | `terminal/iterm2/`                     | iTerm2 Preferences → Custom Folder                 |
+| Ghostty     | `terminal/ghostty/config`              | `~/.config/ghostty/config`                         |
+| herdr       | `terminal/herdr/config.toml`           | `~/.config/herdr/config.toml`                      |
+| Herdr App   | `terminal/herdr-app/`                  | `~/.config/herdr-app/`（逐檔連結，見下方）         |
+| Lazygit     | `terminal/lazygit/config.yml`          | `~/Library/Application Support/lazygit/config.yml` |
+| Claude Code | `ai/claude/`                           | `~/.claude/`（逐檔連結，見下方）                   |
+
+## Claude Code
+
+`~/.claude/` 同時放著手寫設定和 Claude Code 自己的狀態檔，所以只連結手寫的部分：`settings.json`、`statusline-command.sh` 與 `hooks/memory-write-guard.sh`。Claude Code 寫入 `settings.json` 時會沿著 symlink 寫回 repo，也可能重排 key、加入 plugin 的本機路徑，commit 前要看過 diff。
+
+`hooks/herdr-agent-state.sh` 由 herdr 管理，不放進 repo，`settings.json` 裡對應的 `SessionStart` hook 也維持 herdr 寫入的內容。
 
 ## Herdr App
 

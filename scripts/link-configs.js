@@ -88,7 +88,15 @@ const CONFIGS = {
   claude: {
     source: resolve(__dirname, "../ai"),
     target: `${home}/.claude`,
-    files: [{ from: "AGENTS.md", to: "CLAUDE.md" }],
+    files: [
+      { from: "AGENTS.md", to: "CLAUDE.md" },
+      { from: "claude/settings.json", to: "settings.json" },
+      { from: "claude/statusline-command.sh", to: "statusline-command.sh" },
+      {
+        from: "claude/hooks/memory-write-guard.sh",
+        to: "hooks/memory-write-guard.sh",
+      },
+    ],
   },
   codex: {
     source: resolve(__dirname, "../ai"),
