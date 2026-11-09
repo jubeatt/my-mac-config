@@ -9,6 +9,7 @@ vim.pack.add({
   "https://github.com/folke/flash.nvim",
   "https://github.com/nvim-mini/mini.surround",
   "https://github.com/tpope/vim-abolish",
+  "https://github.com/folke/todo-comments.nvim",
 })
 
 local treesj = require("treesj")
@@ -21,6 +22,7 @@ vim.keymap.set("n", "<leader>cj", treesj.join, { desc = "Join code block" })
 
 require("nvim-autopairs").setup()
 require("nvim-ts-autotag").setup()
+require("todo-comments").setup()
 
 local flash = require("flash")
 flash.setup({
