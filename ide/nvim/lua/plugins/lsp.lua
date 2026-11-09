@@ -52,9 +52,22 @@ vim.lsp.enable("tsc")
 
 vim.lsp.enable("biome")
 
+-- These servers' root_dir resolves "diffview://" names to the relative root ".", and Diffview's
+-- index buffers have an empty buftype, so Neovim doesn't filter them out first.
+local function root_dir_without_diffview(server)
+  local root_dir = vim.lsp.config[server].root_dir
+  return function(bufnr, on_dir)
+    if not vim.startswith(vim.api.nvim_buf_get_name(bufnr), "diffview://") then
+      root_dir(bufnr, on_dir)
+    end
+  end
+end
+
+vim.lsp.config("tailwindcss", { root_dir = root_dir_without_diffview("tailwindcss") })
+
 -- Oxlint's root_dir reports nil when no config is found; workspace_required keeps the server
 -- from starting anyway. Oxfmt needs no LSP: conform formats on save.
-vim.lsp.config("oxlint", { workspace_required = true })
+vim.lsp.config("oxlint", { workspace_required = true, root_dir = root_dir_without_diffview("oxlint") })
 vim.lsp.enable("oxlint")
 
 vim.lsp.config("ast_grep", {
