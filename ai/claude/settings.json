@@ -36,8 +36,13 @@
   },
   "tui": "fullscreen",
   "theme": "dark",
-  "attribution": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "autoCompactEnabled": true,
   "autoScrollEnabled": true,
-  "wheelScrollAccelerationEnabled": false
+  "wheelScrollAccelerationEnabled": false,
+  "model": "opus"
 }
