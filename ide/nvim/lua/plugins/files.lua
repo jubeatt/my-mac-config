@@ -5,6 +5,8 @@ vim.pack.add({
 
 require("nvim-tree").setup({
   filters = { git_ignored = false },
+  update_focused_file = { enable = true },
+  view = { width = { min = 30, max = "50%" } },
   -- `D` moves to the macOS Trash; the default `gio trash` isn't installed.
   trash = { cmd = "trash" },
   renderer = {
