@@ -1,0 +1,6 @@
+# Loaded after terminal/lazygit/config.yml only for the Lazygit float that <leader>gg opens.
+customCommands:
+  - key: "q"
+    context: "global"
+    command: 'nvim --server "$NVIM" --remote-expr "v:lua.LazygitHide()"'
+    description: "Hide Lazygit and keep it running"

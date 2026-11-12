@@ -6,10 +6,10 @@ gui:
       - "#444444"
 os:
   editPreset: "nvim-remote"
-  # Same as the preset, but open files in the tab Lazygit came from instead of a new tab (see <leader>gg in ide/nvim/lua/plugins/git.lua).
-  edit: '[ -z "$NVIM" ] && (nvim -- {{filename}}) || (nvim --server "$NVIM" --remote-expr "v:lua.LazygitReturnToEditor()" >/dev/null && nvim --server "$NVIM" --remote {{filename}})'
-  editAtLine: '[ -z "$NVIM" ] && (nvim +{{line}} -- {{filename}}) || (nvim --server "$NVIM" --remote-expr "v:lua.LazygitReturnToEditor()" >/dev/null && nvim --server "$NVIM" --remote {{filename}} && nvim --server "$NVIM" --remote-expr "cursor({{line}}, 1)" >/dev/null)'
-  openDirInEditor: '[ -z "$NVIM" ] && (nvim -- {{dir}}) || (nvim --server "$NVIM" --remote-expr "v:lua.LazygitReturnToEditor()" >/dev/null && nvim --server "$NVIM" --remote {{dir}})'
+  # Same as the preset, but hide the Lazygit float first so files open in the window behind it (see <leader>gg in ide/nvim/lua/plugins/terminal.lua).
+  edit: '[ -z "$NVIM" ] && (nvim -- {{filename}}) || (nvim --server "$NVIM" --remote-expr "v:lua.LazygitHide()" >/dev/null && nvim --server "$NVIM" --remote {{filename}})'
+  editAtLine: '[ -z "$NVIM" ] && (nvim +{{line}} -- {{filename}}) || (nvim --server "$NVIM" --remote-expr "v:lua.LazygitHide()" >/dev/null && nvim --server "$NVIM" --remote {{filename}} && nvim --server "$NVIM" --remote-expr "cursor({{line}}, 1)" >/dev/null)'
+  openDirInEditor: '[ -z "$NVIM" ] && (nvim -- {{dir}}) || (nvim --server "$NVIM" --remote-expr "v:lua.LazygitHide()" >/dev/null && nvim --server "$NVIM" --remote {{dir}})'
 customCommands:
   - key: "A"
     command: git commit --amend {{.Form.V}} --no-edit
