@@ -28,13 +28,27 @@ if placement_state then
   end
 end
 
-local image_doc = require("snacks.image.doc")
-image_doc.transforms.markdown_inline = function(img, ctx)
-  if not (img.src and img.src:find("^data:image/svg%+xml;base64,")) then
+local function cache_svg(data)
+  local ok, svg = pcall(vim.base64.decode, data)
+  if not ok then
     return
   end
-  image_doc.transforms.data_img(img, ctx)
-  -- Lucide previews share a base64 prefix, so the default content_id collides across icons.
-  img.content_id = nil
-  img.ext = "svg"
+  local root = Snacks.image.config.cache
+  local file = ("%s/%s.svg"):format(root, vim.fn.sha256(svg):sub(1, 16))
+  if vim.fn.filereadable(file) == 0 then
+    vim.fn.mkdir(root, "p")
+    local fd = assert(io.open(file, "w"))
+    fd:write(svg)
+    fd:close()
+  end
+  return file
+end
+
+-- Concealed data URIs still take wrapped rows, and snacks skips images on lines not fully visible.
+local open_floating_preview = vim.lsp.util.open_floating_preview
+vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
+  contents = vim.tbl_map(function(line)
+    return (line:gsub("data:image/svg%+xml;base64,([%w+/=]+)", cache_svg))
+  end, contents)
+  return open_floating_preview(contents, syntax, opts)
 end
