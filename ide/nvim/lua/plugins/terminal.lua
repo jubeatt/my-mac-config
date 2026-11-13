@@ -39,6 +39,8 @@ vim.keymap.set("n", "<leader>gg", function()
     local user_config = vim.fs.joinpath(vim.trim(vim.fn.system({ "lazygit", "--print-config-dir" })), "config.yml")
     local nvim_overlay = vim.fs.joinpath(vim.fn.stdpath("config"), "lazygit.yml")
     lazygit_terminals[root] = Terminal:new({
+      -- Without a count it takes the lowest free id, so a stray 1<C-\> or 2<C-\> lands in Lazygit.
+      count = 100 + vim.tbl_count(lazygit_terminals),
       cmd = "lazygit",
       dir = root,
       direction = "float",

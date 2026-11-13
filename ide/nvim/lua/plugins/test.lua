@@ -1,10 +1,10 @@
 vim.pack.add({ "https://github.com/vim-test/vim-test" })
 
 -- vim-test's built-in toggleterm strategy sends to the last toggled terminal, which
--- could be a running dev server, so pin test runs to terminal 9 (9<C-\> toggles it).
+-- could be a running dev server, so pin test runs to terminal 99 (99<C-\> toggles it).
 vim.g["test#custom_strategies"] = {
   toggleterm_test = function(cmd)
-    require("toggleterm").exec(cmd, 9, nil, nil, nil, "test")
+    require("toggleterm").exec(cmd, 99, nil, nil, nil, "test")
   end,
 }
 vim.g["test#strategy"] = "toggleterm_test"
