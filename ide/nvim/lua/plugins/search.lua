@@ -12,6 +12,11 @@ fzf.setup({
     -- Parse file:line queries and jump to the requested line.
     line_query = true,
   },
+  grep = {
+    hidden = true,
+    -- Unlike `files`, grep's default rg_opts doesn't exclude .git, so `--hidden` would search it.
+    rg_opts = [[-g "!.git" ]] .. require("fzf-lua.defaults").defaults.grep.rg_opts,
+  },
   -- Previewing resolves each action, which vtsls rejects for disabled refactors.
   lsp = { code_actions = { previewer = false } },
 })
