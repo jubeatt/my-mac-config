@@ -4,6 +4,13 @@ vim.pack.add({
 })
 
 require("nvim-tree").setup({
+  on_attach = function(bufnr)
+    local api = require("nvim-tree.api")
+    api.config.mappings.default_on_attach(bufnr)
+    local opts = { buffer = bufnr, nowait = true, silent = true }
+    vim.keymap.set("n", "[c", api.node.navigate.git.prev_skip_gitignored, vim.tbl_extend("force", opts, { desc = "nvim-tree: Prev Git" }))
+    vim.keymap.set("n", "]c", api.node.navigate.git.next_skip_gitignored, vim.tbl_extend("force", opts, { desc = "nvim-tree: Next Git" }))
+  end,
   filters = { git_ignored = false },
   update_focused_file = { enable = true },
   view = { width = { min = 30, max = "50%" } },
