@@ -22,9 +22,17 @@ require("catppuccin").setup({
       },
     },
   },
-  custom_highlights = {
-    ModeMsg = { style = {} },
-  },
+  custom_highlights = function(colors)
+    return {
+      ModeMsg = { style = {} },
+      NvimTreeGitDirty = { fg = colors.green },
+      NvimTreeGitStaged = { fg = colors.green },
+      NvimTreeGitNew = { fg = colors.green },
+      NvimTreeGitRenamed = { fg = colors.green },
+      NvimTreeGitDeleted = { fg = colors.red },
+      NvimTreeGitMerge = { fg = colors.red },
+    }
+  end,
 })
 vim.cmd.colorscheme("catppuccin")
 

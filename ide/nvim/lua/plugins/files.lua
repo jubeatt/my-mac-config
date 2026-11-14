@@ -17,14 +17,24 @@ require("nvim-tree").setup({
   -- `D` moves to the macOS Trash; the default `gio trash` isn't installed.
   trash = { cmd = "trash" },
   renderer = {
+    highlight_git = "name",
     icons = {
-      -- Same glyphs mini.icons uses for directories.
       glyphs = {
+        -- Same glyphs mini.icons uses for directories.
         folder = {
           default = "󰉋",
           open = "󰝰",
           empty = "󰉖",
           empty_open = "󰷏",
+        },
+        git = {
+          unstaged = "M",
+          staged = "✓",
+          untracked = "??",
+          deleted = "D",
+          renamed = "R",
+          unmerged = "!",
+          ignored = "◌",
         },
       },
     },
