@@ -76,6 +76,8 @@ cask "ghostty"
 cask "herdr-app"
 # Utility to hide menu bar items
 cask "hiddenbar"
+# Mouse utility to add gesture functions and smooth scrolling to 3rd party mice
+cask "mac-mouse-fix"
 # Mesh VPN based on WireGuard
 cask "tailscale-app"
 # Open-source code editor
