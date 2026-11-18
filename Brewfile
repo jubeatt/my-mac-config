@@ -68,7 +68,7 @@ cask "docker-desktop"
 # Per-application volume mixer, equalizer, and audio router
 cask "finetune"
 cask "font-jetbrains-mono-nerd-font"
-# GIT client
+# Git client
 cask "fork"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
