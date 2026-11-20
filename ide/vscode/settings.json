@@ -28,8 +28,10 @@
   "editor.formatOnSave": true,
   "editor.letterSpacing": 1,
   "editor.suggest.showStatusBar": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.oxc": "explicit"
+  "[javascript][javascriptreact][typescript][typescriptreact][vue][svelte][astro]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.oxc": "never"
+    }
   },
   "oxc.requireConfig": true,
   "explorer.compactFolders": false,
