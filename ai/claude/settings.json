@@ -42,7 +42,7 @@
   },
   "tui": "fullscreen",
   "theme": "dark",
-  "autoCompactEnabled": true,
+  "autoCompactEnabled": false,
   "autoScrollEnabled": true,
   "wheelScrollAccelerationEnabled": false,
   "autoMode": {
