@@ -32,3 +32,5 @@
 	default = upstream
 [rerere]
 	enabled = true
+[branch]
+	autoSetupMerge = simple
