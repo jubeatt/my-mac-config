@@ -64,6 +64,32 @@ else
   echo "✓ desktop-notifications installed"
 fi
 
+QUEUE_APP_DIR="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
+QUEUE_MOD_DIR="$QUEUE_APP_DIR/mods/queue"
+if [ -f "$QUEUE_MOD_DIR/main.js" ]; then
+  echo "✓ Queue already installed"
+elif [ -e "$QUEUE_MOD_DIR" ] || [ -L "$QUEUE_MOD_DIR" ]; then
+  printf 'Queue install path already exists: %s\n' "$QUEUE_MOD_DIR" >&2
+  exit 1
+else
+  (
+    QUEUE_UPSTREAM="https://github.com/Lakris2407/herdr-mods.git"
+    QUEUE_REVISION="b6fdb2ffb1207f8f686dffdd6addc19fe696d435"
+    mkdir -p "$QUEUE_APP_DIR/mods"
+    QUEUE_STAGE="$(mktemp -d "$QUEUE_APP_DIR/.queue-install.XXXXXXXX")"
+    trap 'rm -rf "$QUEUE_STAGE"' EXIT
+
+    git -C "$QUEUE_STAGE" init --quiet
+    git -C "$QUEUE_STAGE" fetch --quiet --depth 1 "$QUEUE_UPSTREAM" "$QUEUE_REVISION"
+    mkdir "$QUEUE_STAGE/queue"
+    git -C "$QUEUE_STAGE" archive "$QUEUE_REVISION:queue/mods/queue" | tar -xf - -C "$QUEUE_STAGE/queue"
+    test -f "$QUEUE_STAGE/queue/main.js"
+    mv -n "$QUEUE_STAGE/queue" "$QUEUE_APP_DIR/mods/"
+    test -f "$QUEUE_MOD_DIR/main.js"
+    echo "✓ Queue installed"
+  )
+fi
+
 step "Collie"
 if [ -x "$HOME/.local/bin/collie" ]; then
   echo "✓ Collie already installed"

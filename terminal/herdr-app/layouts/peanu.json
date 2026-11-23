@@ -76,15 +76,32 @@
       "type": "column",
       "children": [
         {
-          "id": "tabs",
-          "type": "block",
-          "content": {
-            "mod": "tabs"
-          },
+          "id": "tab-bar",
+          "type": "row",
           "size": {
             "px": 42
           },
-          "window_drag": true
+          "resizable": false,
+          "children": [
+            {
+              "id": "tabs",
+              "type": "block",
+              "content": {
+                "mod": "tabs"
+              },
+              "window_drag": true
+            },
+            {
+              "id": "queue-button",
+              "type": "block",
+              "content": {
+                "mod": "queue-button"
+              },
+              "size": {
+                "px": 80
+              }
+            }
+          ]
         },
         {
           "id": "work-body",
@@ -139,6 +156,13 @@
                       "type": "block",
                       "content": {
                         "mod": "changes"
+                      }
+                    },
+                    {
+                      "id": "queue",
+                      "type": "block",
+                      "content": {
+                        "mod": "queue"
                       }
                     }
                   ],

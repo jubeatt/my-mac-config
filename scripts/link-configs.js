@@ -77,12 +77,14 @@ const CONFIGS = {
   // these, and rewrites shipped layouts and mods on every start.
   herdrApp: {
     source: resolve(__dirname, "../terminal/herdr-app"),
-    target: `${home}/.config/herdr-app`,
+    target: process.env.HERDR_APP_HOME || `${home}/.config/herdr-app`,
     files: [
       "settings.json",
       "keys.json",
       "themes/catppuccin-mocha.json",
       "layouts/peanu.json",
+      "mods/queue-button/main.js",
+      "mods/queue-button/mod.json",
     ],
   },
   claude: {
