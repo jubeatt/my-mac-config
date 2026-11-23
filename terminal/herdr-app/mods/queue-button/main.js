@@ -1,6 +1,6 @@
 import { View, svg } from "gpui-kit"
 import { h_flex } from "gpui-base"
-import { layout, run, theme } from "herdr"
+import { layout, nextCommand, run, theme } from "herdr"
 
 function findBlock(node, id) {
   if (node?.id === id) return node
@@ -11,15 +11,38 @@ function findBlock(node, id) {
   }
 }
 
+function isQueueOpen() {
+  const panel = findBlock(layout(), "panel")
+  return Boolean(
+    panel &&
+    !panel.hidden &&
+    findBlock(panel, "panel-body")?.active === "queue",
+  )
+}
+
+function toggleQueue() {
+  if (isQueueOpen()) {
+    run("layout.hide", { id: "panel" })
+    return
+  }
+
+  run("layout.select", { stack: "panel-body", child: "queue" })
+  run("layout.show", { id: "panel" })
+}
+
 export default class QueueButton extends View {
+  init(_props, cx) {
+    cx.spawn(async () => {
+      for (;;) {
+        const command = await nextCommand()
+        if (command === "toggle") toggleQueue()
+      }
+    })
+  }
+
   render() {
     const colors = theme()
-    const root = layout()
-    const panel = findBlock(root, "panel")
-    const panelBody = findBlock(panel, "panel-body")
-    const active = Boolean(
-      panel && !panel.hidden && panelBody?.active === "queue",
-    )
+    const active = isQueueOpen()
 
     return h_flex()
       .size_full()
@@ -42,15 +65,7 @@ export default class QueueButton extends View {
           .text_color(active ? colors.foreground : colors.muted)
           .hover((style) => style.bg(colors.hover))
           .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
-          .on_click(() => {
-            if (active) {
-              run("layout.hide", { id: "panel" })
-              return
-            }
-
-            run("layout.select", { stack: "panel-body", child: "queue" })
-            run("layout.show", { id: "panel" })
-          })
+          .on_click(toggleQueue)
           .child(svg("mods/queue/queue.svg").size(14))
           .child("Queue"),
       )
