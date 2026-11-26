@@ -65,8 +65,7 @@ export const edit = (notes, id, text, files) =>
 export const setDone = (notes, id, done, now) =>
   notes.map((n) => (n.id === id ? { ...n, doneAt: done ? now : null } : n))
 
-// A pinned note is a prompt you use again and again: it is never done, so Send and Copy leave it in
-// place. Unpinning puts it back in the list as a waiting note.
+// A pinned note is a prompt you use again and again: it is never done, so Send leaves it in place. Unpinning puts it back in the list as a waiting note.
 export function setPinned(notes, id, pin) {
   return notes.map((n) => {
     if (n.id !== id) return n

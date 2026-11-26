@@ -1,7 +1,7 @@
 // A list of notes and prompts in a side panel: write one now, send it to an agent when the agent is
 // free. A note can carry files and pasted screenshots; Send pastes the text and the files' paths into
 // the agent's terminal and presses Enter, Copy puts the same text on the clipboard. A pinned note is a
-// prompt you use often: it stays on top, in every space, and Send and Copy never mark it done.
+// prompt you use often: it stays on top, in every space, and Send never marks it done.
 // The notes live in ~/.config/herdr-app/todo.json (store.js); notes.js holds the logic and has no Herdr imports.
 import { View, div, image, svg } from "gpui-kit"
 import {
@@ -558,15 +558,12 @@ export default class Todo extends View {
 
   copy(note, cx) {
     cx.write_to_clipboard(promptText(note))
-    const what = note.files.length
-      ? `Copied with ${plural(note.files.length, "file path")}`
-      : "Copied"
-    const stays = note.doneAt || note.pinned
-    this.say(stays ? what : `${what}, and marked done`, "ok")
-    if (!stays) {
-      this.cur = `restore-${note.id}`
-      this.commit(cx, (notes) => setDone(notes, note.id, true, Date.now()))
-    }
+    this.say(
+      note.files.length
+        ? `Copied with ${plural(note.files.length, "file path")}`
+        : "Copied",
+      "ok",
+    )
   }
 
   // Everything you can act on registers here while the panel renders, in reading order, so the
@@ -1201,15 +1198,10 @@ export default class Todo extends View {
             (cx) => this.copy(n, cx),
             t,
             ink,
-            n.pinned
-              ? {
-                  label: "Copy the prompt",
-                  tip: "Copy the text and the files' paths. The prompt stays pinned.",
-                }
-              : {
-                  label: "Copy the note",
-                  tip: "Copy the text and the files' paths, and mark the note done",
-                },
+            {
+              label: n.pinned ? "Copy the prompt" : "Copy the note",
+              tip: "Copy the text and the files' paths",
+            },
           ),
           this.button("Edit", `edit-${n.id}`, () => this.startEdit(n), t, ink, {
             label: n.pinned ? "Edit the prompt" : "Edit the note",
@@ -1228,7 +1220,7 @@ export default class Todo extends View {
                   ink,
                   {
                     label: "Pin the note as a prompt you use often",
-                    tip: "Keep it on top, in every space. Send and Copy leave a pinned prompt in place.",
+                    tip: "Keep it on top, in every space. Send leaves a pinned prompt in place.",
                   },
                 ),
               ]),
