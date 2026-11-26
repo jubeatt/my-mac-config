@@ -119,8 +119,8 @@ export default class Todo extends View {
     // The same mod is the large view of one pasted image (see preview()).
     this.viewer = (props ?? blockProps())?.viewer ?? null
     if (this.viewer) return
-    this.button = Boolean((props ?? blockProps())?.button)
-    if (this.button) {
+    this.isButton = Boolean((props ?? blockProps())?.button)
+    if (this.isButton) {
       cx.spawn(async () => {
         for (;;) if ((await nextCommand()) === "toggle") togglePanel()
       })
@@ -1460,7 +1460,7 @@ export default class Todo extends View {
   render(cx) {
     const t = theme()
     if (this.viewer) return this.viewerView(t)
-    if (this.button) return renderButton()
+    if (this.isButton) return renderButton()
     const ink = inks(t)
     this.ink = ink
     this.actions = []
