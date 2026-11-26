@@ -21,6 +21,5 @@ Icon
 .plan/
 
 ### Herdr app
-# Generated into each linked mod directory by herdr-app
+# Regenerated into each linked mod directory by herdr-app
 terminal/herdr-app/mods/*/gpui-kit.d.ts
-terminal/herdr-app/mods/*/jsconfig.json

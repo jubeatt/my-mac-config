@@ -126,7 +126,7 @@ bbd
 - `layouts/peanu.json`：以內建的 `main` 為底，配置 desktop-notifications 和右側的 Todo 面板。Todo 按鈕（`cmd-shift-b`）是同一個 todo mod 帶 `button` prop 的另一份，面板和 Files、Changes 共用右側。
 - desktop-notifications mod 沒有授權條款，不收進 repo，由 `setup.sh` 從 [benjaminsicard/herdr-mods](https://github.com/benjaminsicard/herdr-mods) 下載安裝。通知走 `terminal-notifier`。
 - `mods/todo/` 是自己維護的待辦面板，源自 [Lakris2407/herdr-mods](https://github.com/Lakris2407/herdr-mods/tree/main/queue) 的 Queue mod，不追上游更新。待辦和貼上的截圖分別存在 Herdr App 設定目錄下的 `todo.json` 和 `todo-files/`。
-- mod 目錄整個 symlink 進 App，App 寫進去的 `gpui-kit.d.ts`、`jsconfig.json` 由 `.gitignore` 排除。
+- mod 目錄整個 symlink 進 App，App 每次會重寫的 `gpui-kit.d.ts` 由 `.gitignore` 排除；`jsconfig.json` 只在第一次產生，之後歸 repo 管。
 
 ## 手機遠端操作（Collie）
 
