@@ -37,7 +37,6 @@ import {
   viewCopy,
   openFile,
 } from "./store.js"
-import { demoNotes, demoAgent } from "./demo.js"
 import {
   makeNote,
   add,
@@ -119,16 +118,14 @@ export default class Todo extends View {
     // The same mod is the large view of one pasted image (see preview()).
     this.viewer = (props ?? blockProps())?.viewer ?? null
     if (this.viewer) return
-    // `{ "demo": true }` in the block's props: made-up notes for screenshots; nothing is read, saved or sent.
-    this.demo = Boolean((props ?? blockProps())?.demo)
-    this.notes = this.demo ? demoNotes() : []
+    this.notes = []
     try {
-      this.all = !this.demo && localStorage.getItem("scope") === "all"
+      this.all = localStorage.getItem("scope") === "all"
     } catch {
       this.all = false
     }
     this.fileText = null // the file as last read or written: what the next save expects to replace
-    this.ready = this.demo
+    this.ready = false
     this.files = [] // the composer's files
     this.editing = null // the id of the note the composer holds
     this.stash = null // the unsent draft, set aside while a note is edited
@@ -149,7 +146,7 @@ export default class Todo extends View {
 
     let draft = ""
     try {
-      draft = this.demo ? "" : (localStorage.getItem("draft") ?? "")
+      draft = localStorage.getItem("draft") ?? ""
     } catch {}
     this.draft = TextareaState.new({
       value: draft,
@@ -189,7 +186,7 @@ export default class Todo extends View {
       cx.notify()
     })
 
-    if (!this.demo) this.reload(cx)
+    this.reload(cx)
     let minute = Date.now()
     cx.timer.every(TICK, (cx) => {
       const now = Date.now()
@@ -259,11 +256,6 @@ export default class Todo extends View {
       return Promise.resolve(false)
     const before = this.notes,
       after = change(before)
-    if (this.demo) {
-      this.notes = after
-      cx.notify()
-      return Promise.resolve(true)
-    }
     this.saving = true
     this.pendingNotes = after
     cx.notify()
@@ -300,8 +292,7 @@ export default class Todo extends View {
 
   keepDraft() {
     try {
-      if (!this.demo && !this.editing)
-        localStorage.setItem("draft", this.draft.value())
+      if (!this.editing) localStorage.setItem("draft", this.draft.value())
     } catch {}
   }
 
@@ -343,7 +334,7 @@ export default class Todo extends View {
         if (id) this.cur = `edit-${id}`
         else {
           try {
-            if (!this.demo) localStorage.removeItem("draft")
+            localStorage.removeItem("draft")
           } catch {}
         }
       }
@@ -382,7 +373,6 @@ export default class Todo extends View {
 
   // A pasted image that no note holds goes from the disk when the composer lets go of it.
   dropComposerFiles(only = null) {
-    if (this.demo) return
     const held = new Set([
       ...[...this.notes, ...(this.pendingNotes ?? [])].flatMap((n) => n.files),
       ...(this.stash?.files ?? []),
@@ -415,7 +405,6 @@ export default class Todo extends View {
   emptyTrash() {
     const gone = this.trash?.gone ?? []
     this.trash = null
-    if (this.demo) return
     const held = new Set([
       ...[...this.notes, ...(this.pendingNotes ?? [])].flatMap((n) => n.files),
       ...this.files,
@@ -426,7 +415,6 @@ export default class Todo extends View {
   }
 
   pasteFile(cx) {
-    if (this.demo) return
     cx.spawn(async (cx) => {
       const path = await clipboardFile(randomUUID()).catch(() => null)
       if (path) this.files = unique([...this.files, path])
@@ -500,10 +488,6 @@ export default class Todo extends View {
   // Where Send goes now: an agent, or null. The terminal you used last wins; an agent picked in the
   // panel holds while the panel has the keyboard, so pick, then Send.
   target() {
-    if (this.demo) {
-      this.tab = demoAgent.tab
-      return demoAgent
-    }
     const f = focused()
     this.tab = f?.tab ?? null
     if (this.hold && !this.handle.is_focused() && !this.field) this.hold = false
@@ -523,14 +507,6 @@ export default class Todo extends View {
     if (!target || this.sending || this.saving || this.loading || !this.ready)
       return
     this.failed.delete(note.id)
-    if (this.demo) {
-      if (!note.pinned) {
-        this.cur = `restore-${note.id}`
-        this.commit(cx, (notes) => setDone(notes, note.id, true, Date.now()))
-      }
-      this.say(`Sent to ${target.program.name}`, "ok")
-      return
-    }
     this.sending = note.id
     cx.notify()
     cx.spawn(async (cx) => {
@@ -701,8 +677,8 @@ export default class Todo extends View {
       .items_center()
       .children(
         files.map((path, i) => {
-          const thumb = !this.demo && isImage(path) && owned(path, dir),
-            clicks = !this.demo && (isImage(path) || opens)
+          const thumb = isImage(path) && owned(path, dir),
+            clicks = isImage(path) || opens
           const what = isImage(path) ? "see it large" : "open it"
           return h_flex()
             .id(`${key}-${i}`)
@@ -1317,7 +1293,7 @@ export default class Todo extends View {
 
   // The shown space, by the name the spaces list gives it.
   space() {
-    const s = this.demo ? null : spaces().find((x) => x.active)
+    const s = spaces().find((x) => x.active)
     return s
       ? { id: s.id, name: shared("space.labels")?.[s.id]?.name ?? s.name }
       : null
@@ -1330,7 +1306,7 @@ export default class Todo extends View {
 
   body(t, ink) {
     const target = this.target(),
-      list = this.demo ? [demoAgent] : agents()
+      list = agents()
     const searching = Boolean(this.query.trim()),
       mine = this.mine()
     const shown = filter(mine, this.query),
@@ -1481,12 +1457,7 @@ export default class Todo extends View {
     this.actions = []
     this.ids = []
     this.groups = []
-    if (
-      !this.demo &&
-      this.rev !== undefined &&
-      shared(REV) &&
-      shared(REV) !== this.rev
-    ) {
+    if (this.rev !== undefined && shared(REV) && shared(REV) !== this.rev) {
       this.rev = shared(REV)
       this.stale = true
     }

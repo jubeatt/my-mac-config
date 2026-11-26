@@ -27,7 +27,7 @@ export const removeFile = (path) => fs.unlink(path).catch(() => {})
 export async function viewCopy(src, id) {
   const ext = src.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase() ?? "png",
     name = `${id}.${ext}`
-  // A shell copy, as files-plus does: the mod's file calls reach only below the app home.
+  // A shell copy: the mod's file calls reach only below the app home.
   const r = await exec("sh", [
     "-c",
     'mkdir -p "$1" && rm -f "$1"/* && cp "$2" "$1/$3"',

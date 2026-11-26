@@ -1,10 +1,6 @@
-// One color file for every mod. Each mod installs on its own, so each keeps a copy as its colors.js:
-// edit this file, then `./sync.sh` copies it into every mod that has one (a test fails on a stale copy).
-// Pure, so `node --test` loads it.
-//
 // Themes set `muted` and `dim` for their own taste, and some put them below 4.5:1; `readable` lifts a
 // color toward the foreground pole just enough to reach a contrast floor, and leaves it alone when it
-// already does. `roles` gives each meaning one color, the same in every mod.
+// already does. `roles` gives each meaning one color.
 
 // [r, g, b, alpha 0..1], or null when it is not a hex color.
 function parse(hex) {
