@@ -80,6 +80,9 @@ const TICK = 3000,
   UNDO = 8000
 // The search field shows once the list is long enough to need it.
 const SEARCH_FROM = 6
+const TEXT = 15
+const TEXT_SEARCH = 14
+const TEXT_SMALL = 13
 
 // The theme's own colors, lifted only where a theme sets them below a readable contrast (colors.js):
 // labels at 6:1, hints at 4.5:1, the focus ring and a field's edge at 3:1. `card*` sit on a card
@@ -663,7 +666,7 @@ export default class Todo extends View {
       .flex_none()
       .items_center()
       .rounded(6)
-      .text_size(11)
+      .text_size(TEXT_SMALL)
       .text_color(off ? ink.hint : strong ? t.foreground : ink.label)
       .when(strong, (e) => e.bg(t.background).font_semibold())
     return this.action(el, id, act, t, { label, off, edge })
@@ -712,7 +715,7 @@ export default class Todo extends View {
             .rounded(5)
             .overflow_hidden()
             .bg(t.background)
-            .text_size(11)
+            .text_size(TEXT_SMALL)
             .text_color(ink.label)
             .tooltip(
               thumb
@@ -777,7 +780,7 @@ export default class Todo extends View {
       .when(editing, (e) =>
         e.child(
           div()
-            .text_size(11)
+            .text_size(TEXT_SMALL)
             .text_color(ink.label)
             .whitespace_normal()
             .child(
@@ -804,7 +807,7 @@ export default class Todo extends View {
               .border_color(typing ? ink.ring : ink.cardLine)
               .bg(t.background)
               .text_color(t.foreground)
-              .text_size(13),
+              .text_size(TEXT),
           ),
       )
       .when(this.files.length > 0, (e) =>
@@ -828,7 +831,7 @@ export default class Todo extends View {
               .flex_1()
               .min_w(0)
               .truncate()
-              .text_size(11)
+              .text_size(TEXT_SMALL)
               .text_color(ink.hint)
               .child(hint),
           )
@@ -888,7 +891,7 @@ export default class Todo extends View {
     if (!target && !list.length) {
       return div()
         .px(2)
-        .text_size(11)
+        .text_size(TEXT_SMALL)
         .text_color(ink.header)
         .whitespace_normal()
         .child("No agent runs yet. Start one, and Send goes to it.")
@@ -903,7 +906,7 @@ export default class Todo extends View {
       .gap(6)
       .items_center()
       .rounded(6)
-      .text_size(11)
+      .text_size(TEXT_SMALL)
       .child(
         div()
           .flex_none()
@@ -968,7 +971,7 @@ export default class Todo extends View {
           .gap(6)
           .items_center()
           .rounded(6)
-          .text_size(11)
+          .text_size(TEXT_SMALL)
           .child(this.mark(a, ink))
           .child(
             div()
@@ -1003,7 +1006,7 @@ export default class Todo extends View {
         e.child(
           div()
             .px(2)
-            .text_size(11)
+            .text_size(TEXT_SMALL)
             .text_color(ink.warn)
             .whitespace_normal()
             .child(`This agent is in ${place}, not in the tab you see.`),
@@ -1020,7 +1023,7 @@ export default class Todo extends View {
     const body = v_flex()
       .min_w(0)
       .gap(1)
-      .text_size(13)
+      .text_size(TEXT)
       .text_color(n.doneAt ? ink.hint : t.foreground)
       .when(Boolean(n.doneAt), (e) => e.line_through())
       .children(
@@ -1139,7 +1142,7 @@ export default class Todo extends View {
               .min_w(0)
               .pt(4)
               .role("alert")
-              .text_size(11)
+              .text_size(TEXT_SMALL)
               .text_color(ink.cardFail)
               .whitespace_normal()
               .child(fail),
@@ -1256,7 +1259,7 @@ export default class Todo extends View {
                   .min_w(0)
                   .pl(6)
                   .truncate()
-                  .text_size(11)
+                  .text_size(TEXT_SMALL)
                   .text_color(ink.hint)
                   .child(
                     `${done ? `Done ${ago(n.doneAt, now)}` : ago(n.createdAt, now)}${from ? ` · ${from}` : ""}`,
@@ -1290,7 +1293,7 @@ export default class Todo extends View {
             Input.new(this.search)
               .accessibility_label("Search notes")
               .h_full()
-              .text_size(12)
+              .text_size(TEXT_SEARCH)
               .text_color(t.foreground),
           ),
       )
@@ -1371,7 +1374,7 @@ export default class Todo extends View {
               .min_w(0)
               .truncate()
               .role("status")
-              .text_size(11)
+              .text_size(TEXT_SMALL)
               .text_color(ink.header)
               .child(`Deleted ${plural(gone, "note")}`),
           )
@@ -1416,7 +1419,7 @@ export default class Todo extends View {
           .child(
             div()
               .pl(2)
-              .text_size(11)
+              .text_size(TEXT_SMALL)
               .font_semibold()
               .text_color(ink.header)
               .child(`Pinned · ${pins.length}`),
@@ -1427,7 +1430,7 @@ export default class Todo extends View {
               div()
                 .mt(4)
                 .pl(2)
-                .text_size(11)
+                .text_size(TEXT_SMALL)
                 .font_semibold()
                 .text_color(ink.header)
                 .child(`Waiting · ${open.length}`),
@@ -1439,7 +1442,7 @@ export default class Todo extends View {
           div()
             .px(2)
             .py(4)
-            .text_size(12)
+            .text_size(TEXT_SEARCH)
             .text_color(ink.header)
             .whitespace_normal()
             .child(none),
@@ -1459,7 +1462,7 @@ export default class Todo extends View {
                 div()
                   .flex_1()
                   .min_w(0)
-                  .text_size(11)
+                  .text_size(TEXT_SMALL)
                   .font_semibold()
                   .text_color(ink.header)
                   .child(`Done · ${done.length}`),
@@ -1541,7 +1544,7 @@ export default class Todo extends View {
             div()
               .px(2)
               .role("alert")
-              .text_size(11)
+              .text_size(TEXT_SMALL)
               .text_color(ink.fail)
               .whitespace_normal()
               .child(this.error),
@@ -1563,7 +1566,7 @@ export default class Todo extends View {
                 .min_w(0)
                 .pt(4)
                 .role("alert")
-                .text_size(11)
+                .text_size(TEXT_SMALL)
                 .text_color(ink.warn)
                 .whitespace_normal()
                 .child(this.unsaved),
@@ -1610,7 +1613,7 @@ export default class Todo extends View {
         .border_1()
         .border_color(t.border)
         .text_color(t.foreground)
-        .text_size(13)
+        .text_size(TEXT)
         .child(
           h_flex()
             .h(42)
@@ -1627,7 +1630,7 @@ export default class Todo extends View {
                 .min_w(0)
                 .truncate()
                 .role("status")
-                .text_size(11)
+                .text_size(TEXT_SMALL)
                 .text_color(tone)
                 .child(status),
             )
@@ -1646,7 +1649,7 @@ export default class Todo extends View {
               .border_t(1)
               .border_color(t.border)
               .whitespace_normal()
-              .text_size(11)
+              .text_size(TEXT_SMALL)
               .text_color(ink.header)
               .child(
                 `↑ ↓ move · J K next note · Enter runs · N writes${this.searchShown ? " · / searches" : ""} · Esc leaves`,
