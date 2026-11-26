@@ -119,11 +119,11 @@ bbd
 
 ## Herdr App
 
-`~/.config/herdr-app/` 的手寫設定透過 symlink 指向 repo，包括 `settings.json`、`keys.json`、`themes/catppuccin-mocha.json`、`layouts/peanu.json`，以及 `mods/todo/` 和 `mods/todo-button/` 兩個 mod 目錄。App 寫入這些設定時會沿著 symlink 寫回 repo，改 repo 裡的設定也會即時套用。
+`~/.config/herdr-app/` 的手寫設定透過 symlink 指向 repo，包括 `settings.json`、`keys.json`、`themes/catppuccin-mocha.json`、`layouts/peanu.json`，以及 `mods/todo/` 這個 mod 目錄。App 寫入這些設定時會沿著 symlink 寫回 repo，改 repo 裡的設定也會即時套用。
 
 - `keys.json`：以 App 預設快捷鍵為底，改掉會撞到 nvim fzf-lua 的 F 鍵：重新命名 tab／space 改用 `cmd-r`／`cmd-shift-r`。App 只會替沒改過的 `keys.json` 換上新版預設，這份改過就整份歸自己管，App 更新新增的快捷鍵要看 update notes 手動補上。
 
-- `layouts/peanu.json`：以內建的 `main` 為底，配置 desktop-notifications 和右側的 Todo 面板。Todo 按鈕（`cmd-shift-b`）和 Files、Changes 共用右側面板。
+- `layouts/peanu.json`：以內建的 `main` 為底，配置 desktop-notifications 和右側的 Todo 面板。Todo 按鈕（`cmd-shift-b`）是同一個 todo mod 帶 `button` prop 的另一份，面板和 Files、Changes 共用右側。
 - desktop-notifications mod 沒有授權條款，不收進 repo，由 `setup.sh` 從 [benjaminsicard/herdr-mods](https://github.com/benjaminsicard/herdr-mods) 下載安裝。通知走 `terminal-notifier`。
 - `mods/todo/` 是自己維護的待辦面板，源自 [Lakris2407/herdr-mods](https://github.com/Lakris2407/herdr-mods/tree/main/queue) 的 Queue mod，不追上游更新。待辦和貼上的截圖分別存在 Herdr App 設定目錄下的 `todo.json` 和 `todo-files/`。
 - mod 目錄整個 symlink 進 App，App 寫進去的 `gpui-kit.d.ts`、`jsconfig.json` 由 `.gitignore` 排除。

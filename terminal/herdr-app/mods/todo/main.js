@@ -69,6 +69,7 @@ import {
 } from "./notes.js"
 import { readable, roles } from "./colors.js"
 import { leaveSide, imageSize, fit } from "./place.js"
+import { renderButton, togglePanel } from "./button.js"
 
 // Another copy of the panel saved: every copy reads this stamp and loads the file again.
 const REV = "todo.rev"
@@ -118,6 +119,13 @@ export default class Todo extends View {
     // The same mod is the large view of one pasted image (see preview()).
     this.viewer = (props ?? blockProps())?.viewer ?? null
     if (this.viewer) return
+    this.button = Boolean((props ?? blockProps())?.button)
+    if (this.button) {
+      cx.spawn(async () => {
+        for (;;) if ((await nextCommand()) === "toggle") togglePanel()
+      })
+      return
+    }
     this.notes = []
     try {
       this.all = localStorage.getItem("scope") === "all"
@@ -1452,6 +1460,7 @@ export default class Todo extends View {
   render(cx) {
     const t = theme()
     if (this.viewer) return this.viewerView(t)
+    if (this.button) return renderButton()
     const ink = inks(t)
     this.ink = ink
     this.actions = []

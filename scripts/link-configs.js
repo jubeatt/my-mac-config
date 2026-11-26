@@ -83,7 +83,6 @@ const CONFIGS = {
       "keys.json",
       "themes/catppuccin-mocha.json",
       "layouts/peanu.json",
-      "mods/todo-button",
       "mods/todo",
     ],
   },

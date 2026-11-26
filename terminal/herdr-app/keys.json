@@ -64,7 +64,7 @@
     "ctrl-9": "space.select:9"
   },
   "layout:peanu": {
-    "cmd-shift-b": "todo-button.toggle"
+    "cmd-shift-b": "todo.toggle"
   },
   "terminal": {
     "cmd-f": "terminal.search",

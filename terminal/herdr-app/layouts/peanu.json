@@ -95,7 +95,10 @@
               "id": "todo-button",
               "type": "block",
               "content": {
-                "mod": "todo-button"
+                "mod": "todo",
+                "props": {
+                  "button": true
+                }
               },
               "size": {
                 "px": 80
