@@ -27,6 +27,7 @@
     "checkJs": true,
     "strict": true,
     "strictNullChecks": false,
+    "noImplicitAny": false,
     "noEmit": true
   }
 }
