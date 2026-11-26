@@ -111,6 +111,8 @@ const stop = (_e, cx) => cx.stop_propagation()
 // The key that adds a note from the field, as this platform writes it.
 const addKey = () => (window()?.platform === "macos" ? "⌘↵" : "Ctrl+Enter")
 
+const reason = (e) => (e instanceof Error ? e.message : String(e))
+
 const NOT_SAVED =
   "Not saved. The list still shows the last saved notes; your draft stays in the field."
 
@@ -245,7 +247,7 @@ export default class Todo extends View {
         this.error = null
       } catch (e) {
         this.ready = false
-        this.error = `${e.message ?? e}. Fix or remove the file, then retry; nothing is saved until then.`
+        this.error = `${reason(e)}. Fix or remove the file, then retry; nothing is saved until then.`
       } finally {
         this.loading = false
       }
@@ -285,7 +287,7 @@ export default class Todo extends View {
             if (owned(f, filesDir()) && !kept.has(f)) removeFile(f)
           saved = true
         } catch (e) {
-          this.unsaved = `${NOT_SAVED} ${e.message ?? e}`
+          this.unsaved = `${NOT_SAVED} ${reason(e)}`
           this.ready = false
           this.stale = true
         } finally {
@@ -450,7 +452,7 @@ export default class Todo extends View {
           props: { viewer: { picture, size } },
         })
       } catch (e) {
-        this.say(`Could not show ${fileName(path)}: ${e.message ?? e}`, "warn")
+        this.say(`Could not show ${fileName(path)}: ${reason(e)}`, "warn")
         cx.notify()
       }
     })
@@ -467,7 +469,7 @@ export default class Todo extends View {
         }
       },
       (e) => {
-        this.say(`Could not open ${fileName(path)}: ${e.message ?? e}`, "warn")
+        this.say(`Could not open ${fileName(path)}: ${reason(e)}`, "warn")
         cx.notify()
       },
     )
@@ -562,7 +564,7 @@ export default class Todo extends View {
     id,
     act,
     t,
-    { label, role = "button", edge = t.raised, off = false } = {},
+    { label = "", role = "button", edge = t.raised, off = false } = {},
   ) {
     off ||= Boolean(
       this.saving || this.loading || this.submitting || this.sending,
