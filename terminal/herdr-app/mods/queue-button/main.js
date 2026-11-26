@@ -14,9 +14,7 @@ function findBlock(node, id) {
 function isQueueOpen() {
   const panel = findBlock(layout(), "panel")
   return Boolean(
-    panel &&
-    !panel.hidden &&
-    findBlock(panel, "panel-body")?.active === "queue",
+    panel && !panel.hidden && findBlock(panel, "panel-body")?.active === "todo",
   )
 }
 
@@ -26,7 +24,7 @@ function toggleQueue() {
     return
   }
 
-  run("layout.select", { stack: "panel-body", child: "queue" })
+  run("layout.select", { stack: "panel-body", child: "todo" })
   run("layout.show", { id: "panel" })
 }
 
@@ -66,7 +64,7 @@ export default class QueueButton extends View {
           .hover((style) => style.bg(colors.hover))
           .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
           .on_click(toggleQueue)
-          .child(svg("mods/queue/queue.svg").size(14))
+          .child(svg("mods/todo/queue.svg").size(14))
           .child("Queue"),
       )
   }

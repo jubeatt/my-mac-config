@@ -6,7 +6,7 @@ export function leaveSide() {
   let path = null
   const find = (n, up) => {
     if (path || !n) return
-    if (n.content?.mod === "queue") path = [...up, n]
+    if (n.content?.mod === "todo") path = [...up, n]
     else for (const c of n.children ?? []) find(c, [...up, n])
   }
   find(layout(), [])

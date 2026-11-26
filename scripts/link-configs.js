@@ -85,6 +85,7 @@ const CONFIGS = {
       "layouts/peanu.json",
       "mods/queue-button/main.js",
       "mods/queue-button/mod.json",
+      "mods/todo",
     ],
   },
   claude: {

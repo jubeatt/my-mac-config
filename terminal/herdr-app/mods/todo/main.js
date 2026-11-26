@@ -444,7 +444,7 @@ export default class Queue extends View {
           imageSize(path),
         ])
         openOverlay({
-          mod: "queue",
+          mod: "todo",
           kind: "dialog",
           width: 0.9,
           height: 0.9,
