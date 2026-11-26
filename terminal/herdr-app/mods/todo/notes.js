@@ -1,10 +1,10 @@
-// The queue itself: notes with their files, what a note sends, and which agent gets it. Pure (no
+// The list itself: notes with their files, what a note sends, and which agent gets it. Pure (no
 // `herdr` imports), so the tests run in plain Node.
 
 export const VERSION = 1
 const IMAGE = /\.(png|jpe?g|gif|webp|heic|tiff?|bmp)$/i
 
-// The file's text as notes. A missing file is an empty queue; a broken one is an error, so a save
+// The file's text as notes. A missing file is an empty list; a broken one is an error, so a save
 // never replaces notes the panel could not read.
 export function parse(text) {
   if (!text || !text.trim()) return []
@@ -12,10 +12,10 @@ export function parse(text) {
   try {
     data = JSON.parse(text)
   } catch {
-    throw new Error("queue.json is not valid JSON")
+    throw new Error("todo.json is not valid JSON")
   }
   const rows = Array.isArray(data) ? data : data?.notes
-  if (!Array.isArray(rows)) throw new Error("queue.json has no notes list")
+  if (!Array.isArray(rows)) throw new Error("todo.json has no notes list")
   return rows
     .filter((n) => n && typeof n.id === "string" && typeof n.text === "string")
     .map((n) => ({
@@ -66,7 +66,7 @@ export const setDone = (notes, id, done, now) =>
   notes.map((n) => (n.id === id ? { ...n, doneAt: done ? now : null } : n))
 
 // A pinned note is a prompt you use again and again: it is never done, so Send and Copy leave it in
-// place. Unpinning puts it back in the queue as a waiting note.
+// place. Unpinning puts it back in the list as a waiting note.
 export function setPinned(notes, id, pin) {
   return notes.map((n) => {
     if (n.id !== id) return n

@@ -92,10 +92,10 @@
               "window_drag": true
             },
             {
-              "id": "queue-button",
+              "id": "todo-button",
               "type": "block",
               "content": {
-                "mod": "queue-button"
+                "mod": "todo-button"
               },
               "size": {
                 "px": 80

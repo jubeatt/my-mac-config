@@ -11,15 +11,15 @@ function findBlock(node, id) {
   }
 }
 
-function isQueueOpen() {
+function isTodoOpen() {
   const panel = findBlock(layout(), "panel")
   return Boolean(
     panel && !panel.hidden && findBlock(panel, "panel-body")?.active === "todo",
   )
 }
 
-function toggleQueue() {
-  if (isQueueOpen()) {
+function toggleTodo() {
+  if (isTodoOpen()) {
     run("layout.hide", { id: "panel" })
     return
   }
@@ -28,19 +28,19 @@ function toggleQueue() {
   run("layout.show", { id: "panel" })
 }
 
-export default class QueueButton extends View {
+export default class TodoButton extends View {
   init(_props, cx) {
     cx.spawn(async () => {
       for (;;) {
         const command = await nextCommand()
-        if (command === "toggle") toggleQueue()
+        if (command === "toggle") toggleTodo()
       }
     })
   }
 
   render() {
     const colors = theme()
-    const active = isQueueOpen()
+    const active = isTodoOpen()
 
     return h_flex()
       .size_full()
@@ -51,7 +51,7 @@ export default class QueueButton extends View {
       .border_color(colors.border)
       .child(
         h_flex()
-          .id("queue-panel-toggle")
+          .id("todo-panel-toggle")
           .role("button")
           .h(26)
           .px(8)
@@ -63,9 +63,9 @@ export default class QueueButton extends View {
           .text_color(active ? colors.foreground : colors.muted)
           .hover((style) => style.bg(colors.hover))
           .on_mouse_down("left", (_event, cx) => cx.stop_propagation())
-          .on_click(toggleQueue)
-          .child(svg("mods/todo/queue.svg").size(14))
-          .child("Queue"),
+          .on_click(toggleTodo)
+          .child(svg("mods/todo/todo.svg").size(14))
+          .child("Todo"),
       )
   }
 }

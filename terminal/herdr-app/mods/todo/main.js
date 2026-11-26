@@ -1,8 +1,8 @@
-// A queue of notes and prompts in a side panel: write one now, send it to an agent when the agent is
+// A list of notes and prompts in a side panel: write one now, send it to an agent when the agent is
 // free. A note can carry files and pasted screenshots; Send pastes the text and the files' paths into
 // the agent's terminal and presses Enter, Copy puts the same text on the clipboard. A pinned note is a
 // prompt you use often: it stays on top, in every space, and Send and Copy never mark it done.
-// The notes live in ~/.config/herdr-app/queue.json (store.js); notes.js holds the logic and has no Herdr imports.
+// The notes live in ~/.config/herdr-app/todo.json (store.js); notes.js holds the logic and has no Herdr imports.
 import { View, div, image, svg } from "gpui-kit"
 import {
   h_flex,
@@ -72,7 +72,7 @@ import { readable, roles } from "./colors.js"
 import { leaveSide, imageSize, fit } from "./place.js"
 
 // Another copy of the panel saved: every copy reads this stamp and loads the file again.
-const REV = "queue.rev"
+const REV = "todo.rev"
 // A deleted note can come back for UNDO; the timer looks every TICK, so it is at most TICK longer.
 const TICK = 3000,
   MINUTE = 60000,
@@ -111,7 +111,7 @@ const addKey = () => (window()?.platform === "macos" ? "⌘↵" : "Ctrl+Enter")
 const NOT_SAVED =
   "Not saved. The list still shows the last saved notes; your draft stays in the field."
 
-export default class Queue extends View {
+export default class Todo extends View {
   init(props, cx) {
     // The same mod is the large view of one pasted image (see preview()).
     this.viewer = (props ?? blockProps())?.viewer ?? null
@@ -138,7 +138,7 @@ export default class Queue extends View {
     this.picking = false // the list of agents is open
     this.hold = false // the target was picked in the panel: it holds until the keyboard leaves the panel
     // The keyboard cursor is the id of a registered action, so it stays on its button when the list changes.
-    this.cur = "queue-add"
+    this.cur = "todo-add"
     this.actions = []
     this.ids = []
     this.groups = []
@@ -206,7 +206,7 @@ export default class Queue extends View {
       }
       if (this.trash && now > this.trash.until) {
         this.emptyTrash()
-        if (this.cur === "queue-undo") this.cur = "queue-add"
+        if (this.cur === "todo-undo") this.cur = "todo-add"
         draw = true
       }
       if (draw) cx.notify()
@@ -389,14 +389,14 @@ export default class Queue extends View {
   }
 
   // Delete, with a way back: the notes leave the list and the file now, their pasted images only
-  // when Undo's time is up. (If Herdr quits before that, the images stay in queue-files/.)
+  // when Undo's time is up. (If Herdr quits before that, the images stay in todo-files/.)
   deleteNotes(ids, cx) {
     if (!this.ready || this.saving || this.loading || this.sending) return
     if (!ids.length) return
     this.emptyTrash()
     this.trash = { gone: taken(this.notes, ids), until: Date.now() + UNDO }
     for (const id of ids) this.failed.delete(id)
-    this.cur = "queue-undo"
+    this.cur = "todo-undo"
     this.commit(cx, (notes) => removeMany(notes, ids))
   }
 
@@ -433,13 +433,13 @@ export default class Queue extends View {
   }
 
   // An image, large, over the window: Esc, a click on it or beside it closes it. A dropped image
-  // from outside queue-files/ is copied in first, because image() reads only below the app home.
+  // from outside todo-files/ is copied in first, because image() reads only below the app home.
   preview(path, cx) {
     cx.spawn(async () => {
       try {
         const [picture, size] = await Promise.all([
           owned(path, filesDir())
-            ? `queue-files/${fileName(path)}`
+            ? `todo-files/${fileName(path)}`
             : viewCopy(path, randomUUID()),
           imageSize(path),
         ])
@@ -478,7 +478,7 @@ export default class Queue extends View {
     const v = this.viewer,
       shown = fit(v.size, this.size, 32)
     return v_flex()
-      .id("queue-viewer")
+      .id("todo-viewer")
       .size_full()
       .items_center()
       .justify_center()
@@ -512,7 +512,7 @@ export default class Queue extends View {
     this.last = agent.address
     this.hold = true
     this.picking = false
-    this.cur = "queue-target"
+    this.cur = "todo-target"
     this.handle.focus()
   }
 
@@ -637,7 +637,7 @@ export default class Queue extends View {
     else if (k === "/" && this.searchShown) this.search.focus()
     else if (k === "escape" && this.picking) {
       this.picking = false
-      this.cur = "queue-target"
+      this.cur = "todo-target"
     } else if (k === "escape") run("pane.go", { direction: leaveSide() })
     else if (k === "left" || k === "right") run("pane.go", { direction: k })
     else return
@@ -732,7 +732,7 @@ export default class Queue extends View {
                   (cx) => this.show(path, cx),
                   t,
                   { label: `Show ${fileName(path)} large`, edge: t.background },
-                ).child(image(`queue-files/${fileName(path)}`).h(44)),
+                ).child(image(`todo-files/${fileName(path)}`).h(44)),
               ),
             )
             .when(!thumb && clicks, (e) =>
@@ -792,7 +792,7 @@ export default class Queue extends View {
       )
       .child(
         div()
-          .id("queue-field")
+          .id("todo-field")
           .w_full()
           .cursor_text()
           .on_mouse_down("left", stop)
@@ -817,7 +817,7 @@ export default class Queue extends View {
             if (!this.editing) this.dropComposerFiles([gone])
             this.cur = this.files.length
               ? `draft-file-x-${Math.min(i, this.files.length - 1)}`
-              : "queue-add"
+              : "todo-add"
             cx.notify()
           }),
         ),
@@ -839,7 +839,7 @@ export default class Queue extends View {
             e.child(
               this.button(
                 "Cancel",
-                "queue-cancel",
+                "todo-cancel",
                 () => this.cancelEdit(),
                 t,
                 ink,
@@ -850,7 +850,7 @@ export default class Queue extends View {
           .child(
             this.button(
               editing ? "Save" : "Add",
-              "queue-add",
+              "todo-add",
               (cx) => this.submit(cx),
               t,
               ink,
@@ -944,7 +944,7 @@ export default class Queue extends View {
     row = canPick
       ? this.action(
           row,
-          "queue-target",
+          "todo-target",
           () => {
             this.picking = !this.picking
           },
@@ -1070,8 +1070,8 @@ export default class Queue extends View {
           this.commit(cx, (notes) => setPinned(notes, n.id, false))
         },
         t,
-        { label: "Pinned prompt. Unpin it: it goes back in the queue" },
-      ).tooltip("Unpin: back in the queue")
+        { label: "Pinned prompt. Unpin it: it goes back in the list" },
+      ).tooltip("Unpin: back in the list")
     }
     const mark = done
       ? div()
@@ -1107,10 +1107,10 @@ export default class Queue extends View {
       {
         role: "check_box",
         label: done
-          ? "Done. Put the note back in the queue"
+          ? "Done. Put the note back in the list"
           : "Mark the note done",
       },
-    ).tooltip(done ? "Put back in the queue" : "Mark done")
+    ).tooltip(done ? "Put back in the list" : "Mark done")
   }
 
   note(n, target, t, ink) {
@@ -1282,7 +1282,7 @@ export default class Queue extends View {
       .items_center()
       .child(
         div()
-          .id("queue-search")
+          .id("todo-search")
           .flex_1()
           .min_w(0)
           .h(28)
@@ -1306,11 +1306,11 @@ export default class Queue extends View {
         e.child(
           this.button(
             "Clear",
-            "queue-search-clear",
+            "todo-search-clear",
             () => {
               this.search.set_value("")
               this.query = ""
-              this.cur = "queue-add"
+              this.cur = "todo-add"
             },
             t,
             ink,
@@ -1349,7 +1349,7 @@ export default class Queue extends View {
       : mine.length
         ? pins.length && !done.length
           ? ""
-          : `The queue is empty.${done.length ? " The notes below are done." : ""}`
+          : `The list is empty.${done.length ? " The notes below are done." : ""}`
         : "No notes yet. Write a prompt now, and send it when an agent is free. Send pastes the note into the agent and presses Enter. Pin a prompt you use often to keep it."
     this.searchShown = mine.length >= SEARCH_FROM || Boolean(this.query)
     const composer = this.composer(t, ink),
@@ -1384,7 +1384,7 @@ export default class Queue extends View {
               .child(`Deleted ${plural(gone, "note")}`),
           )
           .child(
-            this.button("Undo", "queue-undo", (cx) => this.undo(cx), t, ink, {
+            this.button("Undo", "todo-undo", (cx) => this.undo(cx), t, ink, {
               label: `Put the ${plural(gone, "deleted note")} back`,
               edge: t.background,
             }),
@@ -1512,11 +1512,11 @@ export default class Queue extends View {
     const tone =
       { ok: ink.ok, warn: ink.warn, fail: ink.fail }[flash?.tone] ?? ink.header
     this.group = "top"
-    // Each space has its own queue. The button names the space, and a click shows every space's notes.
+    // Each space has its own list. The button names the space, and a click shows every space's notes.
     const scope = this.here
       ? this.button(
           this.all ? "All spaces" : this.here.name,
-          "queue-scope",
+          "todo-scope",
           () => {
             this.all = !this.all
             try {
@@ -1537,7 +1537,7 @@ export default class Queue extends View {
         )
       : null
     const body = v_flex()
-      .id("queue-body")
+      .id("todo-body")
       .flex_1()
       .min_h(0)
       .overflow_y_scrollbar()
@@ -1555,13 +1555,7 @@ export default class Queue extends View {
               .child(this.error),
           )
           .child(
-            this.button(
-              "Retry",
-              "queue-retry",
-              (cx) => this.reload(cx),
-              t,
-              ink,
-            ),
+            this.button("Retry", "todo-retry", (cx) => this.reload(cx), t, ink),
           ),
       )
       // A change that is not on disk stays written here until you dismiss it or the next save works.
@@ -1585,10 +1579,10 @@ export default class Queue extends View {
             .child(
               this.button(
                 "Dismiss",
-                "queue-unsaved",
+                "todo-unsaved",
                 () => {
                   this.unsaved = null
-                  this.cur = "queue-add"
+                  this.cur = "todo-add"
                 },
                 t,
                 ink,
@@ -1607,9 +1601,9 @@ export default class Queue extends View {
     }
     return (
       v_flex()
-        .id("queue")
+        .id("todo")
         .role("pane")
-        .accessibility_label("Queue")
+        .accessibility_label("Todo")
         .track_focus(this.handle)
         .on_key_down((e, cx) => this.key(e, cx))
         .on_drop((e, cx) => {
@@ -1634,7 +1628,7 @@ export default class Queue extends View {
             .items_center()
             .border_b(1)
             .border_color(t.border)
-            .child(div().flex_none().font_semibold().child("Queue"))
+            .child(div().flex_none().font_semibold().child("Todo"))
             .child(
               div()
                 .flex_1()

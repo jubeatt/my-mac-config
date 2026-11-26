@@ -1,10 +1,10 @@
-// Where the queue lives: ~/.config/herdr-app/queue.json, and pasted images beside it in queue-files/.
+// Where the list lives: ~/.config/herdr-app/todo.json, and pasted images beside it in todo-files/.
 import { exec, readTextFile, writeTextFile, appHome } from "herdr"
 import * as fs from "fs/promises"
 import { parse, serialize } from "./notes.js"
 
-export const notesFile = () => `${appHome()}/queue.json`
-export const filesDir = () => `${appHome()}/queue-files`
+export const notesFile = () => `${appHome()}/todo.json`
+export const filesDir = () => `${appHome()}/todo-files`
 
 // The notes and the exact text they came from: the next save names that text, so a save never
 // replaces a change another window made in between.
@@ -22,7 +22,7 @@ export async function save(notes, expected) {
 export const removeFile = (path) => fs.unlink(path).catch(() => {})
 
 // image() reads only below the app home, so a dropped image from elsewhere is copied into
-// queue-files/view/ to be shown large. One copy at a time: the next one removes the last.
+// todo-files/view/ to be shown large. One copy at a time: the next one removes the last.
 // Returns the path image() takes; the note keeps the original path.
 export async function viewCopy(src, id) {
   const ext = src.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase() ?? "png",
@@ -31,14 +31,14 @@ export async function viewCopy(src, id) {
   const r = await exec("sh", [
     "-c",
     'mkdir -p "$1" && rm -f "$1"/* && cp "$2" "$1/$3"',
-    "queue",
+    "todo",
     `${filesDir()}/view`,
     src,
     name,
   ])
   if (r.code !== 0)
     throw new Error(r.stderr.trim() || "the image could not be copied")
-  return `queue-files/view/${name}`
+  return `todo-files/view/${name}`
 }
 
 // A file that is not an image opens in the app the system picks. macOS only.
@@ -47,7 +47,7 @@ export const openFile = (path) => exec("open", [path])
 const script = (lines, args) =>
   exec("osascript", [...lines.flatMap((l) => ["-e", l]), ...args])
 
-// The clipboard's image as a PNG in queue-files/, or the file a file manager copied, as its own path.
+// The clipboard's image as a PNG in todo-files/, or the file a file manager copied, as its own path.
 // Null when the clipboard holds neither. macOS only: `osascript` reads the clipboard.
 export async function clipboardFile(id) {
   await fs.mkdir(filesDir(), { recursive: true }).catch(() => {})
