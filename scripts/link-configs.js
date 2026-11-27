@@ -84,6 +84,7 @@ const CONFIGS = {
       "themes/catppuccin-mocha.json",
       "layouts/peanu.json",
       "mods/todo",
+      "mods/my-picker",
     ],
   },
   claude: {
